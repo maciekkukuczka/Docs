@@ -1,11 +1,17 @@
-Log.Logger = new LoggerConfiguration().SerilogConfig();
+    var configuration = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(),"Config","Json"))
+            .AddJsonFile("appsettings.json")
+           .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
+            .Build();
+
+Log.Logger = new LoggerConfiguration().SerilogConfig(configuration);
 
 try
 {
     Log.Logger.Information("DOCS STARTED!");
-
+    
     var builder = WebApplication.CreateBuilder(args);
-
+    builder.Configuration.AddConfiguration(configuration);
 
 //DI
     builder.Services.AddServices(builder.Configuration);
