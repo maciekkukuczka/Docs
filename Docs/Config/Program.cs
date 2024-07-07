@@ -29,11 +29,11 @@ try
 
     app.UseStaticFiles();
     app.UseSerilogRequestLogging();
-
-    app.UseAntiforgery();
-
+    
     app.UseAuthentication();
     app.UseAuthorization();
+    
+    app.UseAntiforgery();
 
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();

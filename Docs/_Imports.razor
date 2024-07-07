@@ -1,14 +1,24 @@
-﻿@using System.Net.Http
+﻿@* SYSTEM *@
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Authorization
-@using MudBlazor.StaticInput
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+@using System.Security.Claims
+
+
+@* PATHS *@
 @using MudBlazor
 @using MudBlazor.Services
 @using Docs
 @using Docs.Components
+
+@* 3RD PARTY *@
+@using MudBlazor.StaticInput
+
+@* MODULES *@
+@using Docs.Modules.Identity.Components

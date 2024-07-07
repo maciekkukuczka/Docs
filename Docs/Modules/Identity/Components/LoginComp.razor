@@ -1,0 +1,31 @@
+﻿@* @namespace Mac.Modules.Common *@
+@if (@userClaimsPrincipal.Identity.IsAuthenticated)
+{
+    <div>
+        <MudChip T="string" Variant="MudBlazor.Variant.Text" Color="MudBlazor.Color.Success">
+            @userClaimsPrincipal.Identity.Name
+        </MudChip>
+        <MudLink Href="/Auth/Logout" Underline="Underline.Always">Wyloguj</MudLink>
+    </div>
+}
+else
+{
+    <div>
+        <MudLink Href="/Auth/Login" Underline="Underline.Always" >Zaloguj</MudLink>
+        lub
+        <MudLink Href="/Auth/Register" Underline="Underline.Always">Zarejestruj</MudLink>
+    </div>
+}
+
+
+@code {
+    ClaimsPrincipal? userClaimsPrincipal;
+    [CascadingParameter] public Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+         userClaimsPrincipal = (await AuthenticationStateTask).User;
+    }
+
+
+}
