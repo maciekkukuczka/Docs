@@ -1,0 +1,47 @@
+﻿namespace Docs.Config;
+
+public static class DI
+{
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        //SERILOG
+        services.AddSerilog();
+        
+        services.AddRazorComponents()
+            .AddInteractiveServerComponents();
+
+        services.AddCascadingAuthenticationState();
+        services.AddScoped<IdentityUserAccessor>();
+        services.AddScoped<IdentityRedirectManager>();
+        services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+        services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
+            .AddIdentityCookies();
+        services.AddAuthorization();
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection") ??
+                               throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlite(connectionString));
+        services.AddDatabaseDeveloperPageExceptionFilter();
+
+        services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddSignInManager()
+            .AddDefaultTokenProviders();
+
+        services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+
+        
+        // MUDBLAZOR
+        services.AddMudServices();
+        
+        
+        return services;
+    }
+}
