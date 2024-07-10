@@ -39,24 +39,31 @@ public static class DI
             }
         );
 
+        // DB
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString));
+        services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),lifetime:ServiceLifetime.Scoped);
+        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // IDENTITY
         services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
+        
         services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
 
 
         // MUDBLAZOR
         services.AddMudServices();
 
+        // APP
+        services.AddScoped<DocsService>();
 
         return services;
     }

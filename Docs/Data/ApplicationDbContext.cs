@@ -10,12 +10,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<DocPath> DocPaths { get; set; }
     public DbSet<Tag> Tags { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.EnableSensitiveDataLogging();
+    }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Doc>().ComplexProperty(x => x.Path);
-        
+        // builder.Entity<Doc>().ComplexProperty(x => x.Path);
+        builder.Entity<Doc>().HasOne(x=>x.Path).WithOne(x=>x.Doc).HasForeignKey<DocPath>(x=>x.DocId);
         builder.Entity<Doc>().HasMany(x => x.Categories).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Images).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Links).WithMany(x => x.Docs);

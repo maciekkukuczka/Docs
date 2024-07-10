@@ -1,17 +1,19 @@
 ﻿@inherits LayoutComponentBase
 
+@rendermode InteractiveServer
 <MudThemeProvider IsDarkMode="isDarkMode"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <MudLayout>
     
-    @* BAR *@
+    @* TOP BAR *@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
         <MudText Typo="Typo.h5" Class="ml-3">DOCS</MudText>
         
         <MudSpacer/>
+            <SectionOutlet SectionId="TopBarSectionRight"/>
         <LoginSSRComp/>
         <MudToggleIconButton @bind-Toggled="@isDarkMode"
                              Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Default" title=@(isDarkMode ? "Ciemny" : "Jasny")
@@ -38,6 +40,7 @@
 </div>
 
 @code {
+    internal static object TopBarSectionRight=new();
     bool _drawerOpen = true;
     bool isDarkMode = true;
 

@@ -2,12 +2,14 @@
 
 public class Doc:BaseModel
 {
-    public string Title { get; set; }
-    public DocPath  Path { get; set; }
+    [Required(ErrorMessage = "Tytul jest wymagany")]
+    [MaxLength(200, ErrorMessage = "Tytuł jest za długi. Max. 200 znaków")]
+    public string Title { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
     public string? Description { get; set; }
     
     // NAV
+    public DocPath  Path { get; set; }
     public ICollection<Category>? Categories { get; set; }
     public ICollection<Note>? Notes { get; set; }
     public ICollection<DocPath>? RelatedDocs { get; set; }
