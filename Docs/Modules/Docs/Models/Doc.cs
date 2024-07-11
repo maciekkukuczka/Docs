@@ -9,7 +9,7 @@ public class Doc:BaseModel
     public string? Description { get; set; }
     
     // NAV
-    public DocPath  Path { get; set; }
+    public DocPath Path { get; set; } 
     public ICollection<Category>? Categories { get; set; }
     public ICollection<Note>? Notes { get; set; }
     public ICollection<DocPath>? RelatedDocs { get; set; }

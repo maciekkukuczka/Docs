@@ -1,5 +1,5 @@
 ﻿@page "/add-doc"
-@page "/edit-doc/{id}"
+@page "/edit-doc/{id?}"
 @inject DocsService DocsService
 @inject  NavigationManager NavigationManager
 
@@ -21,9 +21,9 @@
 </EditForm>
 
 @code {
-    [Parameter] public string Id { get; set; }
-    Doc doc = new();
-    /*Doc doc => new()
+    [Parameter] public string? Id { get; set; }
+    // Doc doc = new();
+    Doc doc = new()
     {
         Path =  new DocPath(),
         Categories = new List<Category>(),
@@ -32,16 +32,13 @@
         Notes = new List<Note>(),
         Tags = new List<Tag>()
         
-    };*/
+    };
 
     protected override async Task OnInitializedAsync()
     {
         doc.Path = new DocPath();
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-    }
 
     private async Task OnValidSubmit(EditContext context)
     {

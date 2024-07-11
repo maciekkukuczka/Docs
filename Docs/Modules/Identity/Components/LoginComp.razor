@@ -1,5 +1,5 @@
 ﻿@* @namespace Mac.Modules.Common *@
-@if (@userClaimsPrincipal.Identity.IsAuthenticated)
+@if (userClaimsPrincipal?.Identity is not null && userClaimsPrincipal.Identity.IsAuthenticated)
 {
     <div>
         <MudChip T="string" Variant="MudBlazor.Variant.Text" Color="MudBlazor.Color.Success">
@@ -24,7 +24,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-         userClaimsPrincipal = (await AuthenticationStateTask).User;
+         userClaimsPrincipal = (await AuthenticationStateTask!).User;
     }
 
 
