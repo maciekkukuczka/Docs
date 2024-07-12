@@ -1,4 +1,5 @@
-﻿namespace Docs.Config;
+﻿
+namespace Docs.Config;
 
 public static class DI
 {
@@ -43,7 +44,8 @@ public static class DI
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),lifetime:ServiceLifetime.Scoped);
+        services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
+            lifetime: ServiceLifetime.Scoped);
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -54,15 +56,26 @@ public static class DI
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-        
+
         services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 
-
         // MUDBLAZOR
-        services.AddMudServices();
+        services.AddMudServices(config =>
+        {
+            config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+
+            config.SnackbarConfiguration.PreventDuplicates = false;
+            config.SnackbarConfiguration.NewestOnTop = false;
+            config.SnackbarConfiguration.ShowCloseIcon = true;
+            config.SnackbarConfiguration.VisibleStateDuration = 10000;
+            config.SnackbarConfiguration.HideTransitionDuration = 500;
+            config.SnackbarConfiguration.ShowTransitionDuration = 500;
+            config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+        });
 
         // APP
+        services.AddSingleton<AppState>();
         services.AddScoped<DocsService>();
 
         return services;

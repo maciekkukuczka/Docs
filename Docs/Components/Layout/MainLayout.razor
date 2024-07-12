@@ -5,18 +5,19 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 <MudLayout>
-    
+
     @* TOP BAR *@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
-        <MudText Typo="Typo.h5" Class="ml-3">DOCS</MudText>
-        
-        <MudSpacer/>
-            <SectionOutlet SectionId="TopBarSectionRight"/>
+        <MudLink Href="/" Typo="Typo.h5" Underline="Underline.None">DOCS</MudLink>
+        @* <MudText Typo="Typo.h5" Class="ml-3">DOCS</MudText> *@
+
         <LoginSSRComp/>
         <MudToggleIconButton @bind-Toggled="@isDarkMode"
                              Icon="@Icons.Material.Filled.DarkMode" Color="@Color.Default" title=@(isDarkMode ? "Ciemny" : "Jasny")
                              ToggledIcon="@Icons.Material.Filled.LightMode" ToggledColor="@Color.Warning"/>
+        <MudSpacer/>
+        <SectionOutlet SectionId="TopBarSectionRight"/>
         @* More *@
         @* <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End"/> *@
     </MudAppBar>
@@ -25,7 +26,7 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu/>
     </MudDrawer>
-    
+
     @* MAIN *@
     <MudMainContent Class="mt-16 pa-4">
         @Body
@@ -39,7 +40,7 @@
 </div>
 
 @code {
-    internal static object TopBarSectionRight=new();
+    internal static object TopBarSectionRight = new();
     bool _drawerOpen = true;
     bool isDarkMode = true;
 

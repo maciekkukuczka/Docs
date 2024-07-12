@@ -1,13 +1,15 @@
 ﻿@page "/"
-@using global::Docs.Components.Layout
 @inject  NavigationManager NavigationManager
 @inject DocsService DocsService
 @inject PersistentComponentState ApplicationState
+@inject AppState AppState
+@inject ISnackbar Snackbar
+
 @implements IDisposable 
 <PageTitle>Docs</PageTitle>
 
 <SectionContent SectionId="@MainLayout.TopBarSectionRight">
-    <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary">Dodaj</MudButton>
+    <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">Dodaj</MudButton>
 </SectionContent>
 
 @if (docs is null || !docs.Any())
@@ -16,44 +18,68 @@
 }
 else
 {
-    <MudDataGrid Items="@docs">
+    <MudDataGrid @ref="dataGrid" Items="@docs">
         <Columns>
+            <TemplateColumn >
+                <CellTemplate >
+                    @(docs.IndexOf(context.Item) + 1)
+                </CellTemplate>
+            </TemplateColumn>
             <PropertyColumn Property="x => x.Title" Title="Dokument"/>
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+                                   OnClick="@(()=>Edit(context.Item))">
+                            Edytuj
+                        </MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" StartIcon="@Icons.Material.Filled.DeleteForever"
+                                   OnClick="@(()=>Remove(context.Item.Id))">
+                            Usuń
+                        </MudButton>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </MudDataGrid>
 }
 
 @code
 {
-    List<Doc>? docs;
     PersistingComponentStateSubscription stateSubscription;
+    MudDataGrid<Doc> dataGrid;
+    List<Doc>? docs;
 
     protected override async Task OnInitializedAsync()
     {
-        stateSubscription = ApplicationState.RegisterOnPersisting(PersistData);
-        if (!ApplicationState.TryTakeFromJson<List<Doc>?>("Docs", out var restored))
-        {
-            docs = (await DocsService.GetAllDocs()).data;
-        }
-        else
-        {
-            docs = restored!;
-        }
+        stateSubscription = ApplicationState.RegisterOnPersisting(() => Task.Run(() => ApplicationState.PersistAsJson("Docs", docs)));
+        docs = !ApplicationState.TryTakeFromJson<List<Doc>?>("Docs", out var restored) ? (await DocsService.GetAllDocs()).data : restored!;
     }
 
-    private Task PersistData()
-    {
-        ApplicationState.PersistAsJson("Docs", docs);
-        return Task.CompletedTask;
-    }
 
-    private void AddDoc()
+    void AddDoc()
     {
         NavigationManager.NavigateTo("/add-doc");
     }
 
 
-    public void Dispose()
+    void Edit(Doc contextItem)
     {
+        AppState.DocToEdit = contextItem;
+        NavigationManager.NavigateTo($"/edit-doc/{contextItem.Id}");
     }
+
+    async Task Remove(string contextItemId)
+    {
+        var result = await DocsService.DeleteDoc(contextItemId);
+        var snackbar = result.success ? Snackbar.Add(result.message, Severity.Warning) : Snackbar.Add(result.message, Severity.Error);
+        docs=(await DocsService.GetAllDocs()).data;
+    }
+
+    public void Dispose() => stateSubscription.Dispose();
+    /*private Task PersistData()
+    {
+        ApplicationState.PersistAsJson("Docs", docs);
+        return Task.CompletedTask;
+    }*/
 }

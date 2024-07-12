@@ -19,6 +19,7 @@ global using Docs.Modules.Docs.Services;
 
 
 // 3RD PARTY
+global using MudBlazor;
 global using MudBlazor.Services;
 global using Serilog;
 

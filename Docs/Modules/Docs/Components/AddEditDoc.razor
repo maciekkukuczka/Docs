@@ -1,49 +1,96 @@
 ﻿@page "/add-doc"
+@page "/edit-doc"
 @page "/edit-doc/{id?}"
 @inject DocsService DocsService
 @inject  NavigationManager NavigationManager
+@inject AppState AppState
+@inject ISnackbar Snackbar
+@implements IDisposable
 
 <h3>AddEditDoc</h3>
 
-<EditForm Model="@doc" OnValidSubmit="OnValidSubmit">
-    <DataAnnotationsValidator/>
-    
-    <MudGrid>
-        <MudItem xs="12">
-            <MudPaper>
-                <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
-                              @bind-Value="@doc.Title" For="@(() => doc.Title)"/>
+@if (Doc is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@Doc" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator/>
 
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Dodaj</MudButton>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-</EditForm>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudPaper>
+                    <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
+                                  @bind-Value="@Doc.Title" For="@(() => Doc.Title)"/>
+
+                </MudPaper>
+            </MudItem>
+            @*
+            <SectionContent SectionId="@MainLayout.TopBarSectionRight">
+            </SectionContent>
+            *@
+            <MudItem xs="12" Class="d-flex justify-end">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Zapisz</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}
 
 @code {
     [Parameter] public string? Id { get; set; }
-    // Doc doc = new();
-    Doc doc = new()
-    {
-        Path =  new DocPath(),
-        Categories = new List<Category>(),
-        Links = new List<Link>(),
-        Images = new List<Image>(),
-        Notes = new List<Note>(),
-        Tags = new List<Tag>()
-        
-    };
+    Doc? Doc { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
-        doc.Path = new DocPath();
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        Doc = AppState.DocToEdit ?? new Doc
+        {
+            Path = new DocPath(),
+            Categories = new List<Category>(),
+            Links = new List<Link>(),
+            Images = new List<Image>(),
+            Notes = new List<Note>(),
+            Tags = new List<Tag>()
+        };
     }
 
 
-    private async Task OnValidSubmit(EditContext context)
+    async Task OnValidSubmit(EditContext context)
     {
-        await DocsService.AddDoc(doc);
-        NavigationManager.NavigateTo("/");
+        var submittedDoc = context.Model as Doc;
+        Result result;
+        if (string.IsNullOrWhiteSpace(Id))
+        {
+            result = await DocsService.AddDoc(submittedDoc);
+        }
+        else
+        {
+            result = await DocsService.UpdateDoc(submittedDoc);
+            AppState.DocToEdit = null;
+        }
+
+        if (result.success)
+        {
+            NavigationManager.NavigateTo("/");
+            Snackbar.Add(result.message, Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add(result.message, Severity.Error);
+        }
+    }
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        AppState.DocToEdit = null;
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 
 }
