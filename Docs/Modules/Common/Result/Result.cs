@@ -3,8 +3,9 @@
 public record Result(bool success, string? message)
 {
     public static Result OK(string message="") => new(true, message);
-    public static Result Error(string message) => new(false, message);
     public static Result<T> OK<T>(T data, string? message="") => new(data,true, message);
+    public static Result Error(string message) => new(false, message);
+    public static Result<T> Error<T>(string message) => new(default,false, message);
 }
 
 public record Result<T>(T? data,bool success, string? message) : Result(success, message);

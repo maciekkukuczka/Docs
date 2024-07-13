@@ -5,5 +5,8 @@ namespace Docs.Data;
 // Add profile data for application users by adding properties to the ApplicationUser class
 public class ApplicationUser : IdentityUser
 {
+    // NAV
+    // public ICollection<Doc>? Docs { get; set; }
+
 }
 

@@ -2,5 +2,5 @@
 
 public class AppState
 {
-    public Doc DocToEdit { get; set; }
+    public Doc? DocToEdit { get; set; }
 }

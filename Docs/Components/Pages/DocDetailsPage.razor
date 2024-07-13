@@ -1,0 +1,41 @@
+﻿@page "/doc-details/{id}"
+@inject DocsService DocsService
+
+@if (doc is null)
+{
+    <p>Czekam...</p>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper>
+                <p>Tytuł: @doc.Title</p>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper>
+                <p>Kótki opis: @doc.ShortDescription</p>
+            </MudPaper>
+        </MudItem>
+        <MudItem  xs="12"  >
+            <MudPaper>
+                <p>Opis: @doc.Description</p>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+
+@code {
+    [Parameter] public string Id { get; set; }
+
+    Doc doc;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        doc = (await DocsService.GetDocByld(Id)).data;
+    }
+
+}

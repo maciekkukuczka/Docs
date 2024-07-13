@@ -5,11 +5,14 @@ public class Doc:BaseModel
     [Required(ErrorMessage = "Tytul jest wymagany")]
     [MaxLength(200, ErrorMessage = "Tytuł jest za długi. Max. 200 znaków")]
     public string Title { get; set; } = string.Empty;
+    [MaxLength(1000, ErrorMessage = "Opis jest za długi. Max. 1000 znaków")]
     public string? ShortDescription { get; set; }
+    [MaxLength(5000, ErrorMessage = "Opis jest za długi. Max. 5000 znaków")]
     public string? Description { get; set; }
     
     // NAV
     public DocPath Path { get; set; } 
+    // public ICollection<ApplicationUser>? Users { get; set; }
     public ICollection<Category>? Categories { get; set; }
     public ICollection<Note>? Notes { get; set; }
     public ICollection<DocPath>? RelatedDocs { get; set; }

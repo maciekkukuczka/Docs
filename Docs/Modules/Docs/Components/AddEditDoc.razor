@@ -24,6 +24,12 @@ else
                     <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
                                   @bind-Value="@Doc.Title" For="@(() => Doc.Title)"/>
 
+                    <MudTextField Label="Krótki opis" HelperText="Max 1000 znaków" Lines="5"
+                                  @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)"/>
+                    
+                    <MudTextField Label="Krótki opis" HelperText="Max 5000 znaków" Lines="15"
+                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"/>
+
                 </MudPaper>
             </MudItem>
             @*

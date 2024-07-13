@@ -19,7 +19,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(builder);
 
+        // TODO - Implement Global FIlter 
+        // builder.Entity<Doc>().HasQueryFilter(x => x.Users.Any(x=>x.Id==currentUserId));
+        
         // builder.Entity<Doc>().ComplexProperty(x => x.Path);
+        // builder.Entity<Doc>().HasMany(x => x.Users).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasOne(x=>x.Path).WithOne(x=>x.Doc).HasForeignKey<DocPath>(x=>x.DocId);
         builder.Entity<Doc>().HasMany(x => x.Categories).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Images).WithMany(x => x.Docs);
