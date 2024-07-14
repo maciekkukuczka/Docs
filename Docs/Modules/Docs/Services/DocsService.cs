@@ -5,10 +5,25 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
     public async Task<Result<List<Doc>>> GetAllDocs()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return Result<List<Doc>>.OK(await dbContext.Docs
+        var res = Result<List<Doc>>.OK(await dbContext.Docs
             .AsNoTracking()
             .ToListAsync());
+        return res;
     }
+
+    public async Task<Result<HashSet<Doc>>> GetDocBySubject(string? subjectId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        HashSet<Doc> result;
+        if (subjectId == null)
+        {
+            result = await db.Docs.Where(x => x.Subjects.Any()).ToHashSetAsync();
+        }
+
+        result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId)).ToHashSetAsync();
+        return Result<HashSet<Doc>>.OK(result);
+    }
+
 
     public async Task<Result<Doc>> GetDocByld(string id)
     {

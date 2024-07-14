@@ -2,6 +2,7 @@
 @page "/edit-doc"
 @page "/edit-doc/{id?}"
 @inject DocsService DocsService
+@inject GenericService<Doc> GenericService
 @inject  NavigationManager NavigationManager
 @inject AppState AppState
 @inject ISnackbar Snackbar
@@ -54,12 +55,13 @@ else
 
         Doc = AppState.DocToEdit ?? new Doc
         {
-            Path = new DocPath(),
+            // Subjects =new HashSet<Subject>{ AppState.RecentSubject}
+            /*Path = new DocPath(),
             Categories = new List<Category>(),
             Links = new List<Link>(),
             Images = new List<Image>(),
             Notes = new List<Note>(),
-            Tags = new List<Tag>()
+            Tags = new List<Tag>()*/
         };
     }
 
@@ -67,14 +69,17 @@ else
     async Task OnValidSubmit(EditContext context)
     {
         var submittedDoc = context.Model as Doc;
+        submittedDoc.Subjects.Add(AppState.RecentSubject);
         Result result;
         if (string.IsNullOrWhiteSpace(Id))
         {
-            result = await DocsService.AddDoc(submittedDoc);
+            result = await GenericService.Add(submittedDoc);
+            // result = await DocsService.AddDoc(submittedDoc);
         }
         else
         {
-            result = await DocsService.UpdateDoc(submittedDoc);
+            result = await GenericService.Update(submittedDoc);
+            // result = await DocsService.UpdateDoc(submittedDoc);
             AppState.DocToEdit = null;
         }
 

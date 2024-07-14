@@ -1,0 +1,99 @@
+﻿@inject PersistentComponentState PersistentComponentState 
+@inject GenericService<Subject> GenericService
+@inject ISnackbar Snackbar
+@inject UserManager<ApplicationUser> UserManager
+@implements  IDisposable
+@page "/subjects"
+
+@*
+<SectionContent SectionId="MainLayout.TopBarSectionRight">
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
+</SectionContent>
+*@
+
+<MudGrid>
+    <h3>Tematy</h3>
+    <MudItem>
+        <MudPaper>
+            <EditForm Model="@subject" OnValidSubmit="Submit">
+                <DataAnnotationsValidator/>
+                <MudTextField @bind-Value="subject.Name" Label="Tytuł" For="@(() => subject.Name)"/>
+                <MudTextField @bind-Value="subject.Description" Label="Opis" For="@(() => subject.Name)" Lines="5"/>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Dodaj Temat</MudButton>
+            </EditForm>
+        </MudPaper>
+    </MudItem>
+
+    @if (subjects is null || !subjects.Any())
+    {
+        <p>Brak danych...</p>
+    }
+    else
+    {
+        <MudItem>
+            <MudDataGrid Items="subjects">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudStack Row="true">
+                                <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Edytuj</MudButton>
+                                <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Error">Usuń</MudButton>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                </Columns>
+            </MudDataGrid>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
+    
+    PersistingComponentStateSubscription stateSubscription;
+    List<Subject> subjects = [];
+    Subject subject = new();
+    string? currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userName=(await AuthStateTask).User.Identity.Name;
+        currentUserId = (await UserManager.FindByNameAsync(userName)).Id;
+        
+        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        {
+            PersistentComponentState.PersistAsJson("Subjects", subjects);
+            return Task.CompletedTask;
+        });
+
+        subjects = PersistentComponentState.TryTakeFromJson<List<Subject>>
+            ("Subjects", out var restored)
+            ? restored
+            : (await GenericService.GetAll()).data;
+    }
+
+    async Task Submit(EditContext context)
+    {
+        var subject = (Subject)context.Model;
+        subject.UserId = currentUserId;
+        
+        var result = await GenericService.Add(subject);
+        
+        if (result.success)
+        {
+            subjects = (await GenericService.GetAll()).data;
+            Snackbar.Add(result.message, Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add(result.message, Severity.Error);
+
+            subject = new();
+        }
+    }
+
+    public void Dispose() => stateSubscription.Dispose();
+
+}

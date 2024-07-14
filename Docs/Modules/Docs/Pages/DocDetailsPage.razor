@@ -32,10 +32,12 @@ else
 
     Doc doc;
 
-
+    
     protected override async Task OnParametersSetAsync()
     {
         doc = (await DocsService.GetDocByld(Id)).data;
     }
+
+ 
 
 }

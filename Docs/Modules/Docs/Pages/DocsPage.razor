@@ -1,29 +1,33 @@
 ﻿@page "/"
 @inject  NavigationManager NavigationManager
 @inject DocsService DocsService
+@inject GenericService<Doc> GenericService
 @inject PersistentComponentState ApplicationState
 @inject AppState AppState
 @inject ISnackbar Snackbar
 @inject  IDialogService DialogService
+@implements IDisposable
 
-@implements IDisposable 
+
 <PageTitle>Docs</PageTitle>
 
 <SectionContent SectionId="@MainLayout.TopBarSectionRight">
     <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">Dodaj</MudButton>
 </SectionContent>
 
+    <SubjectDisplayComp  OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
 @if (docs is null || !docs.Any())
 {
     <p>Loading</p>
 }
 else
 {
+
     <MudDataGrid @ref="dataGrid" Items="@docs">
         <Columns>
             <TemplateColumn >
                 <CellTemplate >
-                    @(docs.IndexOf(context.Item) + 1)
+                    @* @(docs.IndexOf(context.Item) + 1) *@
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn>
@@ -54,12 +58,37 @@ else
 {
     PersistingComponentStateSubscription stateSubscription;
     MudDataGrid<Doc> dataGrid;
-    List<Doc>? docs;
+    HashSet<Doc>? docs;
+    // Subject? recentSubject;
+
 
     protected override async Task OnInitializedAsync()
     {
-        stateSubscription = ApplicationState.RegisterOnPersisting(() => Task.Run(() => ApplicationState.PersistAsJson("Docs", docs)));
-        docs = !ApplicationState.TryTakeFromJson<List<Doc>?>("Docs", out var restored) ? (await DocsService.GetAllDocs()).data : restored!;
+        /*AppState.OnChange += SubjectIdChanged;
+        AppState.OnChange += StateHasChanged;*/
+        stateSubscription = ApplicationState.RegisterOnPersisting(() =>
+        {
+            ApplicationState.PersistAsJson("Docs", docs);
+            return Task.CompletedTask;
+        });
+
+        await GetDocs();
+    }
+
+    async Task OnSubjectSelected(Subject subject)
+    {
+        AppState.RecentSubject = subject;
+        await GetDocs(subject.Id);
+    }
+     /*void SubjectIdChanged()
+    {
+     GetDocs();
+    }*/
+
+    async Task GetDocs(string? subjectId="")
+    {
+        docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) ? (await DocsService.GetDocBySubject(subjectId)).data : restored!;
+        // docs = (await DocsService.GetDocBySubject(subjectId)).data ;
     }
 
 
@@ -67,7 +96,6 @@ else
     {
         NavigationManager.NavigateTo("/add-doc");
     }
-
 
     void Edit(Doc contextItem)
     {
@@ -86,13 +114,18 @@ else
         if (state.Equals("Canceled")) return;
         var result = await DocsService.DeleteDoc(contextItemId);
         var snackbar = result.success ? Snackbar.Add(result.message, Severity.Warning) : Snackbar.Add(result.message, Severity.Error);
-        docs = (await DocsService.GetAllDocs()).data;
+        docs = (await DocsService.GetAllDocs()).data.ToHashSet();
     }
 
-    public void Dispose() => stateSubscription.Dispose();
-    /*private Task PersistData()
+    public void Dispose()
     {
-        ApplicationState.PersistAsJson("Docs", docs);
-        return Task.CompletedTask;
-    }*/
+        stateSubscription.Dispose();
+        /*AppState.OnChange -= SubjectIdChanged;
+        AppState.OnChange -= StateHasChanged;*/
+    }
+    /*private Task PersistData()
+{
+ApplicationState.PersistAsJson("Docs", docs);
+return Task.CompletedTask;
+}*/
 }

@@ -6,6 +6,6 @@ public class Note:BaseModel
     public string? Content { get; set; }
     
     //NAV
-    public ICollection<Doc>? Docs { get; set; }
-    
+    public ICollection<Doc>? Docs { get; set; } = (HashSet<Doc>) [];
+
 }

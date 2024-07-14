@@ -39,6 +39,9 @@ public static class DI
             }
         );
 
+        //HTTP
+        services.AddHttpContextAccessor();
+        
         // DB
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -49,6 +52,7 @@ public static class DI
         services.AddDatabaseDeveloperPageExceptionFilter();
 
         // IDENTITY
+        services.AddCascadingAuthenticationState();
         services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -75,7 +79,9 @@ public static class DI
 
         // APP
         services.AddSingleton<AppState>();
+        services.AddScoped(typeof(GenericService<>));
         services.AddScoped<DocsService>();
+        services.AddScoped<SubjectService>();
 
         return services;
     }

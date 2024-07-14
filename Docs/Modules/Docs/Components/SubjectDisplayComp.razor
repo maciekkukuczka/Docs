@@ -1,0 +1,39 @@
+﻿@inject SubjectService SubjectService
+@inject DocsService DocsService
+@inject AppState AppState
+
+<MudPaper Outlined="true" Class="ma-3">
+    <h3>Tematy</h3>
+    <MudStack Row="true">
+        @foreach (var subject in subjects)
+        {
+            <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">@subject.Name</MudButton>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
+    [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
+    Subject selectedSubject;
+    HashSet<Subject> subjects = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateTask).User.Identity.Name;
+        subjects = (await SubjectService.GetSubjects(user)).data;
+    }
+
+    async Task SelectSubject(Subject? subject)
+    {
+        selectedSubject = subject;
+        await OnSubjectSelected.InvokeAsync(selectedSubject);
+        /*await  InvokeAsync(() =>
+          {
+              AppState.SetRecentSubjectId(subjectId);
+              StateHasChanged();
+          });*/
+    }
+
+
+}

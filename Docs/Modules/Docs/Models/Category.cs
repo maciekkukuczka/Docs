@@ -6,5 +6,5 @@ public class Category:BaseModel
     public string? Descritpion { get; set; }
     
     // NAV
-    public ICollection<Doc>? Docs { get; set; }
+    public ICollection<Doc>? Docs { get; set; } = (HashSet<Doc>) [];
 }

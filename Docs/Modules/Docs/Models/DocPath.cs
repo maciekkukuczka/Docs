@@ -8,5 +8,5 @@ public class DocPath:BaseModel
     // NAV
     public string DocId { get; set; }
     public Doc? Doc { get; set; }
-    public ICollection<Doc>? Docs { get; set; }
+    public ICollection<Doc>? Docs { get; set; } = (HashSet<Doc>) [];
 }

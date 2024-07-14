@@ -6,7 +6,8 @@ namespace Docs.Data;
 public class ApplicationUser : IdentityUser
 {
     // NAV
-    // public ICollection<Doc>? Docs { get; set; }
+    // public ICollection<Doc> Docs { get; set; } = (HashSet<Doc>) [];
+    public ICollection<Subject>Subjects { get; set; }= (HashSet<Subject>) [];
 
 }
 
