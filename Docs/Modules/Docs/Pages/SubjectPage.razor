@@ -35,6 +35,14 @@
             <MudDataGrid Items="subjects">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
+                    <TemplateColumn Title="Dokumenty">
+                        <CellTemplate>
+                            @foreach (var doc in context.Item.Docs)
+                            {
+                                <span>@doc.Title</span>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
                     <TemplateColumn>
                         <CellTemplate>
                             <MudStack Row="true">
@@ -62,8 +70,8 @@
     protected override async Task OnInitializedAsync()
     {
         var isAuthenticated = (await AuthStateTask).User.Identity.IsAuthenticated;
-         currentUserName = isAuthenticated?(await AuthStateTask).User.Identity.Name:string.Empty;
-        
+        currentUserName = isAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
+
         if (!string.IsNullOrWhiteSpace(currentUserName))
         {
             currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;

@@ -14,7 +14,8 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
     public async Task<Result<HashSet<Doc>>> GetDocBySubject(string? subjectId)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        HashSet<Doc> result;
+        // HashSet<Doc> result;
+        IQueryable<Doc> res;
         if (string.IsNullOrWhiteSpace(subjectId))
         {
             var firstSubject = await db.Docs
@@ -24,14 +25,19 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
 
             if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject>()}");
             
-            result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id))
-                .ToHashSetAsync();
+            res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
         }
         else
         {
-            result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId)).ToHashSetAsync();
+            res =db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId));
+            // .ToHashSetAsync();
         }
 
+        var result=await res
+            .Include(x => x.Subjects)
+            .AsNoTracking()
+            .ToHashSetAsync();
+        
         return Result<HashSet<Doc>>.OK(result);
     }
 

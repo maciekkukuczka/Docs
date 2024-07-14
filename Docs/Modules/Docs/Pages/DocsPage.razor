@@ -17,14 +17,13 @@
     <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">Dodaj</MudButton>
 </SectionContent>
 
-    <SubjectDisplayComp  OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
+<SubjectDisplayComp OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
 @if (docs is null || !docs.Any())
 {
     <p>Loading</p>
 }
 else
 {
-
     <MudDataGrid @ref="dataGrid" Items="@docs">
         <Columns>
             <TemplateColumn >
@@ -38,6 +37,14 @@ else
                 </CellTemplate>
             </TemplateColumn>
             <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
+            <TemplateColumn TItle="Tematy">
+                <CellTemplate>
+                    @foreach (var subject in context.Item.Subjects)
+                    {
+                        <span>@subject.Name</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
             <TemplateColumn CellClass="d-flex justify-end">
                 <CellTemplate>
                     <MudStack Row>
@@ -68,7 +75,7 @@ else
     {
         /*AppState.OnChange += SubjectIdChanged;
         AppState.OnChange += StateHasChanged;*/
-        
+
         stateSubscription = ApplicationState.RegisterOnPersisting(() =>
         {
             ApplicationState.PersistAsJson("Docs", docs);
@@ -83,12 +90,12 @@ else
         AppState.RecentSubject = subject;
         await GetDocs(subject.Id);
     }
-     /*void SubjectIdChanged()
-    {
-     GetDocs();
-    }*/
+    /*void SubjectIdChanged()
+   {
+    GetDocs();
+   }*/
 
-    async Task GetDocs(string? subjectId="")
+    async Task GetDocs(string? subjectId = "")
     {
         docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) ? (await DocsService.GetDocBySubject(subjectId)).data : restored!;
         // docs = (await DocsService.GetDocBySubject(subjectId)).data ;

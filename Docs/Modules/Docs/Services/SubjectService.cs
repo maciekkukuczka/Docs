@@ -6,7 +6,7 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Subjects
-            // .Include(x=>x.User)
+            .Include(x=>x.Docs)
             .Where(x => x.User.UserName.Equals(userName))
             .AsNoTracking()
             .ToHashSetAsync();
