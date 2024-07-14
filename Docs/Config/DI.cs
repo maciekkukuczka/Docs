@@ -10,38 +10,12 @@ public static class DI
         services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
-        services.AddCascadingAuthenticationState();
-        services.AddScoped<IdentityUserAccessor>();
-        services.AddScoped<IdentityRedirectManager>();
-        services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-        services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            })
-            .AddIdentityCookies();
-
-        services.AddAuthorization();
-
-        //Password
-        services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 1;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredUniqueChars = 0;
-                options.SignIn.RequireConfirmedAccount = false;
-                options.SignIn.RequireConfirmedEmail = false;
-                options.SignIn.RequireConfirmedPhoneNumber = false;
-            }
-        );
+        // IDENTITY
+        services.AddIdentityServices();
 
         //HTTP
         services.AddHttpContextAccessor();
-        
+
         // DB
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -49,33 +23,14 @@ public static class DI
         services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
             lifetime: ServiceLifetime.Scoped);
         services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+
         services.AddDatabaseDeveloperPageExceptionFilter();
 
-        // IDENTITY
-        services.AddCascadingAuthenticationState();
-        services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddSignInManager()
-            .AddDefaultTokenProviders();
-
-
-        services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
+        // IDENTITY2
+        services.AddIdentityServices2();
 
         // MUDBLAZOR
-        services.AddMudServices(config =>
-        {
-            config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
-
-            config.SnackbarConfiguration.PreventDuplicates = false;
-            config.SnackbarConfiguration.NewestOnTop = false;
-            config.SnackbarConfiguration.ShowCloseIcon = true;
-            config.SnackbarConfiguration.VisibleStateDuration = 10000;
-            config.SnackbarConfiguration.HideTransitionDuration = 500;
-            config.SnackbarConfiguration.ShowTransitionDuration = 500;
-            config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
-        });
+        services.AddMudBlazorServices();
 
         // APP
         services.AddSingleton<AppState>();

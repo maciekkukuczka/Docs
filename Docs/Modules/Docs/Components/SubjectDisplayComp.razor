@@ -7,7 +7,8 @@
     <MudStack Row="true">
         @foreach (var subject in subjects)
         {
-            <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">@subject.Name</MudButton>
+            <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
+                       Color="selectedSubject==subject?Color.Primary:Color.Dark">@subject.Name</MudButton>
         }
     </MudStack>
 </MudPaper>
@@ -20,7 +21,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user = (await AuthStateTask).User.Identity.Name;
+        var user = (await AuthStateTask).User.Identity.IsAuthenticated?
+            (await AuthStateTask).User.Identity.Name:string.Empty;
+        
         subjects = (await SubjectService.GetSubjects(user)).data;
     }
 
@@ -28,6 +31,7 @@
     {
         selectedSubject = subject;
         await OnSubjectSelected.InvokeAsync(selectedSubject);
+
         /*await  InvokeAsync(() =>
           {
               AppState.SetRecentSubjectId(subjectId);

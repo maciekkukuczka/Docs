@@ -6,7 +6,9 @@
 @inject  NavigationManager NavigationManager
 @inject AppState AppState
 @inject ISnackbar Snackbar
+@inject UserManager<ApplicationUser> UserManager;
 @implements IDisposable
+@attribute [Authorize]
 
 <h3>AddEditDoc</h3>
 
@@ -45,14 +47,20 @@ else
 }
 
 @code {
+    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
     [Parameter] public string? Id { get; set; }
     Doc? Doc { get; set; }
+    string userId;
 
 
     protected override async Task OnInitializedAsync()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
-
+        
+        var isLogged = (await AuthState).User.Identity.IsAuthenticated;
+        var user = isLogged ? (await AuthState).User.Identity.Name : string.Empty;
+         userId =(await UserManager.Users.FirstOrDefaultAsync(x => x.UserName== user)).Id;
+        
         Doc = AppState.DocToEdit ?? new Doc
         {
             // Subjects =new HashSet<Subject>{ AppState.RecentSubject}
@@ -69,17 +77,21 @@ else
     async Task OnValidSubmit(EditContext context)
     {
         var submittedDoc = context.Model as Doc;
-        submittedDoc.Subjects.Add(AppState.RecentSubject);
+        submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
+        {
+            Name = "Default",
+            UserId = userId
+        });
         Result result;
         if (string.IsNullOrWhiteSpace(Id))
         {
-            result = await GenericService.Add(submittedDoc);
-            // result = await DocsService.AddDoc(submittedDoc);
+            // result = await GenericService.Add(submittedDoc);
+            result = await DocsService.AddDoc(submittedDoc);
         }
         else
         {
-            result = await GenericService.Update(submittedDoc);
-            // result = await DocsService.UpdateDoc(submittedDoc);
+            // result = await GenericService.Update(submittedDoc);
+            result = await DocsService.UpdateDoc(submittedDoc);
             AppState.DocToEdit = null;
         }
 

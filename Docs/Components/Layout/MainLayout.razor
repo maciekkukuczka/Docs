@@ -1,9 +1,13 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Microsoft.AspNetCore.Authorization
+@inherits LayoutComponentBase
 <MudThemeProvider IsDarkMode="isDarkMode"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
+
+@* @attribute [Authorize] *@
+@* <AuthorizeView> *@
+    
 <MudLayout>
 
     @* TOP BAR *@
@@ -32,6 +36,7 @@
         @Body
     </MudMainContent>
 </MudLayout>
+@* </AuthorizeView> *@
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

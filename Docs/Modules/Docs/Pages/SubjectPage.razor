@@ -1,10 +1,11 @@
 ﻿@inject PersistentComponentState PersistentComponentState 
 @inject GenericService<Subject> GenericService
-@inject ISnackbar Snackbar
+@inject SubjectService SubjectService
 @inject UserManager<ApplicationUser> UserManager
+@inject ISnackbar Snackbar
 @implements  IDisposable
 @page "/subjects"
-
+@attribute [Authorize]
 @*
 <SectionContent SectionId="MainLayout.TopBarSectionRight">
     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
@@ -51,39 +52,47 @@
 
 @code {
     [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
-    
+
     PersistingComponentStateSubscription stateSubscription;
-    List<Subject> subjects = [];
+    HashSet<Subject> subjects = [];
     Subject subject = new();
     string? currentUserId;
+    string? currentUserName;
 
     protected override async Task OnInitializedAsync()
     {
-        var userName=(await AuthStateTask).User.Identity.Name;
-        currentUserId = (await UserManager.FindByNameAsync(userName)).Id;
+        var isAuthenticated = (await AuthStateTask).User.Identity.IsAuthenticated;
+         currentUserName = isAuthenticated?(await AuthStateTask).User.Identity.Name:string.Empty;
         
+        if (!string.IsNullOrWhiteSpace(currentUserName))
+        {
+            currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;
+        }
+
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
         {
             PersistentComponentState.PersistAsJson("Subjects", subjects);
             return Task.CompletedTask;
         });
 
-        subjects = PersistentComponentState.TryTakeFromJson<List<Subject>>
+        subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
             ("Subjects", out var restored)
             ? restored
-            : (await GenericService.GetAll()).data;
+            // : (await GenericService.GetAll()).data;
+            : (await SubjectService.GetSubjects(currentUserName)).data;
     }
 
     async Task Submit(EditContext context)
     {
         var subject = (Subject)context.Model;
         subject.UserId = currentUserId;
-        
+
         var result = await GenericService.Add(subject);
-        
+
         if (result.success)
         {
-            subjects = (await GenericService.GetAll()).data;
+            subjects = (await SubjectService.GetSubjects(currentUserName)).data;
+            // subjects = (await GenericService.GetAll()).data;
             Snackbar.Add(result.message, Severity.Success);
         }
         else

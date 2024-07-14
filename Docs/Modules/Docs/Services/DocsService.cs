@@ -15,12 +15,23 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         HashSet<Doc> result;
-        if (subjectId == null)
+        if (string.IsNullOrWhiteSpace(subjectId))
         {
-            result = await db.Docs.Where(x => x.Subjects.Any()).ToHashSetAsync();
+            var firstSubject = await db.Docs
+                .Where(x=>x.Subjects.Any())
+                .Select(x => x.Subjects.FirstOrDefault())
+                .FirstOrDefaultAsync();
+
+            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject>()}");
+            
+            result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id))
+                .ToHashSetAsync();
+        }
+        else
+        {
+            result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId)).ToHashSetAsync();
         }
 
-        result = await db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId)).ToHashSetAsync();
         return Result<HashSet<Doc>>.OK(result);
     }
 
@@ -33,13 +44,26 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result<Doc>.OK(exist);
     }
 
-    public async Task<Result> AddDoc(Doc doc)
+    public async Task<Result> AddDoc(Doc newDoc)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        dbContext.Add(doc);
+
+        var existSubjects = dbContext.Subjects;
+
+        foreach (var existSubject in existSubjects)
+        {
+            if (newDoc.Subjects.Any(x => x.Id == existSubject.Id))
+            {
+                var untracked = newDoc.Subjects.FirstOrDefault(x => x.Id == existSubject.Id);
+                newDoc.Subjects.Remove(untracked);
+                newDoc.Subjects.Add(existSubject);
+            }
+        }
+
+        dbContext.Add(newDoc);
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {doc.Title}");
-        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {doc.Title}");
+        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
     public async Task<Result> UpdateDoc(Doc doc)
