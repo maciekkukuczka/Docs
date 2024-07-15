@@ -1,8 +1,10 @@
 ﻿@inject NavigationManager NavigationManager
 
-<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.DocumentScanner">Docs</MudNavLink>
-    <MudNavLink Href="/subjects" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Subject">Tematy</MudNavLink>
-    @* <MudNavLink Href="auth" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Lock">Auth Required</MudNavLink> *@
+<MudNavMenu Class="d-flex flex-column flex-grow-1 justify-space-between">
+    <div>
+        <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.DocumentScanner">Docs</MudNavLink>
+        <MudNavLink Href="/subjects" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Subject">Tematy</MudNavLink>
+        @* <MudNavLink Href="auth" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Lock">Auth Required</MudNavLink> *@
+    </div>
+    <VersionComponent Name="Docs" By="Mac&Dolimka"/>
 </MudNavMenu>
-

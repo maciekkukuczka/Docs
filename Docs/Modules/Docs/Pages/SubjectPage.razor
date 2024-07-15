@@ -105,7 +105,6 @@
     {
         var contextSubject = (Subject)context.Model;
         contextSubject.UserId = currentUserId;
-
         var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
 
         if (result.success)
