@@ -32,7 +32,7 @@
     else
     {
         <MudItem xs="6">
-            <MudDataGrid Items="subjects">
+            <MudDataGrid @ref="grid" Items="subjects">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
                     <TemplateColumn Title="Dokumenty">
@@ -50,7 +50,8 @@
                                            OnClick="(async () => await Edit(context.Item))">
                                     Edytuj
                                 </MudButton>
-                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Usuń</MudButton>
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
+                                           OnClick="async ()=>await Delete(context.Item)">Usuń</MudButton>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
@@ -69,6 +70,9 @@
     Subject subject = new();
     string? currentUserId;
     string? currentUserName;
+    bool isToEdit = false;
+     MudDataGrid<Subject> grid;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -76,9 +80,8 @@
         currentUserName = isAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
 
         if (!string.IsNullOrWhiteSpace(currentUserName))
-        {
             currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;
-        }
+        
 
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
         {
@@ -86,6 +89,11 @@
             return Task.CompletedTask;
         });
 
+        await GetSubjects();
+    }
+
+    private async Task GetSubjects()
+    {
         subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
             ("Subjects", out var restored)
             ? restored
@@ -95,10 +103,10 @@
 
     async Task Submit(EditContext context)
     {
-        var subject = (Subject)context.Model;
-        subject.UserId = currentUserId;
+        var contextSubject = (Subject)context.Model;
+        contextSubject.UserId = currentUserId;
 
-        var result = await GenericService.Add(subject);
+        var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
 
         if (result.success)
         {
@@ -106,30 +114,26 @@
             // subjects = (await GenericService.GetAll()).data;
             Snackbar.Add(result.message, Severity.Success);
         }
-        else
-        {
-            Snackbar.Add(result.message, Severity.Error);
-        }
+        else Snackbar.Add(result.message, Severity.Error);
 
-        this.subject = new();
+        isToEdit = false;
+        subject = new();
     }
-
-
+    
+    
     async Task Edit(Subject? contextSubject)
     {
-        // TODO Add object to edit form
-        
-        if (contextSubject is not null)
-        {
-            var result = (await SubjectService.UpdateSubject(contextSubject));
-            var snackbar = result.success
-                ? Snackbar.Add(result.message, Severity.Success)
-                : Snackbar.Add(result.message, Severity.Error);
-        }
-        
-        
+        isToEdit = true;
+        if (contextSubject is not null) subject = contextSubject;
     }
 
-    public void Dispose() => stateSubscription.Dispose();
 
+     async Task Delete(Subject? contextSubject)
+     {
+         var result = (await SubjectService.DeleteSubject(contextSubject.Id));
+             Snackbar.Add(result.message, result.success?Severity.Success:Severity.Error);
+             await GetSubjects();
+     }
+
+    public void Dispose() => stateSubscription.Dispose();
 }

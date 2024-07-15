@@ -14,8 +14,8 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         if (result is null) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
         return Result<HashSet<Subject>>.OK(result);
     }
-    
-    
+
+
 //UPDATE
     public async Task<Result> UpdateSubject(Subject subject)
     {
@@ -25,11 +25,10 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
 
         db.Subjects.Entry(exist).CurrentValues.SetValues(subject);
 
-
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if(saveResult <=0) return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {subject.Name}");
+            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {subject.Name}");
             return Result.OK($"{Errors.ObjectSaved<Subject>()}: {subject.Name}");
         }
         catch (DbUpdateException ex)
@@ -39,6 +38,37 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         catch (Exception ex)
         {
             return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {ex.Message}");
+        }
+    }
+
+    // DELETE
+    public async Task<Result> DeleteSubject(string subjectId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        var exist = await db.Subjects.Include(x => x.Docs)
+            .FirstOrDefaultAsync(x => x.Id.Equals(subjectId));
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Subject>()}: {subjectId}");
+
+        var relatedDocsNames = string.Join(",", exist.Docs.Select(x => x.Title));
+
+        if (exist.Docs.Any())
+            return Result.Error($"{Errors.ObjectCannotBeDeletedHasRelatedEntities<Subject>()}: {subjectId}\n" +
+                                $"Powiązane encje: {relatedDocsNames}");
+
+        db.Subjects.Remove(exist);
+
+        try
+        {
+            if (await db.SaveChangesAsync() <= 0) return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}");
+            return Result.OK($"{Errors.ObjectDeleted<Subject>()}: {subjectId}");
+        }
+        catch (DbUpdateException e)
+        {
+            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
+        }
+        catch (Exception e)
+        {
+            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
         }
     }
 }

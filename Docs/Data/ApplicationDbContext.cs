@@ -25,19 +25,9 @@ public class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
-
-        /*// Global filter for documents based on subjects and the current user
-        builder.Entity<Doc>().HasQueryFilter(x => x.Subjects.Any(
-            x=>x.Users.Any(x=>x.Id==currentUserId)));*/
-
-        /*// Global filter for subjects based on the current user
-        builder.Entity<Subject>().HasQueryFilter(x => x.Users.Any(
-            x=>x.Id==currentUserId));*/
+        
 
         // builder.Entity<Doc>().ComplexProperty(x => x.Path);
-        builder.Entity<Doc>().HasOne(x => x.Path).WithOne(x => x.Doc).HasForeignKey<DocPath>(x => x.DocId);
-        // builder.Entity<Doc>().HasMany(x => x.Users).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Subjects).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Categories).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Images).WithMany(x => x.Docs);
@@ -46,6 +36,8 @@ public class ApplicationDbContext(
         builder.Entity<Doc>().HasMany(x => x.RelatedDocs).WithMany(x => x.Docs);
         builder.Entity<Doc>().HasMany(x => x.Tags).WithMany(x => x.Docs);
 
+        builder.Entity<Doc>().HasOne(x => x.Path).WithOne(x => x.Doc).HasForeignKey<DocPath>(x => x.DocId);
+        
         builder.Entity<ApplicationUser>().HasMany(x => x.Subjects)
             .WithOne(x => x.User).HasForeignKey(x => x.UserId);
 
