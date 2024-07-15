@@ -13,8 +13,8 @@
 *@
 
 <MudGrid>
-    <h3>Tematy</h3>
-    <MudItem>
+    <MudItem xs="4">
+        <h3>Tematy</h3>
         <MudPaper>
             <EditForm Model="@subject" OnValidSubmit="Submit">
                 <DataAnnotationsValidator/>
@@ -31,7 +31,7 @@
     }
     else
     {
-        <MudItem>
+        <MudItem xs="6">
             <MudDataGrid Items="subjects">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
@@ -39,15 +39,18 @@
                         <CellTemplate>
                             @foreach (var doc in context.Item.Docs)
                             {
-                                <span>@doc.Title</span>
+                                <span @key="doc.Id">@doc.Title</span>
                             }
                         </CellTemplate>
                     </TemplateColumn>
                     <TemplateColumn>
                         <CellTemplate>
                             <MudStack Row="true">
-                                <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning">Edytuj</MudButton>
-                                <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Error">Usuń</MudButton>
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+                                           OnClick="(async () => await Edit(context.Item))">
+                                    Edytuj
+                                </MudButton>
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Usuń</MudButton>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
@@ -106,9 +109,25 @@
         else
         {
             Snackbar.Add(result.message, Severity.Error);
-
-            subject = new();
         }
+
+        this.subject = new();
+    }
+
+
+    async Task Edit(Subject? contextSubject)
+    {
+        // TODO Add object to edit form
+        
+        if (contextSubject is not null)
+        {
+            var result = (await SubjectService.UpdateSubject(contextSubject));
+            var snackbar = result.success
+                ? Snackbar.Add(result.message, Severity.Success)
+                : Snackbar.Add(result.message, Severity.Error);
+        }
+        
+        
     }
 
     public void Dispose() => stateSubscription.Dispose();

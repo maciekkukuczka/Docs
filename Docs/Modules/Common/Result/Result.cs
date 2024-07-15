@@ -1,14 +1,27 @@
-﻿namespace Docs.Modules.Common.Result;
+﻿using Serilog.Core;
+
+namespace Docs.Modules.Common.Result;
 
 public record Result(bool success, string? message)
 {
-    public static Result OK(string message="") => new(true, message);
-    public static Result<T> OK<T>(T data, string? message="") => new(data,true, message);
-    public static Result Error(string message) => new(false, message);
-    public static Result<T> Error<T>(string message) => new(default,false, message);
+    public static Result OK(string message = "") => new(true, message);
+    public static Result<T> OK<T>(T data, string? message = "") => new(data, true, message);
+
+    public static Result Error(string message, bool isLog = true)
+    {
+        if (isLog) LogError(message);
+        return new Result(false, message);
+    }
+
+    public static Result<T> Error<T>(string message, bool isLog = true)
+    {
+        if (isLog) LogError(message);
+        return new Result<T>(default, false, message);
+    }
+    static void LogError(string e) => Log.Logger.Error(e);
 }
 
-public record Result<T>(T? data,bool success, string? message) : Result(success, message);
+public record Result<T>(T? data, bool success, string? message) : Result(success, message);
 
 /*public class Result
 {
