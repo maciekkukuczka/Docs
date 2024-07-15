@@ -97,7 +97,8 @@ else
 
     async Task GetDocs(string? subjectId = "")
     {
-        docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) ? (await DocsService.GetDocBySubject(subjectId)).data : restored!;
+        docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
+            ? (await DocsService.GetDocBySubject(subjectId)).data : restored!;
         // docs = (await DocsService.GetDocBySubject(subjectId)).data ;
     }
 

@@ -2,7 +2,7 @@
 @if (userClaimsPrincipal?.Identity is not null && userClaimsPrincipal.Identity.IsAuthenticated)
 {
     <div>
-        <MudChip T="string" Variant="MudBlazor.Variant.Text" Color="MudBlazor.Color.Success">
+        <MudChip T="string" Variant="Variant.Text" Color="Color.Success">
             @userClaimsPrincipal.Identity.Name
         </MudChip>
         <MudLink Href="/Auth/Logout" Underline="Underline.Always">Wyloguj</MudLink>

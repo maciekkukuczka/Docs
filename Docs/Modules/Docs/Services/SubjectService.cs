@@ -8,7 +8,7 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Subjects
             .Include(x => x.Docs)
-            .Where(x => x.User.UserName.Equals(userName))
+            // .Where(x => x.User.UserName.Equals(userName))
             .AsNoTracking()
             .ToHashSetAsync();
         if (result is null) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
