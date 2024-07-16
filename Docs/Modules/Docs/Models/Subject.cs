@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Docs.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Docs.Modules.Docs.Models;
 
 public class Subject:BaseModel
 {
@@ -8,6 +10,7 @@ public class Subject:BaseModel
     public string? Description { get; set; }
     
     // NAV
+    [JsonIgnore]
     public ICollection<Doc> Docs { get; set; } = (HashSet<Doc>)[];
     // public ICollection<ApplicationUser> Users { get; set; } = (HashSet<ApplicationUser>) [];
 

@@ -1,26 +1,29 @@
 ﻿namespace Docs.Modules.Docs.Services;
 
-public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactory,
+public class DocsVMService(
+    IDbContextFactory<ApplicationDbContext> dbContextFactory,
     HybridCache cache)
 {
-     HybridCache cache = cache;
-    public async Task<Result<List<Doc>>> GetAllDocs()
+    HybridCache cache = cache;
+
+    public async Task<Result<HashSet<DocVM>>> GetAllDocs()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = Result<List<Doc>>.OK(await dbContext.Docs
+        var res = await dbContext.Docs
             .AsNoTracking()
-            .ToListAsync());
-        return res;
+            .ToHashSetAsync();
+
+        var resultVM = res.Select(x => DocVM.ToVM(x)).ToHashSet();
+        return Result.OK(resultVM);
     }
 
-    public async Task<Result<HashSet<Doc>>> GetDocBySubject(string? subjectId, 
+    public async Task<Result<HashSet<DocVM>>> GetDocBySubject(string? subjectId,
         CancellationToken cancellationToken = default)
     {
         /*return await cache.GetOrCreateAsync(
             $"Docs", async cancel=>*/
-        
+
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        // HashSet<Doc> result;
         IQueryable<Doc> res;
         if (string.IsNullOrWhiteSpace(subjectId))
         {
@@ -29,22 +32,23 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
                 .Select(x => x.Subjects.FirstOrDefault())
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject>()}");
-            
+            if (firstSubject is null) return Result.Error<HashSet<DocVM>>($"{Errors.ObjectNotExist<Subject>()}");
+
             res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
         }
         else
         {
-            res =db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId));
+            res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId));
             // .ToHashSetAsync();
         }
 
-        var result=await res
+        var result = await res
             .Include(x => x.Subjects)
             .AsNoTracking()
             .ToHashSetAsync(cancellationToken: cancellationToken);
-        
-        return Result<HashSet<Doc>>.OK(result);
+
+        var resultVM = result.Select(x => DocVM.ToVM(x)).ToHashSet();
+        return Result<HashSet<DocVM>>.OK(resultVM);
     }
 
 
@@ -56,10 +60,12 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result<Doc>.OK(exist);
     }
 
-    public async Task<Result> AddDoc(Doc newDoc)
+    //ADD
+    public async Task<Result> AddDoc(DocVM newDocVM)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+        var newDoc = DocVM.ToModel(newDocVM);
         var existSubjects = dbContext.Subjects;
 
         foreach (var existSubject in existSubjects)
@@ -78,8 +84,10 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
-    public async Task<Result> UpdateDoc(Doc doc)
+    // UPDATE
+    public async Task<Result> UpdateDoc(DocVM docVM)
     {
+        var doc = DocVM.ToModel(docVM);
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         if (doc is null) return Result.Error($"{Errors.ObjectNotExist<Doc>()}: {doc.Title}");
 

@@ -1,4 +1,5 @@
-﻿@inject SubjectService SubjectService
+﻿@* @inject SubjectService SubjectService *@
+@inject SubjectVMService SubjectService
 @inject DocsService DocsService
 @inject AppState AppState
 
@@ -15,9 +16,12 @@
 
 @code {
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
-    [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
-    Subject selectedSubject;
-    HashSet<Subject> subjects = [];
+    // [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
+    [Parameter] public EventCallback<SubjectVM> OnSubjectSelected { get; set; }
+    // Subject selectedSubject;
+    SubjectVM selectedSubject;
+    // HashSet<Subject> subjects = [];
+    HashSet<SubjectVM> subjects = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -27,7 +31,8 @@
         subjects = (await SubjectService.GetSubjects(user)).data;
     }
 
-    async Task SelectSubject(Subject? subject)
+    // async Task SelectSubject(Subject? subject)
+    async Task SelectSubject(SubjectVM? subject)
     {
         selectedSubject = subject;
         await OnSubjectSelected.InvokeAsync(selectedSubject);

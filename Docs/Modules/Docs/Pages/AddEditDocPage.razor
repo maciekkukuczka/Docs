@@ -1,8 +1,9 @@
 ﻿@page "/add-doc"
 @page "/edit-doc"
 @page "/edit-doc/{id?}"
-@inject DocsService DocsService
-@inject GenericService<Doc> GenericService
+@* @inject DocsService DocsService *@
+@inject DocsVMService DocsService
+@* @inject GenericService<Doc> GenericService *@
 @inject  NavigationManager NavigationManager
 @inject AppState AppState
 @inject ISnackbar Snackbar
@@ -29,7 +30,7 @@ else
 
                     <MudTextField Label="Krótki opis" HelperText="Max 1000 znaków" Lines="5"
                                   @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)"/>
-                    
+
                     <MudTextField Label="Krótki opis" HelperText="Max 5000 znaków" Lines="15"
                                   @bind-Value="@Doc.Description" For="@(() => Doc.Description)"/>
 
@@ -48,20 +49,24 @@ else
 
 @code {
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
+
     [Parameter] public string? Id { get; set; }
-    Doc? Doc { get; set; }
+
+    // Doc? Doc { get; set; }
+    DocVM? Doc { get; set; }
     string userId;
 
 
     protected override async Task OnInitializedAsync()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
-        
+
         var isLogged = (await AuthState).User.Identity.IsAuthenticated;
         var user = isLogged ? (await AuthState).User.Identity.Name : string.Empty;
-         userId =(await UserManager.Users.FirstOrDefaultAsync(x => x.UserName== user)).Id;
-        
-        Doc = AppState.DocToEdit ?? new Doc
+        userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user)).Id;
+
+        // Doc = AppState.DocToEdit ?? new Doc
+        Doc = AppState.DocToEdit ?? new DocVM
         {
             // Subjects =new HashSet<Subject>{ AppState.RecentSubject}
             /*Path = new DocPath(),
@@ -76,8 +81,10 @@ else
 
     async Task OnValidSubmit(EditContext context)
     {
-        var submittedDoc = context.Model as Doc;
-        submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
+        // var submittedDoc = context.Model as Doc;
+        var submittedDoc = context.Model as DocVM;
+        // submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
+        submittedDoc.Subjects.Add(AppState.RecentSubject ??= new SubjectVM
         {
             Name = "Default",
             UserId = userId
@@ -86,6 +93,7 @@ else
         if (string.IsNullOrWhiteSpace(Id))
         {
             // result = await GenericService.Add(submittedDoc);
+            // result = await DocsService.AddDoc(submittedDoc);
             result = await DocsService.AddDoc(submittedDoc);
         }
         else

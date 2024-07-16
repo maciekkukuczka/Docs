@@ -5,6 +5,8 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
 global using System.Security.Claims;
+global using Microsoft.Extensions.Caching.Hybrid;
+
 
 
 // NAMESPACES
@@ -16,6 +18,8 @@ global using Docs.Modules.Common.Models;
 global using Docs.Modules.Docs.Models;
 global using Docs.Modules.Common.Result;
 global using Docs.Modules.Docs.Services;
+global using Docs.Modules.Docs.Models.ViewModels;
+
 
 
 // 3RD PARTY

@@ -1,6 +1,7 @@
 ﻿@inject PersistentComponentState PersistentComponentState 
-@inject GenericService<Subject> GenericService
-@inject SubjectService SubjectService
+@* @inject GenericService<Subject> GenericService *@
+@* @inject SubjectService SubjectService *@
+@inject SubjectVMService SubjectService
 @inject UserManager<ApplicationUser> UserManager
 @inject ISnackbar Snackbar
 @implements  IDisposable
@@ -66,12 +67,15 @@
     [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
 
     PersistingComponentStateSubscription stateSubscription;
-    HashSet<Subject> subjects = [];
-    Subject subject = new();
+    // HashSet<Subject> subjects = [];
+    HashSet<SubjectVM> subjects = [];
+    // Subject subject = new();
+    SubjectVM subject = new();
     string? currentUserId;
     string? currentUserName;
     bool isToEdit = false;
-     MudDataGrid<Subject> grid;
+     // MudDataGrid<Subject> grid;
+     MudDataGrid<SubjectVM> grid;
 
 
     protected override async Task OnInitializedAsync()
@@ -94,7 +98,8 @@
 
     private async Task GetSubjects()
     {
-        subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+        // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+        subjects = PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
             ("Subjects", out var restored)
             ? restored
             // : (await GenericService.GetAll()).data;
@@ -103,9 +108,11 @@
 
     async Task Submit(EditContext context)
     {
-        var contextSubject = (Subject)context.Model;
+        // var contextSubject = (Subject)context.Model;
+        var contextSubject = (SubjectVM)context.Model;
         contextSubject.UserId = currentUserId;
-        var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
+        // var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
+        var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await SubjectService.AddSubject(contextSubject);
 
         if (result.success)
         {
@@ -120,14 +127,16 @@
     }
     
     
-    async Task Edit(Subject? contextSubject)
+    // async Task Edit(Subject? contextSubject)
+    async Task Edit(SubjectVM? contextSubject)
     {
         isToEdit = true;
         if (contextSubject is not null) subject = contextSubject;
     }
 
 
-     async Task Delete(Subject? contextSubject)
+     // async Task Delete(Subject? contextSubject)
+     async Task Delete(SubjectVM? contextSubject)
      {
          var result = (await SubjectService.DeleteSubject(contextSubject.Id));
              Snackbar.Add(result.message, result.success?Severity.Success:Severity.Error);

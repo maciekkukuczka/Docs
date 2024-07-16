@@ -51,10 +51,9 @@ public class ApplicationDbContext(
                     */
         if (!string.IsNullOrWhiteSpace(currentUserId))
         {
-            builder.Entity<Doc>().HasQueryFilter(
-                x => x.Subjects.Any(
-                    x => x.UserId == currentUserId));
-            
+            /*builder.Entity<Doc>().HasQueryFilter(x => x.Subjects.Any(x =>
+                x.UserId == currentUserId));*/
+            // builder.Entity<Doc>().HasQueryFilter(x=>x.Subjects.Where(x=>x.UserId == currentUserId));
             builder.Entity<Subject>().HasQueryFilter(x=>x.UserId == currentUserId);
         }
     }

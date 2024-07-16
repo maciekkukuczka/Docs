@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Docs.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Docs.Modules.Docs.Models;
 
 public class Doc:BaseModel
 {

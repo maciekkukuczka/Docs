@@ -1,13 +1,14 @@
 ﻿@page "/"
 @inject  NavigationManager NavigationManager
-@inject DocsService DocsService
-@inject GenericService<Doc> GenericService
+@* @inject DocsService DocsService *@
+@inject DocsVMService DocsService
+@* @inject GenericService<Doc> GenericService *@
 @inject PersistentComponentState ApplicationState
 @inject AppState AppState
 @inject ISnackbar Snackbar
 @inject  IDialogService DialogService
 @implements IDisposable
-@using Microsoft.AspNetCore.Authorization
+
 @attribute [Authorize]
 
 
@@ -66,8 +67,10 @@ else
 @code
 {
     PersistingComponentStateSubscription stateSubscription;
-    MudDataGrid<Doc> dataGrid;
-    HashSet<Doc>? docs;
+    // MudDataGrid<Doc> dataGrid;
+    MudDataGrid<DocVM> dataGrid;
+    // HashSet<Doc>? docs;
+    HashSet<DocVM>? docs;
     // Subject? recentSubject;
 
 
@@ -85,8 +88,10 @@ else
         await GetDocs();
     }
 
-    async Task OnSubjectSelected(Subject subject)
+    // async Task OnSubjectSelected(Subject subject)
+    async Task OnSubjectSelected(SubjectVM subject)
     {
+        // AppState.RecentSubject = subject;
         AppState.RecentSubject = subject;
         await GetDocs(subject.Id);
     }
@@ -97,8 +102,13 @@ else
 
     async Task GetDocs(string? subjectId = "")
     {
-        docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
-            ? (await DocsService.GetDocBySubject(subjectId)).data : restored!;
+        /*var des = ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restorede);
+        var res = restorede;*/
+        
+        // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
+        docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored) 
+            ? (await DocsService.GetDocBySubject(subjectId)).data
+            : restored!;
         // docs = (await DocsService.GetDocBySubject(subjectId)).data ;
     }
 
@@ -108,7 +118,8 @@ else
         NavigationManager.NavigateTo("/add-doc");
     }
 
-    void Edit(Doc contextItem)
+    // void Edit(Doc contextItem)
+    void Edit(DocVM contextItem)
     {
         AppState.DocToEdit = contextItem;
         NavigationManager.NavigateTo($"/edit-doc/{contextItem.Id}");

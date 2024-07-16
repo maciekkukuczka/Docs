@@ -29,14 +29,18 @@ public static class DI
         // IDENTITY2
         services.AddIdentityServices2();
 
+        // CACHE
+        services.AddHybridCache();
         // MUDBLAZOR
         services.AddMudBlazorServices();
 
         // APP
-        services.AddSingleton<AppState>();
+        services.AddScoped<AppState>();
         services.AddScoped(typeof(GenericService<>));
         services.AddScoped<DocsService>();
+        services.AddScoped<DocsVMService>();
         services.AddScoped<SubjectService>();
+        services.AddScoped<SubjectVMService>();
 
         return services;
     }

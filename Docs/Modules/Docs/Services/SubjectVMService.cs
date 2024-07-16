@@ -1,9 +1,9 @@
 ﻿namespace Docs.Modules.Docs.Services;
 
-public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFactory) 
+public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
     // GET
-    public async Task<Result<HashSet<Subject>>> GetSubjects(string? userName)
+    public async Task<Result<HashSet<SubjectVM>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Subjects
@@ -12,15 +12,17 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
             .AsNoTracking()
             .ToHashSetAsync();
 
-        if (result is null) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
-        return Result<HashSet<Subject>>.OK(result);
+        if (result is null) return Result.Error<HashSet<SubjectVM>>($"{Errors.ObjectNotFound<HashSet<SubjectVM>>()}");
+        var resultVms = result.Select(x => SubjectVM.ToVm(x)).ToHashSet();
+        return Result<HashSet<SubjectVM>>.OK(resultVms);
     }
-    
+
     // ADD
-    public async Task<Result> AddSubject(Subject subject)
+    public async Task<Result> AddSubject(SubjectVM subjectVM)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
+        var subject = SubjectVM.ToModel(subjectVM);
         await db.Subjects.AddAsync(subject);
 
         try
@@ -39,9 +41,8 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         }
     }
 
-
 //UPDATE
-    public async Task<Result> UpdateSubject(Subject subject)
+    public async Task<Result> UpdateSubject(SubjectVM subject)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Subjects.FindAsync(subject.Id);
@@ -64,7 +65,6 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
             return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {ex.Message}");
         }
     }
-
 
     // DELETE
     public async Task<Result> DeleteSubject(string subjectId)
