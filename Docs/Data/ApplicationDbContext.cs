@@ -43,17 +43,12 @@ public class ApplicationDbContext(
 
 
         // GLOBAL FILTERS
-        /*
-        builder.Entity<Doc>().HasQueryFilter(
-            x => x.Subjects.Any(
-                x => x.Users.Any(
-                    x => x.Id == currentUserId)));
-                    */
         if (!string.IsNullOrWhiteSpace(currentUserId))
         {
             /*builder.Entity<Doc>().HasQueryFilter(x => x.Subjects.Any(x =>
                 x.UserId == currentUserId));*/
             // builder.Entity<Doc>().HasQueryFilter(x=>x.Subjects.Where(x=>x.UserId == currentUserId));
+            
             builder.Entity<Subject>().HasQueryFilter(x=>x.UserId == currentUserId);
         }
     }

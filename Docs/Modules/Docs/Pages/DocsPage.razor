@@ -7,6 +7,7 @@
 @inject AppState AppState
 @inject ISnackbar Snackbar
 @inject  IDialogService DialogService
+@using System.Diagnostics
 @implements IDisposable
 
 @attribute [Authorize]
@@ -67,8 +68,10 @@ else
 @code
 {
     PersistingComponentStateSubscription stateSubscription;
+
     // MudDataGrid<Doc> dataGrid;
     MudDataGrid<DocVM> dataGrid;
+
     // HashSet<Doc>? docs;
     HashSet<DocVM>? docs;
     // Subject? recentSubject;
@@ -102,14 +105,33 @@ else
 
     async Task GetDocs(string? subjectId = "")
     {
-        /*var des = ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restorede);
-        var res = restorede;*/
-        
-        // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
-        docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored) 
-            ? (await DocsService.GetDocBySubject(subjectId)).data
-            : restored!;
-        // docs = (await DocsService.GetDocBySubject(subjectId)).data ;
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            /*var des = ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restorede);
+            var res = restorede;*/
+
+            // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
+            /*docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored)
+                ? (await DocsService.GetDocBySubject(subjectId)).data
+                : restored!;*/
+            
+            if (ApplicationState.TryTakeFromJson<HashSet<DocVM>>("Docs", out var restored))
+            {
+                docs = restored;
+                Log.Error("REESTORED");
+            }
+            else
+            {
+                docs = (await DocsService.GetDocBySubject(subjectId)).data;
+                Log.Error("DB");
+            }
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($" POMIAR DOCSÓW: {sw.ElapsedMilliseconds} ms");
+        }
     }
 
 

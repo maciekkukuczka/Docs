@@ -6,6 +6,7 @@ global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using System.ComponentModel.DataAnnotations;
 global using System.Security.Claims;
 global using Microsoft.Extensions.Caching.Hybrid;
+global using System.Diagnostics;
 
 
 

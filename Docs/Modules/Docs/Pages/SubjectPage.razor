@@ -4,6 +4,7 @@
 @inject SubjectVMService SubjectService
 @inject UserManager<ApplicationUser> UserManager
 @inject ISnackbar Snackbar
+@using System.Diagnostics
 @implements  IDisposable
 @page "/subjects"
 @attribute [Authorize]
@@ -52,7 +53,9 @@
                                     Edytuj
                                 </MudButton>
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
-                                           OnClick="async ()=>await Delete(context.Item)">Usuń</MudButton>
+                                           OnClick="async () => await Delete(context.Item)">
+                                    Usuń
+                                </MudButton>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
@@ -67,15 +70,19 @@
     [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
 
     PersistingComponentStateSubscription stateSubscription;
+
     // HashSet<Subject> subjects = [];
     HashSet<SubjectVM> subjects = [];
+
     // Subject subject = new();
     SubjectVM subject = new();
     string? currentUserId;
     string? currentUserName;
+
     bool isToEdit = false;
-     // MudDataGrid<Subject> grid;
-     MudDataGrid<SubjectVM> grid;
+
+    // MudDataGrid<Subject> grid;
+    MudDataGrid<SubjectVM> grid;
 
 
     protected override async Task OnInitializedAsync()
@@ -85,7 +92,7 @@
 
         if (!string.IsNullOrWhiteSpace(currentUserName))
             currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;
-        
+
 
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
         {
@@ -98,12 +105,22 @@
 
     private async Task GetSubjects()
     {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+
         // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
         subjects = PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
             ("Subjects", out var restored)
             ? restored
             // : (await GenericService.GetAll()).data;
             : (await SubjectService.GetSubjects(currentUserName)).data;
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($"POMIAR TEMATÓW: {sw.ElapsedMilliseconds}ms");
+        }
     }
 
     async Task Submit(EditContext context)
@@ -125,8 +142,8 @@
         isToEdit = false;
         subject = new();
     }
-    
-    
+
+
     // async Task Edit(Subject? contextSubject)
     async Task Edit(SubjectVM? contextSubject)
     {
@@ -135,13 +152,13 @@
     }
 
 
-     // async Task Delete(Subject? contextSubject)
-     async Task Delete(SubjectVM? contextSubject)
-     {
-         var result = (await SubjectService.DeleteSubject(contextSubject.Id));
-             Snackbar.Add(result.message, result.success?Severity.Success:Severity.Error);
-             await GetSubjects();
-     }
+    // async Task Delete(Subject? contextSubject)
+    async Task Delete(SubjectVM? contextSubject)
+    {
+        var result = (await SubjectService.DeleteSubject(contextSubject.Id));
+        Snackbar.Add(result.message, result.success ? Severity.Success : Severity.Error);
+        await GetSubjects();
+    }
 
     public void Dispose() => stateSubscription.Dispose();
 }

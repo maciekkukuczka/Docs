@@ -2,6 +2,8 @@
 @inject SubjectVMService SubjectService
 @inject DocsService DocsService
 @inject AppState AppState
+@inject PersistentComponentState PersistantComponentState
+@implements IDisposable
 
 <MudPaper Outlined="true" Class="ma-3">
     <h3>Tematy</h3>
@@ -9,26 +11,64 @@
         @foreach (var subject in subjects)
         {
             <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
-                       Color="selectedSubject==subject?Color.Primary:Color.Dark">@subject.Name</MudButton>
+                       Color="selectedSubject == subject ? Color.Primary : Color.Dark">
+                @subject.Name
+            </MudButton>
         }
     </MudStack>
 </MudPaper>
 
 @code {
+
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
+
     // [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
     [Parameter] public EventCallback<SubjectVM> OnSubjectSelected { get; set; }
+
     // Subject selectedSubject;
     SubjectVM selectedSubject;
+
     // HashSet<Subject> subjects = [];
     HashSet<SubjectVM> subjects = [];
+    PersistingComponentStateSubscription subscription;
+
 
     protected override async Task OnInitializedAsync()
     {
-        var user = (await AuthStateTask).User.Identity.IsAuthenticated?
-            (await AuthStateTask).User.Identity.Name:string.Empty;
-        
-        subjects = (await SubjectService.GetSubjects(user)).data;
+        var user = (await AuthStateTask).User.Identity.IsAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
+
+
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            subscription = PersistantComponentState.RegisterOnPersisting(() =>
+            {
+                PersistantComponentState.PersistAsJson("SubjectsInComp", subjects);
+                return Task.CompletedTask;
+            });
+
+            /*subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
+                ? restored
+                : (await SubjectService.GetSubjects(user)).data*/;
+
+            if (PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored))
+            {
+                subjects = restored;
+                Log.Error("RESTORED (SubjectComp)");
+
+            }
+            else
+            {
+                subjects = (await SubjectService.GetSubjects(user)).data;
+                Log.Error("DB (SubjectComp)");
+
+            }
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($"POMIAR KOMPONENT TEMATÓW: {sw.ElapsedMilliseconds} ms");
+        }
     }
 
     // async Task SelectSubject(Subject? subject)
@@ -44,5 +84,10 @@
           });*/
     }
 
+    public void Dispose()
+    {
+        subscription.Dispose();
+        AuthStateTask.Dispose();
+    }
 
 }
