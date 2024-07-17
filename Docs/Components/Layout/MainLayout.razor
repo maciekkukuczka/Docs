@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 <MudThemeProvider IsDarkMode="isDarkMode"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
@@ -33,9 +32,7 @@
 
     @* MAIN *@
     <MudMainContent Class="mt-16 pa-4">
-        <MudGrid>
             @Body
-        </MudGrid>
     </MudMainContent>
 </MudLayout>
 @* </AuthorizeView> *@

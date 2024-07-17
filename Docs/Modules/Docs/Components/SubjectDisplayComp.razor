@@ -5,21 +5,23 @@
 @inject PersistentComponentState PersistantComponentState
 @implements IDisposable
 
-<MudItem xs="12">
+<MudGrid>
+    <MudItem xs="12">
 
-    <MudPaper Outlined="true" Class="pa-5">
-        @* <h3>Tematy</h3> *@
-        <MudStack Row="true">
-            @foreach (var subject in subjects)
-            {
-                <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
-                           Color="selectedSubject == subject ? Color.Primary : Color.Inherit">
-                    @subject.Name
-                </MudButton>
-            }
-        </MudStack>
-    </MudPaper>
-</MudItem>
+        <MudPaper Outlined="true" Class="pa-5">
+            @* <h3>Tematy</h3> *@
+            <MudStack Row="true">
+                @foreach (var subject in subjects)
+                {
+                    <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
+                               Color="selectedSubject == subject ? Color.Primary : Color.Inherit">
+                        @subject.Name
+                    </MudButton>
+                }
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
 
@@ -40,37 +42,38 @@
     {
         var user = (await AuthStateTask).User.Identity.IsAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
 
-            subscription = PersistantComponentState.RegisterOnPersisting(() =>
-            {
-                PersistantComponentState.PersistAsJson("SubjectsInComp", subjects);
-                return Task.CompletedTask;
-            });
+        subscription = PersistantComponentState.RegisterOnPersisting(() =>
+        {
+            PersistantComponentState.PersistAsJson("SubjectsInComp", subjects);
+            return Task.CompletedTask;
+        });
 
-            subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
-                ? restored : (await SubjectService.GetSubjects(user)).data;
+        subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
+            ? restored
+            : (await SubjectService.GetSubjects(user)).data;
 
-            selectedSubject = subjects.FirstOrDefault();
-            /*
-            try
-            var sw = Stopwatch.StartNew();
+        selectedSubject = subjects.FirstOrDefault();
+        /*
+        try
+        var sw = Stopwatch.StartNew();
+        {
+            if (PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored))
             {
-                if (PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored))
-                {
-                    subjects = restored;
-                    Log.Error("RESTORED (SubjectComp)");
-                }
-                else
-                {
-                    subjects = (await SubjectService.GetSubjects(user)).data;
-                    Log.Error("DB (SubjectComp)");
-                }
+                subjects = restored;
+                Log.Error("RESTORED (SubjectComp)");
             }
-            finally
+            else
             {
-                sw.Stop();
-                Log.Warning($"POMIAR KOMPONENT TEMATÓW: {sw.ElapsedMilliseconds} ms");
+                subjects = (await SubjectService.GetSubjects(user)).data;
+                Log.Error("DB (SubjectComp)");
             }
-        */
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($"POMIAR KOMPONENT TEMATÓW: {sw.ElapsedMilliseconds} ms");
+        }
+    */
     }
 
     // async Task SelectSubject(Subject? subject)

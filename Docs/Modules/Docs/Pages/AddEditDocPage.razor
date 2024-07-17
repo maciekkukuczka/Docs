@@ -1,6 +1,7 @@
 ﻿@page "/add-doc"
-@page "/edit-doc"
 @page "/edit-doc/{id?}"
+@page "/doc-details/{id?}"
+
 @* @inject DocsService DocsService *@
 @inject DocsVMService DocsService
 @* @inject GenericService<Doc> GenericService *@
@@ -11,11 +12,17 @@
 @implements IDisposable
 @attribute [Authorize]
 
-<h3>AddEditDoc</h3>
+
+<SectionContent SectionId="MainLayout.TopBarSectionRight">
+    <MudButton Variant="Variant.Filled" Color="@(isEdited ? Color.Warning : Color.Info)" OnClick="Edit">
+        @(isEdited ? "Wyjdź z edycji" : "Edytuj")
+    </MudButton>
+</SectionContent>
+
 
 @if (Doc is null)
 {
-    <p>Loading...</p>
+    <NoDataComp/>
 }
 else
 {
@@ -23,34 +30,86 @@ else
         <DataAnnotationsValidator/>
 
         <MudGrid>
-            <MudItem xs="12">
-                <MudPaper>
-                    <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
-                                  @bind-Value="@Doc.Title" For="@(() => Doc.Title)"/>
+            @* <MudItem xs="12"> *@
+            @* <MudPaper> *@
+            @if (isEdited)
+            {
+                <MudItem xs="12">
+                    <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków" 
+                                  @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!isEdited"/>
+                </MudItem>
+            }
+            else
+            {
+                <MudItem xs="12">
+                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                        <MudText Typo="Typo.h4">
+                            @Doc.Title
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+                @* <PageHeaderComp Name="@Doc.Title"/> *@
+                <MudFlexBreak/>
+            }
 
+            @if (isEdited)
+            {
+                <MudItem xs="12">
                     <MudTextField Label="Krótki opis" HelperText="Max 1000 znaków" Lines="5"
-                                  @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)"/>
+                                  @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)" Disabled="!isEdited"/>
+                </MudItem>
+            }
+            else
+            {
+                <MudItem xs="6">
+                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                        <MudText>
+                            @Doc.ShortDescription
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+            }
 
-                    <MudTextField Label="Krótki opis" HelperText="Max 5000 znaków" Lines="15"
-                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"/>
+            @if (isEdited)
+            {
+                <MudItem xs="12">
+                    <MudTextField Label="Opis" HelperText="Max 5000 znaków" Lines="15"
+                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!isEdited"/>
+                </MudItem>
+            }
+            else
+            {
+                <MudItem xs="6">
+                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                        <MudText>
+                            @Doc.Description
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+            }
 
-                </MudPaper>
-            </MudItem>
+            @* </MudPaper> *@
+            @* </MudItem> *@
             @*
             <SectionContent SectionId="@MainLayout.TopBarSectionRight">
             </SectionContent>
             *@
-            <MudItem xs="12" Class="d-flex justify-end">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Zapisz</MudButton>
-            </MudItem>
+
+            @if (isEdited)
+            {
+                <MudItem xs="12" Class="d-flex justify-end">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Warning">Zapisz</MudButton>
+                </MudItem>
+            }
         </MudGrid>
     </EditForm>
 }
 
 @code {
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
-
     [Parameter] public string? Id { get; set; }
+
+    bool isEdited = false;
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
@@ -105,13 +164,19 @@ else
 
         if (result.success)
         {
-            NavigationManager.NavigateTo("/");
+            // NavigationManager.NavigateTo("/");
             Snackbar.Add(result.message, Severity.Success);
+            isEdited = false;
         }
         else
         {
             Snackbar.Add(result.message, Severity.Error);
         }
+    }
+
+    async Task Edit()
+    {
+        isEdited = !isEdited;
     }
 
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
@@ -123,5 +188,6 @@ else
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
+
 
 }
