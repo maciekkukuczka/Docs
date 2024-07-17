@@ -39,19 +39,24 @@
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
                     <TemplateColumn Title="Dokumenty">
                         <CellTemplate>
-                            @foreach (var doc in context.Item.Docs)
-                            {
-                                <span @key="doc.Id">@doc.Title</span>
+                            @{
+                                string docs = String.Empty;
+                                foreach (var doc in context.Item.Docs)
+                                {
+                                    docs = string.Join(", ", doc.Title);
+                                    @* <span @key="doc.Id">@doc.Title</span> *@
+                                }
+                                <span>@docs</span>
                             }
                         </CellTemplate>
                     </TemplateColumn>
                     <TemplateColumn CellClass="d-flex justify-end">
-                        <CellTemplate> 
+                        <CellTemplate>
                             <MudStack Row="true">
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
                                            OnClick="(async () => await Edit(context.Item))">
                                     Edytuj
-                                </MudButton> 
+                                </MudButton>
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
                                            OnClick="async () => await Delete(context.Item)">
                                     Usuń
