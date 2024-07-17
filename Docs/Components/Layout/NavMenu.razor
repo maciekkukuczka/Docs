@@ -6,5 +6,12 @@
         <MudNavLink Href="/subjects" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Subject">Tematy</MudNavLink>
         @* <MudNavLink Href="auth" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Lock">Auth Required</MudNavLink> *@
     </div>
-    <VersionComponent Name="Docs" By="Mac&Dolimka"/>
+    <div>
+        <MudNavLink Href="/release-notes" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.NewReleases">
+            <MudText Typo="Typo.caption">
+                Release Notes
+            </MudText>
+        </MudNavLink>
+        <VersionComponent Name="Docs" By="Mac&Dolimka"/>
+    </div>
 </MudNavMenu>
