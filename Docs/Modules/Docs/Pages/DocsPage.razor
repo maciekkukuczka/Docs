@@ -158,7 +158,7 @@ else
         if (state.Equals("Canceled")) return;
         var result = await DocsService.DeleteDoc(contextItemId);
         var snackbar = result.success ? Snackbar.Add(result.message, Severity.Warning) : Snackbar.Add(result.message, Severity.Error);
-        docs = (await DocsService.GetAllDocs()).data.ToHashSet();
+     await GetDocs(); 
     }
 
     public void Dispose()
