@@ -1,4 +1,4 @@
-﻿@page "/add-doc"
+﻿@page "/add-doc/{isEdited:bool=true}"
 @page "/edit-doc/{id?}"
 @page "/doc-details/{id?}"
 
@@ -14,9 +14,12 @@
 
 
 <SectionContent SectionId="MainLayout.TopBarSectionRight">
-    <MudButton Variant="Variant.Filled" Color="@(isEdited ? Color.Warning : Color.Info)" OnClick="Edit">
-        @(isEdited ? "Wyjdź z edycji" : "Edytuj")
-    </MudButton>
+    @if (!string.IsNullOrWhiteSpace(Id))
+    {
+        <MudButton Variant="Variant.Filled" Color="@(isEdited ? Color.Warning : Color.Info)" OnClick="Edit">
+            @(isEdited ? "Wyjdź z edycji" : "Edytuj")
+        </MudButton>
+    }
 </SectionContent>
 
 
@@ -35,7 +38,7 @@ else
             @if (isEdited)
             {
                 <MudItem xs="12">
-                    <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków" 
+                    <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
                                   @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!isEdited"/>
                 </MudItem>
             }
@@ -108,8 +111,9 @@ else
 @code {
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
     [Parameter] public string? Id { get; set; }
+    [Parameter] public bool isEdited { get; set; } = false;
 
-    bool isEdited = false;
+    // bool isEdited = false;
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
@@ -187,6 +191,7 @@ else
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+        AuthState.Dispose();
     }
 
 
