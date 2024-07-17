@@ -19,51 +19,54 @@
     <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">Dodaj</MudButton>
 </SectionContent>
 
-<SubjectDisplayComp OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
-@if (docs is null || !docs.Any())
-{
-    <p>Loading</p>
-}
-else
-{
-    <MudDataGrid @ref="dataGrid" Items="@docs">
-        <Columns>
-            <TemplateColumn >
-                <CellTemplate >
-                    @* @(docs.IndexOf(context.Item) + 1) *@
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Nazwa">
-                <CellTemplate>
-                    <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink>
-                </CellTemplate>
-            </TemplateColumn>
-            <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
-            <TemplateColumn TItle="Tematy">
-                <CellTemplate>
-                    @foreach (var subject in context.Item.Subjects)
-                    {
-                        <span>@subject.Name</span>
-                    }
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn CellClass="d-flex justify-end">
-                <CellTemplate>
-                    <MudStack Row>
-                        <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
-                                   OnClick="@(() => Edit(context.Item))">
-                            Edytuj
-                        </MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" StartIcon="@Icons.Material.Filled.DeleteForever"
-                                   OnClick="@(() => Remove(context.Item.Id))">
-                            Usuń
-                        </MudButton>
-                    </MudStack>
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-    </MudDataGrid>
-}
+
+<MudItem xs="12">
+    <SubjectDisplayComp OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
+    @if (docs is null || !docs.Any())
+    {
+        <NoDataComp/>
+    }
+    else
+    {
+        <MudDataGrid @ref="dataGrid" Items="@docs">
+            <Columns>
+                <TemplateColumn >
+                    <CellTemplate >
+                        @* @(docs.IndexOf(context.Item) + 1) *@
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Nazwa">
+                    <CellTemplate>
+                        <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
+                <TemplateColumn TItle="Tematy">
+                    <CellTemplate>
+                        @foreach (var subject in context.Item.Subjects)
+                        {
+                            <span>@subject.Name</span>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+                                       OnClick="@(() => Edit(context.Item))">
+                                Edytuj
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" StartIcon="@Icons.Material.Filled.DeleteForever"
+                                       OnClick="@(() => Remove(context.Item.Id))">
+                                Usuń
+                            </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+</MudItem>
 
 @code
 {
@@ -105,17 +108,14 @@ else
 
     async Task GetDocs(string? subjectId = "")
     {
-        var sw = Stopwatch.StartNew();
-        try
-        {
-            /*var des = ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restorede);
-            var res = restorede;*/
+        // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
+        docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored)
+            ? (await DocsService.GetDocBySubject(subjectId)).data
+            : restored!;
 
-            // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
-            /*docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored)
-                ? (await DocsService.GetDocBySubject(subjectId)).data
-                : restored!;*/
-            
+        /*        try
+        {
+        var sw = Stopwatch.StartNew();
             if (ApplicationState.TryTakeFromJson<HashSet<DocVM>>("Docs", out var restored))
             {
                 docs = restored;
@@ -131,7 +131,7 @@ else
         {
             sw.Stop();
             Log.Warning($" POMIAR DOCSÓW: {sw.ElapsedMilliseconds} ms");
-        }
+        }*/
     }
 
 
@@ -158,7 +158,7 @@ else
         if (state.Equals("Canceled")) return;
         var result = await DocsService.DeleteDoc(contextItemId);
         var snackbar = result.success ? Snackbar.Add(result.message, Severity.Warning) : Snackbar.Add(result.message, Severity.Error);
-     await GetDocs(); 
+        await GetDocs();
     }
 
     public void Dispose()
@@ -167,9 +167,5 @@ else
         /*AppState.OnChange -= SubjectIdChanged;
         AppState.OnChange -= StateHasChanged;*/
     }
-    /*private Task PersistData()
-{
-ApplicationState.PersistAsJson("Docs", docs);
-return Task.CompletedTask;
-}*/
+
 }

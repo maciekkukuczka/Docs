@@ -7,7 +7,7 @@
 
 @* @attribute [Authorize] *@
 @* <AuthorizeView> *@
-    
+
 <MudLayout>
 
     @* TOP BAR *@
@@ -33,7 +33,9 @@
 
     @* MAIN *@
     <MudMainContent Class="mt-16 pa-4">
-        @Body
+        <MudGrid>
+            @Body
+        </MudGrid>
     </MudMainContent>
 </MudLayout>
 @* </AuthorizeView> *@

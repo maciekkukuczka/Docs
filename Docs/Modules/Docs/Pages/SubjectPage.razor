@@ -14,26 +14,26 @@
 </SectionContent>
 *@
 
-<MudGrid>
-    <MudItem xs="4">
-        <h3>Tematy</h3>
-        <MudPaper>
-            <EditForm Model="@subject" OnValidSubmit="Submit">
-                <DataAnnotationsValidator/>
-                <MudTextField @bind-Value="subject.Name" Label="Tytuł" For="@(() => subject.Name)"/>
-                <MudTextField @bind-Value="subject.Description" Label="Opis" For="@(() => subject.Name)" Lines="5"/>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success">Dodaj Temat</MudButton>
-            </EditForm>
-        </MudPaper>
-    </MudItem>
+<MudItem xs="12">
+    <h3 class="ma-3">Tematy</h3>
+    <MudPaper Outlined="true" Class="pa-5 ">
+        <EditForm Model="@subject" OnValidSubmit="Submit">
+            <DataAnnotationsValidator/>
+            <MudTextField @bind-Value="subject.Name" Label="Tytuł" For="@(() => subject.Name)"/>
+            <MudTextField @bind-Value="subject.Description" Label="Opis" For="@(() => subject.Name)" Lines="2"/>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Dodaj Temat</MudButton>
+        </EditForm>
+    </MudPaper>
+</MudItem>
 
-    @if (subjects is null || !subjects.Any())
-    {
-        <p>Brak danych...</p>
-    }
-    else
-    {
-        <MudItem xs="6">
+<MudItem xs="12">
+    <MudPaper Outlined="true" Class="pa-5">
+        @if (subjects is null || !subjects.Any())
+        {
+            <NoDataComp/>
+        }
+        else
+        {
             <MudDataGrid @ref="grid" Items="subjects">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
@@ -45,13 +45,13 @@
                             }
                         </CellTemplate>
                     </TemplateColumn>
-                    <TemplateColumn>
-                        <CellTemplate>
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate> 
                             <MudStack Row="true">
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
                                            OnClick="(async () => await Edit(context.Item))">
                                     Edytuj
-                                </MudButton>
+                                </MudButton> 
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
                                            OnClick="async () => await Delete(context.Item)">
                                     Usuń
@@ -62,9 +62,9 @@
 
                 </Columns>
             </MudDataGrid>
-        </MudItem>
-    }
-</MudGrid>
+        }
+    </MudPaper >
+</MudItem >
 
 @code {
     [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
@@ -108,13 +108,12 @@
         var sw = Stopwatch.StartNew();
         try
         {
-
-        // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
-        subjects = PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
-            ("Subjects", out var restored)
-            ? restored
-            // : (await GenericService.GetAll()).data;
-            : (await SubjectService.GetSubjects(currentUserName)).data;
+            // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+            subjects = PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
+                ("Subjects", out var restored)
+                ? restored
+                // : (await GenericService.GetAll()).data;
+                : (await SubjectService.GetSubjects(currentUserName)).data;
         }
         finally
         {
