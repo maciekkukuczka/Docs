@@ -28,7 +28,13 @@
         }
         else
         {
-            <MudDataGrid @ref="dataGrid" Items="@docs">
+            <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="searchFilter">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Docsy</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Szukaj" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
                 <Columns>
                     <TemplateColumn >
                         <CellTemplate >
@@ -38,12 +44,12 @@
                     <TemplateColumn Title="Nazwa">
                         <CellTemplate>
                             @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
-                            <MudButton  Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" 
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                                        OnClick="@(() => Edit(context.Item))">
-                            @context.Item.Title
+                                @context.Item.Title
                             </MudButton>
-                        
-                            </CellTemplate>
+
+                        </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
                     <TemplateColumn TItle="Tematy">
@@ -84,6 +90,7 @@
     // HashSet<Doc>? docs;
     HashSet<DocVM>? docs;
     // Subject? recentSubject;
+    string searchString;
 
 
     protected override async Task OnInitializedAsync()
@@ -167,11 +174,15 @@
         await GetDocs();
     }
 
-    public void Dispose()
+    Func<DocVM, bool> searchFilter => x =>
     {
-        stateSubscription.Dispose();
-        /*AppState.OnChange -= SubjectIdChanged;
-        AppState.OnChange -= StateHasChanged;*/
-    }
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (x.Title is not null && x.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.ShortDescription is not null && x.ShortDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.Description is not null && x.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    };
+
+    public void Dispose()=>stateSubscription.Dispose();
 
 }

@@ -33,7 +33,8 @@ try
 
     app.UseHttpsRedirection();
 
-    app.UseStaticFiles();
+    // app.UseStaticFiles();
+    app.MapStaticAssets();
     app.UseSerilogRequestLogging();
     
     app.UseAuthentication();
@@ -42,6 +43,7 @@ try
     app.UseAntiforgery();
 
     app.MapRazorComponents<App>()
+        .WithStaticAssets()
         .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.

@@ -62,7 +62,7 @@ else
                                   @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)" Disabled="!isEdited"/>
                 </MudItem>
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(Doc.ShortDescription))
             {
                 <MudItem xs="6">
                     <MudPaper Outlined="true" Class="pa-3 ma-3">
@@ -80,7 +80,8 @@ else
                                   @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!isEdited"/>
                 </MudItem>
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(Doc.Description))
+
             {
                 <MudItem xs="6">
                     <MudPaper Outlined="true" Class="pa-3 ma-3">
@@ -112,8 +113,6 @@ else
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
     [Parameter] public string? Id { get; set; }
     [Parameter] public bool isEdited { get; set; } = false;
-
-    // bool isEdited = false;
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
@@ -168,9 +167,9 @@ else
 
         if (result.success)
         {
-            // NavigationManager.NavigateTo("/");
             Snackbar.Add(result.message, Severity.Success);
             isEdited = false;
+            NavigationManager.NavigateTo("/");
         }
         else
         {

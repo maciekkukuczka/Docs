@@ -53,6 +53,7 @@
             : (await SubjectService.GetSubjects(user)).data;
 
         selectedSubject = subjects.FirstOrDefault();
+        await OnSubjectSelected.InvokeAsync(selectedSubject);
         /*
         try
         var sw = Stopwatch.StartNew();
