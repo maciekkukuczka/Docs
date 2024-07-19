@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Docs.Data;
 
 namespace Docs.Components.Account;
 

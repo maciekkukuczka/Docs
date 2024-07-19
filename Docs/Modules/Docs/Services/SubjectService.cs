@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Services;
+﻿namespace Docs.Modules.Subjects;
 
 public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFactory) 
 {
@@ -12,8 +12,8 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
             .AsNoTracking()
             .ToHashSetAsync();
 
-        if (result is null) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
-        return Result<HashSet<Subject>>.OK(result);
+        if (result is null||result.Count <= 0) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
+        return Result.OK(result);
     }
     
     // ADD

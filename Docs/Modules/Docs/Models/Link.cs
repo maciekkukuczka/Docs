@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Models;
+﻿namespace Docs.Modules.Links;
 
 public class Link:BaseModel
 {

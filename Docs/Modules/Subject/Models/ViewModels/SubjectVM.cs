@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Models.ViewModels;
+﻿namespace Docs.Modules.Subjects;
 
 public class SubjectVM : BaseModel
 {
@@ -8,7 +8,7 @@ public class SubjectVM : BaseModel
     [MaxLength(5000, ErrorMessage = "Maksymalnie 5000 znaków ")]
     public string? Description { get; set; }
 
-    public string UserId { get; set; }
+    public string? UserId { get; set; }
 
 
     public ICollection<DocVM> Docs { get; set; } = new HashSet<DocVM>();
@@ -23,6 +23,8 @@ public class SubjectVM : BaseModel
             UserId = subject.UserId,
             Docs = includeDocs ? subject.Docs.Select(x => DocVM.ToVM(x, false)).ToHashSet() : new HashSet<DocVM>()
         };
+    
+
 
     public static Subject ToModel(SubjectVM vm, bool includeSubjects = true) =>
         new()

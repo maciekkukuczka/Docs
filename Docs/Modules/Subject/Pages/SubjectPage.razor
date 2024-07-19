@@ -1,0 +1,12 @@
+﻿@namespace Docs.Modules.Subjects
+
+@page "/subjects"
+@attribute [Authorize]
+
+<SubjectCrudComp/>
+
+@*<GenericCrudComp TEntity="Subject" TViewModel="SubjectVM" Columns="@((HashSet<Expression<Func<SubjectVM,object>>>)[
+x=>x.Name,
+x=>x.Id
+])"/>*@
+

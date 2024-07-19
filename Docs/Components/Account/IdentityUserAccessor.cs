@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Docs.Data;
 
 namespace Docs.Components.Account;
 

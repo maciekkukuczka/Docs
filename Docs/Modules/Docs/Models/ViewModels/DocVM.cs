@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Models.ViewModels;
+﻿namespace Docs.Modules.Docs;
 
 public class DocVM:BaseModel
 {

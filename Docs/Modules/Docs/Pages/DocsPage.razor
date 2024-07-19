@@ -1,4 +1,6 @@
-﻿@page "/"
+﻿@namespace Docs.Modules.Docs
+
+@page "/"
 @inject  NavigationManager NavigationManager
 @* @inject DocsService DocsService *@
 @inject DocsVMService DocsService
@@ -22,13 +24,14 @@
 
     <MudItem xs="12">
         <SubjectDisplayComp OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
+        
         @if (docs is null || !docs.Any())
         {
             <NoDataComp/>
         }
         else
         {
-            <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="searchFilter">
+            <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="SearchFilter">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Docsy</MudText>
                     <MudSpacer />
@@ -54,7 +57,7 @@
                     <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
                     <TemplateColumn TItle="Tematy">
                         <CellTemplate>
-                            @foreach (var subject in context.Item.Subjects)
+                            @foreach (var subject in context.Item?.Subjects)
                             {
                                 <span>@subject.Name</span>
                             }
@@ -85,12 +88,12 @@
     PersistingComponentStateSubscription stateSubscription;
 
     // MudDataGrid<Doc> dataGrid;
-    MudDataGrid<DocVM> dataGrid;
+    MudDataGrid<DocVM>? dataGrid;
 
     // HashSet<Doc>? docs;
     HashSet<DocVM>? docs;
     // Subject? recentSubject;
-    string searchString;
+    string? searchString;
 
 
     protected override async Task OnInitializedAsync()
@@ -123,7 +126,7 @@
     {
         // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
         docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored)
-            ? (await DocsService.GetDocBySubject(subjectId)).data
+            ? (await DocsService.GetDocBySubject(subjectId)).Data
             : restored!;
 
         /*        try
@@ -170,11 +173,11 @@
         var state = dialogResult == null ? "Canceled" : "Deleted!";
         if (state.Equals("Canceled")) return;
         var result = await DocsService.DeleteDoc(contextItemId);
-        var snackbar = result.success ? Snackbar.Add(result.message, Severity.Warning) : Snackbar.Add(result.message, Severity.Error);
+        var snackbar = result.Success ? Snackbar.Add(result.Message, Severity.Warning) : Snackbar.Add(result.Message, Severity.Error);
         await GetDocs();
     }
 
-    Func<DocVM, bool> searchFilter => x =>
+    Func<DocVM, bool> SearchFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         if (x.Title is not null && x.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;

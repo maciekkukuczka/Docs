@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Docs.Modules.Docs.Models;
+﻿namespace Docs.Modules.Docs;
 
 public class Doc:BaseModel
 {
@@ -13,7 +11,7 @@ public class Doc:BaseModel
     public string? Description { get; set; }
     
     // NAV
-    public DocPath Path { get; set; }
+    public DocPath? Path { get; set; }
     // public ICollection<ApplicationUser> Users { get; set; } = (HashSet<ApplicationUser>) [];
     public ICollection<Subject> Subjects { get; set; }=(HashSet<Subject>) [];
     public ICollection<Category> Categories { get; set; } = (HashSet<Category>) [];

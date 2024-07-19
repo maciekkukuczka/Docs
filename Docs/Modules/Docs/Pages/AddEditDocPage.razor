@@ -1,4 +1,5 @@
-﻿@page "/add-doc/{isEdited:bool=true}"
+﻿@namespace Docs.Modules.Docs
+@page "/add-doc/{isEdited:bool=true}"
 @page "/edit-doc/{id?}"
 @page "/doc-details/{id?}"
 
@@ -16,8 +17,8 @@
 <SectionContent SectionId="MainLayout.TopBarSectionRight">
     @if (!string.IsNullOrWhiteSpace(Id))
     {
-        <MudButton Variant="Variant.Filled" Color="@(isEdited ? Color.Warning : Color.Info)" OnClick="Edit">
-            @(isEdited ? "Wyjdź z edycji" : "Edytuj")
+        <MudButton Variant="Variant.Filled" Color="@(IsEdited ? Color.Warning : Color.Info)" OnClick="Edit">
+            @(IsEdited ? "Wyjdź z edycji" : "Edytuj")
         </MudButton>
     }
 </SectionContent>
@@ -35,11 +36,11 @@ else
         <MudGrid>
             @* <MudItem xs="12"> *@
             @* <MudPaper> *@
-            @if (isEdited)
+            @if (IsEdited)
             {
                 <MudItem xs="12">
                     <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
-                                  @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!isEdited"/>
+                                  @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!IsEdited"/>
                 </MudItem>
             }
             else
@@ -55,11 +56,11 @@ else
                 <MudFlexBreak/>
             }
 
-            @if (isEdited)
+            @if (IsEdited)
             {
                 <MudItem xs="12">
                     <MudTextField Label="Krótki opis" HelperText="Max 1000 znaków" Lines="5"
-                                  @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)" Disabled="!isEdited"/>
+                                  @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)" Disabled="!IsEdited"/>
                 </MudItem>
             }
             else if (!string.IsNullOrWhiteSpace(Doc.ShortDescription))
@@ -73,11 +74,11 @@ else
                 </MudItem>
             }
 
-            @if (isEdited)
+            @if (IsEdited)
             {
                 <MudItem xs="12">
                     <MudTextField Label="Opis" HelperText="Max 5000 znaków" Lines="15"
-                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!isEdited"/>
+                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!IsEdited"/>
                 </MudItem>
             }
             else if (!string.IsNullOrWhiteSpace(Doc.Description))
@@ -99,7 +100,7 @@ else
             </SectionContent>
             *@
 
-            @if (isEdited)
+            @if (IsEdited)
             {
                 <MudItem xs="12" Class="d-flex justify-end">
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Warning">Zapisz</MudButton>
@@ -109,23 +110,23 @@ else
     </EditForm>
 }
 
+@* ReSharper disable once InconsistentNaming *@
 @code {
-    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }
+    [CascadingParameter] Task<AuthenticationState>? AuthStateTask { get; set; }
     [Parameter] public string? Id { get; set; }
-    [Parameter] public bool isEdited { get; set; } = false;
+    [Parameter] public bool IsEdited { get; set; }
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
-    string userId;
+    string? userId;
 
 
     protected override async Task OnInitializedAsync()
     {
         NavigationManager.LocationChanged += OnLocationChanged;
 
-        var isLogged = (await AuthState).User.Identity.IsAuthenticated;
-        var user = isLogged ? (await AuthState).User.Identity.Name : string.Empty;
-        userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user)).Id;
+        var user = (await AuthStateTask).User.Identity is { IsAuthenticated: true } ? (await AuthStateTask).User.Identity.Name : string.Empty;
+        userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user))?.Id;
 
         // Doc = AppState.DocToEdit ?? new Doc
         Doc = AppState.DocToEdit ?? new DocVM
@@ -146,40 +147,42 @@ else
         // var submittedDoc = context.Model as Doc;
         var submittedDoc = context.Model as DocVM;
         // submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
-        submittedDoc.Subjects.Add(AppState.RecentSubject ??= new SubjectVM
+        submittedDoc?.Subjects.Add(AppState.RecentSubject ??= new SubjectVM
         {
             Name = "Default",
             UserId = userId
         });
-        Result result;
+        Result? result = null;
         if (string.IsNullOrWhiteSpace(Id))
         {
             // result = await GenericService.Add(submittedDoc);
             // result = await DocsService.AddDoc(submittedDoc);
-            result = await DocsService.AddDoc(submittedDoc);
+            if (submittedDoc != null) result = await DocsService.AddDoc(submittedDoc);
         }
         else
         {
             // result = await GenericService.Update(submittedDoc);
-            result = await DocsService.UpdateDoc(submittedDoc);
+            if (submittedDoc != null) result = await DocsService.UpdateDoc(submittedDoc);
             AppState.DocToEdit = null;
         }
-
-        if (result.success)
+        
+        
+        if (result.Success)
         {
-            Snackbar.Add(result.message, Severity.Success);
-            isEdited = false;
+            Snackbar.Add(result.Message, Severity.Success);
+            IsEdited = false;
             NavigationManager.NavigateTo("/");
         }
         else
         {
-            Snackbar.Add(result.message, Severity.Error);
+            Snackbar.Add(result.Message, Severity.Error);
         }
     }
 
-    async Task Edit()
+    Task Edit()
     {
-        isEdited = !isEdited;
+        IsEdited = !IsEdited;
+        return Task.CompletedTask;
     }
 
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
@@ -190,7 +193,7 @@ else
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-        AuthState.Dispose();
+        AuthStateTask?.Dispose();
     }
 
 

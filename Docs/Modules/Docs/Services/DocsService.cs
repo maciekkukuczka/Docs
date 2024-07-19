@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Services;
+﻿namespace Docs.Modules.Docs;
 
 public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactory,
     HybridCache cache)
@@ -7,7 +7,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
     public async Task<Result<List<Doc>>> GetAllDocs()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = Result<List<Doc>>.OK(await dbContext.Docs
+        var res = Result.OK(await dbContext.Docs
             .AsNoTracking()
             .ToListAsync());
         return res;
@@ -44,7 +44,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
             .AsNoTracking()
             .ToHashSetAsync(cancellationToken: cancellationToken);
         
-        return Result<HashSet<Doc>>.OK(result);
+        return Result.OK(result);
     }
 
 
@@ -53,7 +53,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(id);
         if (exist == null) return Result.Error<Doc>($"{Errors.ObjectNotFound<Doc>()}: {id}");
-        return Result<Doc>.OK(exist);
+        return Result.OK(exist);
     }
 
     public async Task<Result> AddDoc(Doc newDoc)
@@ -67,7 +67,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
             if (newDoc.Subjects.Any(x => x.Id == existSubject.Id))
             {
                 var untracked = newDoc.Subjects.FirstOrDefault(x => x.Id == existSubject.Id);
-                newDoc.Subjects.Remove(untracked);
+                if (untracked != null) newDoc.Subjects.Remove(untracked);
                 newDoc.Subjects.Add(existSubject);
             }
         }
@@ -78,10 +78,10 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
-    public async Task<Result> UpdateDoc(Doc doc)
+    public async Task<Result> UpdateDoc(Doc? doc)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        if (doc is null) return Result.Error($"{Errors.ObjectNotExist<Doc>()}: {doc.Title}");
+        if (doc is null) return Result.Error($"{Errors.ObjectNotExist<Doc>()}: {doc?.Title}");
 
         var exist = await dbContext.Docs.FindAsync(doc.Id);
         if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {doc.Title}");
@@ -95,11 +95,11 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result.OK($"{Errors.ObjectSaved<Doc>()}: {doc.Title}");
     }
 
-    public async Task<Result> DeleteDoc(string docId)
+    public async Task<Result> DeleteDoc(string? docId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(docId);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist.Title}");
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist?.Title}");
         dbContext.Docs.Remove(exist);
         var saveResult = await dbContext.SaveChangesAsync();
         if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");

@@ -1,13 +1,12 @@
-﻿@inject PersistentComponentState PersistentComponentState 
+﻿@namespace Docs.Modules.Subjects
+
+@inject PersistentComponentState PersistentComponentState 
 @* @inject GenericService<Subject> GenericService *@
 @* @inject SubjectService SubjectService *@
 @inject SubjectVMService SubjectService
 @inject UserManager<ApplicationUser> UserManager
 @inject ISnackbar Snackbar
-@using System.Diagnostics
 @implements  IDisposable
-@page "/subjects"
-@attribute [Authorize]
 @*
 <SectionContent SectionId="MainLayout.TopBarSectionRight">
     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
@@ -15,7 +14,7 @@
 *@
 
 <MudItem xs="12">
-    <PageHeaderComp/>
+    @* <PageHeaderComp Name="Tematy"/> *@
     <MudPaper Outlined="true" Class="pa-5 ">
         <EditForm Model="@subject" OnValidSubmit="Submit">
             <DataAnnotationsValidator/>
@@ -46,6 +45,7 @@
                                     docs = string.Join(", ", doc.Title);
                                     @* <span @key="doc.Id">@doc.Title</span> *@
                                 }
+
                                 <span>@docs</span>
                             }
                         </CellTemplate>
@@ -54,7 +54,7 @@
                         <CellTemplate>
                             <MudStack Row="true">
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
-                                           OnClick="(async () => await Edit(context.Item))">
+                                           OnClick="() => Edit(context.Item)">
                                     Edytuj
                                 </MudButton>
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
@@ -87,16 +87,19 @@
     bool isToEdit = false;
 
     // MudDataGrid<Subject> grid;
-    MudDataGrid<SubjectVM> grid;
+    MudDataGrid<SubjectVM>? grid;
 
 
     protected override async Task OnInitializedAsync()
     {
-        var isAuthenticated = (await AuthStateTask).User.Identity.IsAuthenticated;
-        currentUserName = isAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
+        if (AuthStateTask != null)
+        {
+            var isAuthenticated = (await AuthStateTask).User.Identity?.IsAuthenticated;
+            currentUserName = isAuthenticated != null && isAuthenticated.Value ? (await AuthStateTask).User.Identity?.Name : string.Empty;
+        }
 
         if (!string.IsNullOrWhiteSpace(currentUserName))
-            currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;
+            currentUserId = (await UserManager.FindByNameAsync(currentUserName))?.Id;
 
 
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
@@ -110,21 +113,24 @@
 
     private async Task GetSubjects()
     {
+        // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+        subjects = (PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
+            ("Subjects", out var restored)
+            ? restored
+            // : (await GenericService.GetAll()).data;
+            : (await SubjectService?.GetSubjects(currentUserName)).Data);
+
+        /*
         var sw = Stopwatch.StartNew();
         try
         {
-            // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
-            subjects = PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
-                ("Subjects", out var restored)
-                ? restored
-                // : (await GenericService.GetAll()).data;
-                : (await SubjectService.GetSubjects(currentUserName)).data;
         }
         finally
         {
             sw.Stop();
             Log.Warning($"POMIAR TEMATÓW: {sw.ElapsedMilliseconds}ms");
         }
+    */
     }
 
     async Task Submit(EditContext context)
@@ -133,15 +139,15 @@
         var contextSubject = (SubjectVM)context.Model;
         contextSubject.UserId = currentUserId;
         // var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
-        var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await SubjectService.AddSubject(contextSubject);
+        var result = isToEdit ? await SubjectService?.UpdateSubject(contextSubject)! : await SubjectService?.AddSubject(contextSubject)!;
 
-        if (result.success)
+        if (result.Success)
         {
-            subjects = (await SubjectService.GetSubjects(currentUserName)).data;
+            subjects = (await SubjectService?.GetSubjects(currentUserName)).Data!;
             // subjects = (await GenericService.GetAll()).data;
-            Snackbar.Add(result.message, Severity.Success);
+            Snackbar.Add(result.Message, Severity.Success);
         }
-        else Snackbar.Add(result.message, Severity.Error);
+        else Snackbar.Add(result.Message, Severity.Error);
 
         isToEdit = false;
         subject = new();
@@ -149,7 +155,7 @@
 
 
     // async Task Edit(Subject? contextSubject)
-    async Task Edit(SubjectVM? contextSubject)
+    void Edit(SubjectVM? contextSubject)
     {
         isToEdit = true;
         if (contextSubject is not null) subject = contextSubject;
@@ -159,8 +165,8 @@
     // async Task Delete(Subject? contextSubject)
     async Task Delete(SubjectVM? contextSubject)
     {
-        var result = (await SubjectService.DeleteSubject(contextSubject.Id));
-        Snackbar.Add(result.message, result.success ? Severity.Success : Severity.Error);
+        var result = (await SubjectService?.DeleteSubject(contextSubject?.Id)!);
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
         await GetSubjects();
     }
 

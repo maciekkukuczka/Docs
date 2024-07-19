@@ -1,0 +1,210 @@
+﻿@*
+@namespace Docs.Modules.Common
+@typeparam TEntity where TEntity :  BaseModel, new()
+@typeparam TViewModel where TViewModel :  BaseModel, new()
+
+@inject PersistentComponentState PersistentComponentState 
+@inject GenericService<TEntity,TViewModel> GenericService
+$1$ @inject SubjectService SubjectService #1#
+@inject SubjectVMService SubjectService
+@inject UserManager<ApplicationUser> UserManager
+@inject ISnackbar Snackbar
+@using System.Linq.Expressions
+@implements  IDisposable
+$1$
+<SectionContent SectionId="MainLayout.TopBarSectionRight">
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
+</SectionContent>
+#1#
+
+<MudItem xs="12">
+    <PageHeaderComp/>
+    <MudPaper Outlined="true" Class="pa-5 ">
+        <EditForm Model="@item" OnValidSubmit="Submit">
+            <DataAnnotationsValidator/>
+            @foreach (var expression in Columns)
+            {
+                $1$ <MudTextField  TextChanged="@(()=>BindProperty(expression))" On Label="Tytuł" For="@(() => GetPropertyName(expression))"/> #1#
+                <MudTextField T="TViewModel"  TextChanged="@(()=>BindProperty(expression))" Label="Tytuł" />
+            }
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Dodaj Temat</MudButton>
+        </EditForm>
+    </MudPaper>
+</MudItem>
+
+<MudItem xs="12">
+    <MudPaper Outlined="true" Class="pa-5">
+        @if (items is null || !items.Any())
+        {
+            <NoDataComp/>
+        }
+        else
+        {
+            <MudDataGrid T="TViewModel" @ref="grid" Items="items">
+                <Columns>
+
+                    $1$<PropertyColumn Property="x => x.Name" Title="Tytuł"/>
+                    <TemplateColumn Title="Dokumenty">
+                        <CellTemplate>
+                            @{
+                                string docs = String.Empty;
+                                foreach (var doc in context.Item.Docs)
+                                {
+                                    docs = string.Join(", ", doc.Title);
+                                   $2$ <span @key="doc.Id">@doc.Title</span>  #2#
+                                }
+
+                                <span>@docs</span>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>#1#
+                    @foreach (var column in Columns)
+                    {
+                        <PropertyColumn Property="@column" Title="Test"/>
+                    }
+
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudStack Row="true">
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+                                           OnClick="(async () => await Edit(context.Item))">
+                                    Edytuj
+                                </MudButton>
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
+                                           OnClick="async () => await Delete(context.Item)">
+                                    Usuń
+                                </MudButton>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        }
+    </MudPaper >
+</MudItem >
+
+@code {
+    [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
+    [Parameter] public HashSet<Expression<Func<TViewModel, object>>>? Columns { get; set; }
+
+    PersistingComponentStateSubscription stateSubscription;
+
+    // HashSet<Subject> subjects = [];
+    MudDataGrid<TViewModel> grid;
+    HashSet<TViewModel> items = [];
+    TViewModel item = new();
+    string? currentUserId;
+    string? currentUserName;
+
+    bool isToEdit = false;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = (await AuthStateTask).User.Identity.IsAuthenticated;
+        currentUserName = isAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(currentUserName))
+            currentUserId = (await UserManager.FindByNameAsync(currentUserName)).Id;
+
+
+        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        {
+            PersistentComponentState.PersistAsJson("Subjects", items);
+            return Task.CompletedTask;
+        });
+
+        await GetItems();
+    }
+
+
+    async Task GetItems()
+    {
+        // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+        items = PersistentComponentState.TryTakeFromJson<HashSet<TViewModel>>
+            ("Subjects", out var restored)
+            ? restored
+            : (await GenericService.GetAll()).data;
+            // : (await SubjectService.GetSubjects(currentUserName)).data;
+
+        /*
+        var sw = Stopwatch.StartNew();
+        try
+        {
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($"POMIAR TEMATÓW: {sw.ElapsedMilliseconds}ms");
+        }
+    */
+    }
+
+    
+    private object BindProperty(Expression<Func<TViewModel, object>> expression)
+    {
+        var compiledExpression = expression.Compile();
+        return compiledExpression(item);
+    }
+
+    private string GetPropertyName(Expression<Func<TViewModel, object>> expression)
+    {
+        if (expression.Body is MemberExpression memberExpression)
+        {
+            return memberExpression.Member.Name;
+        }
+        else if (expression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression innerMemberExpression)
+        {
+            return innerMemberExpression.Member.Name;
+        }
+
+        return string.Empty;
+    }
+
+
+async Task Submit(EditContext context)
+{
+// var contextSubject = (Subject)context.Model;
+var contextSubject = (SubjectVM)context.Model;
+contextSubject.UserId = currentUserId;
+// var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
+var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await SubjectService.AddSubject(contextSubject);
+
+if (result.success)
+{
+// items = (await SubjectService.GetSubjects(currentUserName)).data;
+
+// subjects = (await GenericService.GetAll()).data;
+Snackbar.Add(result.message, Severity.Success);
+}
+else Snackbar.Add(result.message, Severity.Error);
+
+isToEdit = false;
+item = new();
+}
+
+
+// async Task Edit(Subject? contextSubject)
+async Task Edit(TViewModel? contextSubject)
+{
+isToEdit = true;
+if (contextSubject is not null) item = contextSubject;
+}
+
+
+// async Task Delete(Subject? contextSubject)
+async Task Delete(TViewModel? contextSubject)
+{
+var result = (await SubjectService.DeleteSubject(contextSubject.Id));
+Snackbar.Add(result.message, result.success ? Severity.Success : Severity.Error);
+await GetItems();
+}
+
+public void Dispose() => stateSubscription.Dispose();
+
+
+
+}
+*@

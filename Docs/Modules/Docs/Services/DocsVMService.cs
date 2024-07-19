@@ -1,4 +1,5 @@
-﻿namespace Docs.Modules.Docs.Services;
+﻿// ReSharper disable InconsistentNaming
+namespace Docs.Modules.Docs;
 
 public class DocsVMService(
     IDbContextFactory<ApplicationDbContext> dbContextFactory,
@@ -48,7 +49,7 @@ public class DocsVMService(
             .ToHashSetAsync(cancellationToken: cancellationToken);
 
         var resultVM = result.Select(x => DocVM.ToVM(x)).ToHashSet();
-        return Result<HashSet<DocVM>>.OK(resultVM);
+        return Result.OK(resultVM);
     }
 
 
@@ -57,10 +58,11 @@ public class DocsVMService(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(id);
         if (exist == null) return Result.Error<Doc>($"{Errors.ObjectNotFound<Doc>()}: {id}");
-        return Result<Doc>.OK(exist);
+        return Result.OK(exist);
     }
 
     //ADD
+    // ReSharper disable once InconsistentNaming
     public async Task<Result> AddDoc(DocVM newDocVM)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -73,7 +75,7 @@ public class DocsVMService(
             if (newDoc.Subjects.Any(x => x.Id == existSubject.Id))
             {
                 var untracked = newDoc.Subjects.FirstOrDefault(x => x.Id == existSubject.Id);
-                newDoc.Subjects.Remove(untracked);
+                if (untracked != null) newDoc.Subjects.Remove(untracked);
                 newDoc.Subjects.Add(existSubject);
             }
         }
@@ -85,11 +87,10 @@ public class DocsVMService(
     }
 
     // UPDATE
-    public async Task<Result> UpdateDoc(DocVM docVM)
+    public async Task<Result> UpdateDoc(DocVM? docVM)
     {
         var doc = DocVM.ToModel(docVM);
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        if (doc is null) return Result.Error($"{Errors.ObjectNotExist<Doc>()}: {doc.Title}");
 
         var exist = await dbContext.Docs.FindAsync(doc.Id);
         if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {doc.Title}");
@@ -107,7 +108,7 @@ public class DocsVMService(
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(docId);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist.Title}");
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist?.Title}");
         dbContext.Docs.Remove(exist);
         var saveResult = await dbContext.SaveChangesAsync();
         if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");

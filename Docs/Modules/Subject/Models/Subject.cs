@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Docs.Modules.Docs.Models;
+﻿namespace Docs.Modules.Subjects;
 
 public class Subject:BaseModel
 {
@@ -14,6 +12,6 @@ public class Subject:BaseModel
     public ICollection<Doc> Docs { get; set; } = (HashSet<Doc>)[];
     // public ICollection<ApplicationUser> Users { get; set; } = (HashSet<ApplicationUser>) [];
 
-    public string UserId { get; set; }
-    public ApplicationUser User { get; set; } 
+    public string? UserId { get; set; }
+    public ApplicationUser? User { get; set; } 
 }

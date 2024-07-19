@@ -4,7 +4,7 @@ public class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser>(options)
 {
-    string currentUserId => httpContextAccessor.HttpContext.User
+    string? currentUserId => httpContextAccessor.HttpContext?.User
         .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
     public DbSet<Doc> Docs { get; set; }

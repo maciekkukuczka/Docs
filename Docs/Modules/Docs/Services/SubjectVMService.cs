@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs.Services;
+﻿namespace Docs.Modules.Subjects;
 
 public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
@@ -12,9 +12,9 @@ public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextF
             .AsNoTracking()
             .ToHashSetAsync();
 
-        if (result is null) return Result.Error<HashSet<SubjectVM>>($"{Errors.ObjectNotFound<HashSet<SubjectVM>>()}");
+        if (result is null||result.Count<=0) return Result.Error<HashSet<SubjectVM>>($"{Errors.ObjectNotFound<HashSet<SubjectVM>>()}");
         var resultVms = result.Select(x => SubjectVM.ToVm(x)).ToHashSet();
-        return Result<HashSet<SubjectVM>>.OK(resultVms);
+        return Result.OK(resultVms);
     }
 
     // ADD

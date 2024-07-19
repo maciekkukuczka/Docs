@@ -1,8 +1,6 @@
-﻿using Serilog.Core;
+﻿namespace Docs.Modules.Common;
 
-namespace Docs.Modules.Common.Result;
-
-public record Result(bool success, string? message)
+public record Result(bool Success, string? Message)
 {
     public static Result OK(string message = "") => new(true, message);
     public static Result<T> OK<T>(T data, string? message = "") => new(data, true, message);
@@ -21,7 +19,7 @@ public record Result(bool success, string? message)
     static void LogError(string e) => Log.Logger.Error(e);
 }
 
-public record Result<T>(T? data, bool success, string? message) : Result(success, message);
+public record Result<T>(T? Data, bool Success, string? Message) : Result(Success, Message);
 
 /*public class Result
 {

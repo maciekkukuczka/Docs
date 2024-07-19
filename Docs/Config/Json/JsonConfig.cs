@@ -8,7 +8,7 @@ public static class JsonConfig
     {
         JsonSerializerOptions options = new JsonSerializerOptions
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+            ReferenceHandler = ReferenceHandler.Preserve,
             WriteIndented = true ,// opcjonalne, aby zwiększyć czytelność JSON
             PropertyNameCaseInsensitive = true
         };

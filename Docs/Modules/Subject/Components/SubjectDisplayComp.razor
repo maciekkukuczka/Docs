@@ -1,7 +1,9 @@
-﻿@* @inject SubjectService SubjectService *@
+﻿@namespace Docs.Modules.Subjects
+
+@* @inject SubjectService SubjectService *@
 @inject SubjectVMService SubjectService
-@inject DocsService DocsService
-@inject AppState AppState
+@* @inject DocsService DocsService *@
+@* @inject AppState AppState *@
 @inject PersistentComponentState PersistantComponentState
 @implements IDisposable
 
@@ -23,6 +25,8 @@
     </MudItem>
 </MudGrid>
 
+@* ReSharper disable once InconsistentNaming *@
+@* ReSharper disable once InconsistentNaming *@
 @code {
 
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
@@ -40,7 +44,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user = (await AuthStateTask).User.Identity.IsAuthenticated ? (await AuthStateTask).User.Identity.Name : string.Empty;
+        var user = (await AuthStateTask).User.Identity is { IsAuthenticated: true } ? (await AuthStateTask).User.Identity.Name : string.Empty;
 
         subscription = PersistantComponentState.RegisterOnPersisting(() =>
         {
@@ -50,9 +54,9 @@
 
         subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
             ? restored
-            : (await SubjectService.GetSubjects(user)).data;
+            : (await SubjectService.GetSubjects(user)).Data;
 
-        selectedSubject = subjects.FirstOrDefault();
+        if (subjects != null) selectedSubject = subjects.FirstOrDefault();
         await OnSubjectSelected.InvokeAsync(selectedSubject);
         /*
         try
@@ -80,7 +84,7 @@
     // async Task SelectSubject(Subject? subject)
     async Task SelectSubject(SubjectVM? subject)
     {
-        selectedSubject = subject;
+        if (subject != null) selectedSubject = subject;
         await OnSubjectSelected.InvokeAsync(selectedSubject);
 
         /*await  InvokeAsync(() =>

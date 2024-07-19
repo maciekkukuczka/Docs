@@ -24,4 +24,16 @@
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2-dev-00338" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Modules\Docs\Components\" />
+    <Folder Include="Modules\Generic\Components\" />
+    <Folder Include="Modules\Subject\Services\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <AdditionalFiles Include="Modules\Generic\Components\CrudComponent\GenericCrudComp.razor" />
+  </ItemGroup>
+
 </Project>
