@@ -3,7 +3,40 @@
 @page "/release-notes"
 
 <PageHeaderComp Name="Release notes"/>
+@* <MudStack Row="false"> *@
 <MudGrid>
+
+    <MudFlexBreak/>
+
+    <MudItem xs="6">
+        <MudPaper Outlined="true" Class="ma-5 pa-5 ">
+            <MudText Class="pb-3">
+                <MudLink Color="Color.Primary" Typo="Typo.h6" Underline="Underline.Always" Class="pb-3" Target="_blank"
+                         href="https://github.com/maciekkukuczka/Docs/issues/28">
+                    v.0.3.0
+                </MudLink>
+            </MudText>
+            <p>
+                <MudLink Color="Color.Default" Typo="Typo.inherit" Target="_blank" href="https://github.com/maciekkukuczka/Docs/issues/28">
+                    - Dodano wyszukiwarke na dokumentach.
+                </MudLink>
+            </p>
+            <p>
+                <MudLink Color="Color.Default" Typo="Typo.inherit" Target="_blank" href="https://github.com/maciekkukuczka/Docs/issues/12">
+                    - Refaktoryzacja warningów i kodu
+                </MudLink>
+            </p>
+            <p>
+                <MudLink Color="Color.Default" Typo="Typo.inherit" Target="_blank" href="https://github.com/maciekkukuczka/Docs/issues/29">
+                    - Naprawiono błąd generowania tematu "Default", nawet gdy już istniał
+                </MudLink>
+            </p>
+
+        </MudPaper>
+    </MudItem>
+
+    <MudFlexBreak/>
+
     <MudItem xs="6">
         <MudPaper Outlined="true" Class="ma-5 pa-5 ">
             <MudText Typo="Typo.h6" Color="Color.Primary" Class="pb-3" Style="text-decoration-line: underline">v. 0.2.0</MudText>
@@ -14,7 +47,10 @@
             <p>- Poprawiono układ komponentu Logowani i Rejestracji</p>
         </MudPaper>
     </MudItem>
+
+
 </MudGrid>
+@* </MudStack> *@
 
 @code {
 

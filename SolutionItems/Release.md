@@ -1,13 +1,13 @@
 ﻿## Releases
 
-1. Sort out Tasks on sprint board
-2. Change version in appsetting.json
-3. Update Info Page
-4. Commit and Push
-5. Add Tag
-6. Merge Dev branch to Master
-7. New Sprint
-8.  Close old Sprint
+1.  Sort  and Close current Tasks on sprint board.
+2. Close old Sprint
+3. Change version in appsetting.json
+4. Update Info Page
+5. Commit and Push
+6. Add Tag
+7. Merge Dev branch to Master
+8. New Sprint
 
 
 ## Old

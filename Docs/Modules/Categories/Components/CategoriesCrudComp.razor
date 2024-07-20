@@ -1,0 +1,174 @@
+﻿@namespace Docs.Modules.Categories
+
+@inject PersistentComponentState PersistentComponentState 
+@* @inject GenericService<Subject> GenericService *@
+@* @inject SubjectService SubjectService *@
+@inject CategoriesVMService CategoriesService
+@inject UserManager<ApplicationUser> UserManager
+@inject ISnackbar Snackbar
+@implements  IDisposable
+@*
+<SectionContent SectionId="MainLayout.TopBarSectionRight">
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
+</SectionContent>
+*@
+
+<MudItem xs="12">
+    @* <PageHeaderComp Name="Tematy"/> *@
+    <MudPaper Outlined="true" Class="pa-5 ">
+        <EditForm Model="@subject" OnValidSubmit="Submit">
+            <DataAnnotationsValidator/>
+            <MudTextField @bind-Value="subject.Name" Label="Tytuł" For="@(() => subject.Name)"/>
+            <MudTextField @bind-Value="subject.Description" Label="Opis" For="@(() => subject.Name)" Lines="2"/>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Dodaj Temat</MudButton>
+        </EditForm>
+    </MudPaper>
+</MudItem>
+
+<MudItem xs="12">
+    <MudPaper Outlined="true" Class="pa-5">
+        @if (subjects is null || !subjects.Any())
+        {
+            <NoDataComp/>
+        }
+        else
+        {
+            <MudDataGrid @ref="grid" Items="subjects">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
+                    <TemplateColumn Title="Dokumenty">
+                        <CellTemplate>
+                            @{
+                                string docs = String.Empty;
+                                foreach (var doc in context.Item.Docs)
+                                {
+                                    docs = string.Join(", ", doc.Title);
+                                    @* <span @key="doc.Id">@doc.Title</span> *@
+                                }
+
+                                <span>@docs</span>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudStack Row="true">
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+                                           OnClick="() => Edit(context.Item)">
+                                    Edytuj
+                                </MudButton>
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
+                                           OnClick="async () => await Delete(context.Item)">
+                                    Usuń
+                                </MudButton>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                </Columns>
+            </MudDataGrid>
+        }
+    </MudPaper >
+</MudItem >
+
+@code {
+    [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    PersistingComponentStateSubscription stateSubscription;
+
+    // HashSet<Subject> subjects = [];
+    HashSet<SubjectVM> subjects = [];
+
+    // Subject subject = new();
+    SubjectVM subject = new();
+    string? currentUserId;
+    string? currentUserName;
+
+    bool isToEdit = false;
+
+    // MudDataGrid<Subject> grid;
+    MudDataGrid<SubjectVM>? grid;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask != null)
+        {
+            var isAuthenticated = (await AuthStateTask).User.Identity?.IsAuthenticated;
+            currentUserName = isAuthenticated != null && isAuthenticated.Value ? (await AuthStateTask).User.Identity?.Name : string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(currentUserName))
+            currentUserId = (await UserManager.FindByNameAsync(currentUserName))?.Id;
+
+
+        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        {
+            PersistentComponentState.PersistAsJson("Subjects", subjects);
+            return Task.CompletedTask;
+        });
+
+        await GetSubjects();
+    }
+
+    private async Task GetSubjects()
+    {
+        // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
+        subjects = (PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
+            ("Subjects", out var restored)
+            ? restored
+            // : (await GenericService.GetAll()).data;
+            : (await CategoriesService?.GetSubjects(currentUserName)).Data);
+
+        /*
+        var sw = Stopwatch.StartNew();
+        try
+        {
+        }
+        finally
+        {
+            sw.Stop();
+            Log.Warning($"POMIAR TEMATÓW: {sw.ElapsedMilliseconds}ms");
+        }
+    */
+    }
+
+    async Task Submit(EditContext context)
+    {
+        // var contextSubject = (Subject)context.Model;
+        var contextSubject = (SubjectVM)context.Model;
+        contextSubject.UserId = currentUserId;
+        // var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
+        var result = isToEdit ? await CategoriesService?.UpdateSubject(contextSubject)! : await CategoriesService?.AddSubject(contextSubject)!;
+
+        if (result.Success)
+        {
+            subjects = (await CategoriesService?.GetSubjects(currentUserName)).Data!;
+            // subjects = (await GenericService.GetAll()).data;
+            Snackbar.Add(result.Message, Severity.Success);
+        }
+        else Snackbar.Add(result.Message, Severity.Error);
+
+        isToEdit = false;
+        subject = new();
+    }
+
+
+    // async Task Edit(Subject? contextSubject)
+    void Edit(SubjectVM? contextSubject)
+    {
+        isToEdit = true;
+        if (contextSubject is not null) subject = contextSubject;
+    }
+
+
+    // async Task Delete(Subject? contextSubject)
+    async Task Delete(SubjectVM? contextSubject)
+    {
+        var result = (await CategoriesService?.DeleteSubject(contextSubject?.Id)!);
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+        await GetSubjects();
+    }
+
+    public void Dispose() => stateSubscription.Dispose();
+}

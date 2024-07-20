@@ -28,11 +28,13 @@
   <ItemGroup>
     <Folder Include="Modules\Docs\Components\" />
     <Folder Include="Modules\Generic\Components\" />
-    <Folder Include="Modules\Subject\Services\" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <AdditionalFiles Include="Modules\Categories\Components\CategoriesCrudComp.razor" />
+    <AdditionalFiles Include="Modules\Categories\Components\CategoriesDisplayComp.razor" />
+    <AdditionalFiles Include="Modules\Categories\Pages\CategoriesPage.razor" />
     <AdditionalFiles Include="Modules\Generic\Components\CrudComponent\GenericCrudComp.razor" />
   </ItemGroup>
 
