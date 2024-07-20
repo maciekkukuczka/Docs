@@ -8,31 +8,27 @@ public class CategoryVM : BaseModel
     [MaxLength(5000, ErrorMessage = "Maksymalnie 5000 znaków ")]
     public string? Description { get; set; }
 
-    public string? UserId { get; set; }
-
 
     public ICollection<DocVM> Docs { get; set; } = new HashSet<DocVM>();
 
 
-    public static SubjectVM ToVm(Subject subject, bool includeDocs = true) =>
+    public static CategoryVM ToVm(Category category, bool includeDocs = true) =>
         new()
         {
-            Id = subject.Id,
-            Name = subject.Name,
-            Description = subject.Description,
-            UserId = subject.UserId,
-            Docs = includeDocs ? subject.Docs.Select(x => DocVM.ToVM(x, false)).ToHashSet() : new HashSet<DocVM>()
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Descritpion,
+            Docs = includeDocs ? category.Docs.Select(x => DocVM.ToVM(x, false)).ToHashSet() : []
         };
     
 
 
-    public static Subject ToModel(SubjectVM vm, bool includeSubjects = true) =>
+    public static Category ToModel(CategoryVM vm, bool includeCategories = true) =>
         new()
         {
             Id = vm.Id,
             Name = vm.Name,
-            Description = vm.Description,
-            UserId = vm.UserId,
-            Docs = includeSubjects ? vm.Docs.Select(x => DocVM.ToModel(x, false)).ToHashSet() : new HashSet<Doc>()
+            Descritpion = vm.Description,
+            Docs = includeCategories ? vm.Docs.Select(x => DocVM.ToModel(x, false)).ToHashSet() : []
         };
 }

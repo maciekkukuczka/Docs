@@ -41,6 +41,7 @@ public static class DI
         services.AddScoped<DocsVMService>();
         services.AddScoped<SubjectService>();
         services.AddScoped<SubjectVMService>();
+        services.AddScoped<CategoriesVMService>();
 
         return services;
     }

@@ -14,6 +14,7 @@ public class DocVM:BaseModel
     public string? Description { get; set; }
 
     public ICollection<SubjectVM> Subjects { get; set; } = (HashSet<SubjectVM>) [];
+    public ICollection<CategoryVM> Categories { get; set; } = (HashSet<CategoryVM>) [];
 
 
     public static DocVM ToVM(Doc doc, bool includeSubjects=true) =>

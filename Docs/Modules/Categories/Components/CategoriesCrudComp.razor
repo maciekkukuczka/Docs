@@ -1,8 +1,6 @@
 ﻿@namespace Docs.Modules.Categories
 
 @inject PersistentComponentState PersistentComponentState 
-@* @inject GenericService<Subject> GenericService *@
-@* @inject SubjectService SubjectService *@
 @inject CategoriesVMService CategoriesService
 @inject UserManager<ApplicationUser> UserManager
 @inject ISnackbar Snackbar
@@ -16,24 +14,24 @@
 <MudItem xs="12">
     @* <PageHeaderComp Name="Tematy"/> *@
     <MudPaper Outlined="true" Class="pa-5 ">
-        <EditForm Model="@subject" OnValidSubmit="Submit">
+        <EditForm Model="@category" OnValidSubmit="Submit">
             <DataAnnotationsValidator/>
-            <MudTextField @bind-Value="subject.Name" Label="Tytuł" For="@(() => subject.Name)"/>
-            <MudTextField @bind-Value="subject.Description" Label="Opis" For="@(() => subject.Name)" Lines="2"/>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Dodaj Temat</MudButton>
+            <MudTextField @bind-Value="category.Name" Label="Tytuł" For="@(() => category.Name)"/>
+            <MudTextField @bind-Value="category.Description" Label="Opis" For="@(() => category.Name)" Lines="2"/>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Zapisz</MudButton>
         </EditForm>
     </MudPaper>
 </MudItem>
 
 <MudItem xs="12">
     <MudPaper Outlined="true" Class="pa-5">
-        @if (subjects is null || !subjects.Any())
+        @if (categories is null || !categories.Any())
         {
             <NoDataComp/>
         }
         else
         {
-            <MudDataGrid @ref="grid" Items="subjects">
+            <MudDataGrid @ref="grid" Items="categories">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
                     <TemplateColumn Title="Dokumenty">
@@ -77,17 +75,17 @@
     PersistingComponentStateSubscription stateSubscription;
 
     // HashSet<Subject> subjects = [];
-    HashSet<SubjectVM> subjects = [];
+    HashSet<CategoryVM> categories = [];
 
     // Subject subject = new();
-    SubjectVM subject = new();
+    CategoryVM category = new();
     string? currentUserId;
     string? currentUserName;
 
     bool isToEdit = false;
 
     // MudDataGrid<Subject> grid;
-    MudDataGrid<SubjectVM>? grid;
+    MudDataGrid<CategoryVM>? grid;
 
 
     protected override async Task OnInitializedAsync()
@@ -104,7 +102,7 @@
 
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
         {
-            PersistentComponentState.PersistAsJson("Subjects", subjects);
+            PersistentComponentState.PersistAsJson("Subjects", categories);
             return Task.CompletedTask;
         });
 
@@ -114,11 +112,11 @@
     private async Task GetSubjects()
     {
         // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
-        subjects = (PersistentComponentState.TryTakeFromJson<HashSet<SubjectVM>>
+        categories = (PersistentComponentState.TryTakeFromJson<HashSet<CategoryVM>>
             ("Subjects", out var restored)
             ? restored
             // : (await GenericService.GetAll()).data;
-            : (await CategoriesService?.GetSubjects(currentUserName)).Data);
+            : (await CategoriesService?.GetCategories(currentUserName)).Data);
 
         /*
         var sw = Stopwatch.StartNew();
@@ -136,36 +134,32 @@
     async Task Submit(EditContext context)
     {
         // var contextSubject = (Subject)context.Model;
-        var contextSubject = (SubjectVM)context.Model;
-        contextSubject.UserId = currentUserId;
+        var contextModel = (CategoryVM)context.Model;
+        // contextModel.UserId = currentUserId;
         // var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
-        var result = isToEdit ? await CategoriesService?.UpdateSubject(contextSubject)! : await CategoriesService?.AddSubject(contextSubject)!;
+        var result = isToEdit ? await CategoriesService?.UpdateCategory(contextModel)! : await CategoriesService?.AddCategory(contextModel)!;
+            
 
-        if (result.Success)
-        {
-            subjects = (await CategoriesService?.GetSubjects(currentUserName)).Data!;
-            // subjects = (await GenericService.GetAll()).data;
-            Snackbar.Add(result.Message, Severity.Success);
-        }
-        else Snackbar.Add(result.Message, Severity.Error);
+        if (result.Success)categories = (await CategoriesService?.GetCategories(currentUserName)).Data!;
+        Snackbar.Add(result.Message,result.Success? Severity.Success : Severity.Error);
 
         isToEdit = false;
-        subject = new();
+        category = new();
     }
 
 
     // async Task Edit(Subject? contextSubject)
-    void Edit(SubjectVM? contextSubject)
+    void Edit(CategoryVM? contextSubject)
     {
         isToEdit = true;
-        if (contextSubject is not null) subject = contextSubject;
+        if (contextSubject is not null) category = contextSubject;
     }
 
 
     // async Task Delete(Subject? contextSubject)
-    async Task Delete(SubjectVM? contextSubject)
+    async Task Delete(CategoryVM? contextSubject)
     {
-        var result = (await CategoriesService?.DeleteSubject(contextSubject?.Id)!);
+        var result = (await CategoriesService?.DeleteCategory(contextSubject?.Id)!);
         Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
         await GetSubjects();
     }

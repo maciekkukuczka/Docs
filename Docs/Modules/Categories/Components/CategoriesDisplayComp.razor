@@ -13,10 +13,10 @@
         <MudPaper Outlined="true" Class="pa-5">
             @* <h3>Tematy</h3> *@
             <MudStack Row="true">
-                @foreach (var subject in subjects)
+                @foreach (var subject in categories)
                 {
                     <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
-                               Color="selectedSubject == subject ? Color.Primary : Color.Inherit">
+                               Color="selectedCategory == subject ? Color.Primary : Color.Inherit">
                         @subject.Name
                     </MudButton>
                 }
@@ -25,20 +25,19 @@
     </MudItem>
 </MudGrid>
 
-@* ReSharper disable once InconsistentNaming *@
-@* ReSharper disable once InconsistentNaming *@
+
 @code {
 
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
 
     // [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
-    [Parameter] public EventCallback<SubjectVM> OnSubjectSelected { get; set; }
+    [Parameter] public EventCallback<CategoryVM> OnSubjectSelected { get; set; }
 
     // Subject selectedSubject;
-    SubjectVM selectedSubject;
+    CategoryVM selectedCategory;
 
     // HashSet<Subject> subjects = [];
-    HashSet<SubjectVM> subjects = [];
+    HashSet<CategoryVM> categories = [];
     PersistingComponentStateSubscription subscription;
 
 
@@ -48,16 +47,16 @@
 
         subscription = PersistantComponentState.RegisterOnPersisting(() =>
         {
-            PersistantComponentState.PersistAsJson("SubjectsInComp", subjects);
+            PersistantComponentState.PersistAsJson("CategoriesInComp", categories);
             return Task.CompletedTask;
         });
 
-        subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
+        categories = PersistantComponentState.TryTakeFromJson<HashSet<CategoryVM>>("CategoriesInComp", out var restored)
             ? restored
-            : (await CategoriesService.GetSubjects(user)).Data;
+            : (await CategoriesService.GetCategories(user)).Data;
 
-        if (subjects != null) selectedSubject = subjects.FirstOrDefault();
-        await OnSubjectSelected.InvokeAsync(selectedSubject);
+        if (categories != null) selectedCategory = categories.FirstOrDefault();
+        await OnSubjectSelected.InvokeAsync(selectedCategory);
         /*
         try
         var sw = Stopwatch.StartNew();
@@ -82,10 +81,10 @@
     }
 
     // async Task SelectSubject(Subject? subject)
-    async Task SelectSubject(SubjectVM? subject)
+    async Task SelectSubject(CategoryVM? category)
     {
-        if (subject != null) selectedSubject = subject;
-        await OnSubjectSelected.InvokeAsync(selectedSubject);
+        if (category != null) selectedCategory = category;
+        await OnSubjectSelected.InvokeAsync(selectedCategory);
 
         /*await  InvokeAsync(() =>
           {
