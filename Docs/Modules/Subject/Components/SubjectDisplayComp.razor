@@ -1,45 +1,43 @@
-﻿@namespace Docs.Modules.Subjects
+﻿@namespace Docs.Modules.Subject.Components
 
-@* @inject SubjectService SubjectService *@
 @inject SubjectVMService SubjectService
-@* @inject DocsService DocsService *@
-@* @inject AppState AppState *@
+@inject AppState AppState
 @inject PersistentComponentState PersistantComponentState
 @implements IDisposable
 
-<MudGrid>
-    <MudItem xs="12">
+@if (Subjects is null)
+{
+    <NoDataComp/>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12">
 
-        <MudPaper Outlined="true" Class="pa-5">
-            @* <h3>Tematy</h3> *@
-            <MudStack Row="true">
-                @foreach (var subject in subjects)
-                {
-                    <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
-                               Color="selectedSubject == subject ? Color.Primary : Color.Inherit">
-                        @subject.Name
-                    </MudButton>
-                }
-            </MudStack>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+            <MudPaper Outlined="true" Class="pa-5">
+                @* <h3>Tematy</h3> *@
+                <MudStack Row="true">
+                    @foreach (var subject in Subjects)
+                    {
+                        <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
+                                   Color="selectedSubject == subject ? Color.Primary : Color.Inherit">
+                            @subject.Name
+                        </MudButton>
+                    }
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
-@* ReSharper disable once InconsistentNaming *@
-@* ReSharper disable once InconsistentNaming *@
+
 @code {
 
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
-
-    // [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
     [Parameter] public EventCallback<SubjectVM> OnSubjectSelected { get; set; }
-
-    // Subject selectedSubject;
-    SubjectVM selectedSubject;
-
-    // HashSet<Subject> subjects = [];
-    HashSet<SubjectVM> subjects = [];
+    [Parameter] public HashSet<SubjectVM> Subjects { get; set; }
     PersistingComponentStateSubscription subscription;
+    SubjectVM selectedSubject;
 
 
     protected override async Task OnInitializedAsync()
@@ -48,16 +46,21 @@
 
         subscription = PersistantComponentState.RegisterOnPersisting(() =>
         {
-            PersistantComponentState.PersistAsJson("SubjectsInComp", subjects);
+            PersistantComponentState.PersistAsJson("SubjectsInComp", Subjects);
             return Task.CompletedTask;
         });
 
-        subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
+
+        Subjects = PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored)
             ? restored
             : (await SubjectService.GetSubjects(user)).Data;
 
-        if (subjects != null) selectedSubject = subjects.FirstOrDefault();
-        await OnSubjectSelected.InvokeAsync(selectedSubject);
+        if (selectedSubject is null)
+        {
+            selectedSubject = Subjects.FirstOrDefault();
+            await SelectSubject();
+        }
+
         /*
         try
         var sw = Stopwatch.StartNew();
@@ -81,10 +84,11 @@
     */
     }
 
-    // async Task SelectSubject(Subject? subject)
-    async Task SelectSubject(SubjectVM? subject)
+
+    async Task SelectSubject(SubjectVM? subject = null)
     {
         if (subject != null) selectedSubject = subject;
+        AppState.SelectedSubject=selectedSubject;
         await OnSubjectSelected.InvokeAsync(selectedSubject);
 
         /*await  InvokeAsync(() =>

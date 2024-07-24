@@ -1,6 +1,6 @@
-﻿namespace Docs.Modules.Subjects;
+﻿namespace Docs.Modules.Categories.Services;
 
-public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContextFactory) 
+public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
     // GET
     public async Task<Result<HashSet<Category>>> GetCategories(string? userName)
@@ -12,10 +12,11 @@ public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContext
             .AsNoTracking()
             .ToHashSetAsync();
 
-        if (result is null||result.Count <= 0) return Result.Error<HashSet<Category>>($"{Errors.ObjectNotFound<HashSet<Category>>()}");
+        if (result is null || result.Count <= 0)
+            return Result.Error<HashSet<Category>>($"{Errors.ObjectNotFound<HashSet<Category>>()}");
         return Result.OK(result);
     }
-    
+
     // ADD
     public async Task<Result> AddCategory(Category category)
     {
@@ -26,16 +27,19 @@ public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContext
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {category.Name}");
-            return Result.OK($"{Errors.ObjectSaved<Subject>()}:{category.Name}");
+            if (saveResult <= 0)
+                return Result.Error($"{Errors.ObjectCannotBeSaved<Subject.Models.Subject>()}: {category.Name}");
+            return Result.OK($"{Errors.ObjectSaved<Subject.Models.Subject>()}:{category.Name}");
         }
         catch (DbUpdateException e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}:{category.Name}\n {e.Message}");
+            return Result.Error(
+                $"{Errors.ObjectCannotBeSaved<Subject.Models.Subject>()}:{category.Name}\n {e.Message}");
         }
         catch (Exception e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}:{category.Name}\n {e.Message}");
+            return Result.Error(
+                $"{Errors.ObjectCannotBeSaved<Subject.Models.Subject>()}:{category.Name}\n {e.Message}");
         }
     }
 
@@ -53,7 +57,7 @@ public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContext
         {
             var saveResult = await db.SaveChangesAsync();
             if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Category>()}: {category.Name}");
-            return Result.OK($"{Errors.ObjectSaved<Subject>()}: {category.Name}");
+            return Result.OK($"{Errors.ObjectSaved<Subject.Models.Subject>()}: {category.Name}");
         }
         catch (DbUpdateException ex)
         {
@@ -72,29 +76,32 @@ public class CategoriesService(IDbContextFactory<ApplicationDbContext> dbContext
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Subjects.Include(x => x.Docs)
             .FirstOrDefaultAsync(x => x.Id.Equals(subjectId));
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Subject>()}: {subjectId}");
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Subject.Models.Subject>()}: {subjectId}");
 
         var relatedDocsNames = string.Join(",", exist.Docs.Select(x => x.Title));
 
         if (exist.Docs.Any())
-            return Result.Error($"{Errors.ObjectCannotBeDeletedHasRelatedEntities<Subject>()}: {subjectId}\n" +
-                                $"Powiązane encje: {relatedDocsNames}");
+            return Result.Error(
+                $"{Errors.ObjectCannotBeDeletedHasRelatedEntities<Subject.Models.Subject>()}: {subjectId}\n" +
+                $"Powiązane encje: {relatedDocsNames}");
 
         db.Subjects.Remove(exist);
 
         try
         {
             if (await db.SaveChangesAsync() <= 0)
-                return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}");
-            return Result.OK($"{Errors.ObjectDeleted<Subject>()}: {subjectId}");
+                return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject.Models.Subject>()}: {subjectId}");
+            return Result.OK($"{Errors.ObjectDeleted<Subject.Models.Subject>()}: {subjectId}");
         }
         catch (DbUpdateException e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
+            return Result.Error(
+                $"{Errors.ObjectCannotBeDeleted<Subject.Models.Subject>()}: {subjectId}\n\n{e.Message}");
         }
         catch (Exception e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
+            return Result.Error(
+                $"{Errors.ObjectCannotBeDeleted<Subject.Models.Subject>()}: {subjectId}\n\n{e.Message}");
         }
     }
 }

@@ -24,18 +24,20 @@
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2-dev-00338" />
   </ItemGroup>
 
-
+<!--
   <ItemGroup>
     <Folder Include="Modules\Docs\Components\" />
     <Folder Include="Modules\Generic\Components\" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 
+<!--
   <ItemGroup>
     <AdditionalFiles Include="Modules\Categories\Components\CategoriesCrudComp.razor" />
     <AdditionalFiles Include="Modules\Categories\Components\CategoriesDisplayComp.razor" />
     <AdditionalFiles Include="Modules\Categories\Pages\CategoriesPage.razor" />
     <AdditionalFiles Include="Modules\Generic\Components\CrudComponent\GenericCrudComp.razor" />
   </ItemGroup>
+-->
 
 </Project>

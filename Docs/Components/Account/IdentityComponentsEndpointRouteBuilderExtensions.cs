@@ -1,12 +1,12 @@
 using System.Text.Json;
+using Docs.Components.Account.Pages;
+using Docs.Components.Account.Pages.Manage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Docs.Components.Account.Pages;
-using Docs.Components.Account.Pages.Manage;
 
-namespace Microsoft.AspNetCore.Routing;
+namespace Docs.Components.Account;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {

@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Categories;
+﻿namespace Docs.Modules.Categories.Models.ViewModels;
 
 public class CategoryVM : BaseModel
 {
@@ -18,9 +18,8 @@ public class CategoryVM : BaseModel
             Id = category.Id,
             Name = category.Name,
             Description = category.Descritpion,
-            Docs = includeDocs ? category.Docs.Select(x => DocVM.ToVM(x, false)).ToHashSet() : []
+            Docs = includeDocs ? category.Docs.Select(x => DocVM.ToVM(x, false)).ToHashSet() : [],
         };
-    
 
 
     public static Category ToModel(CategoryVM vm, bool includeCategories = true) =>

@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Common;
+﻿namespace Docs.Modules.Common.Result;
 
 public record Result(bool Success, string? Message)
 {

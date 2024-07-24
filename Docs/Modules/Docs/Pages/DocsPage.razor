@@ -1,18 +1,8 @@
-﻿@namespace Docs.Modules.Docs
+﻿@namespace Docs.Modules.Items.Pages
 
 @page "/"
-@inject  NavigationManager NavigationManager
-@* @inject DocsService DocsService *@
-@inject DocsVMService DocsService
-@* @inject GenericService<Doc> GenericService *@
-@inject PersistentComponentState ApplicationState
-@inject AppState AppState
-@inject ISnackbar Snackbar
-@inject  IDialogService DialogService
-@implements IDisposable
-
+@* @inherits DocsPageBase *@
 @attribute [Authorize]
-
 
 <PageTitle>Docs</PageTitle>
 
@@ -23,8 +13,9 @@
 <MudGrid>
 
     <MudItem xs="12">
-        <SubjectDisplayComp OnSubjectSelected="(subject)=>OnSubjectSelected(subject)"/>
-        
+        @* <SubjectDisplayComp/> *@
+        <SubjectDisplayComp OnSubjectSelected="@OnSubjectSelected"/>
+        <CategoriesDisplayComp OnCategorySelected="@OnCategorySelected" SelectedSubjectIId="@selectedSubject?.Id"/>
         @if (docs is null || !docs.Any())
         {
             <NoDataComp/>
@@ -34,9 +25,10 @@
             <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="SearchFilter">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Docsy</MudText>
-                    <MudSpacer />
+                    <MudSpacer/>
                     <MudTextField @bind-Value="searchString" Placeholder="Szukaj" Adornment="Adornment.Start" Immediate="true"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+                    </MudTextField>
                 </ToolBarContent>
                 <Columns>
                     <TemplateColumn >
@@ -44,6 +36,8 @@
                             @* @(docs.IndexOf(context.Item) + 1) *@
                         </CellTemplate>
                     </TemplateColumn>
+                    
+                    @* Title *@
                     <TemplateColumn Title="Nazwa">
                         <CellTemplate>
                             @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
@@ -51,10 +45,11 @@
                                        OnClick="@(() => Edit(context.Item))">
                                 @context.Item.Title
                             </MudButton>
-
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
+
+                    @* Subjects *@
                     <TemplateColumn TItle="Tematy">
                         <CellTemplate>
                             @foreach (var subject in context.Item?.Subjects)
@@ -63,6 +58,18 @@
                             }
                         </CellTemplate>
                     </TemplateColumn>
+                    
+                    @* Categories *@
+                    <TemplateColumn TItle="Kategorie">
+                        <CellTemplate>
+                            @foreach (var category in context.Item?.Categories)
+                            {
+                                <span>@category.Name</span>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    
+                    @* Buttons *@
                     <TemplateColumn CellClass="d-flex justify-end">
                         <CellTemplate>
                             <MudStack Row>
@@ -82,110 +89,3 @@
         }
     </MudItem>
 </MudGrid>
-
-@code
-{
-    PersistingComponentStateSubscription stateSubscription;
-
-    // MudDataGrid<Doc> dataGrid;
-    MudDataGrid<DocVM>? dataGrid;
-
-    // HashSet<Doc>? docs;
-    HashSet<DocVM>? docs;
-    // Subject? recentSubject;
-    string? searchString;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        /*AppState.OnChange += SubjectIdChanged;
-        AppState.OnChange += StateHasChanged;*/
-
-        stateSubscription = ApplicationState.RegisterOnPersisting(() =>
-        {
-            ApplicationState.PersistAsJson("Docs", docs);
-            return Task.CompletedTask;
-        });
-
-        await GetDocs();
-    }
-
-    // async Task OnSubjectSelected(Subject subject)
-    async Task OnSubjectSelected(SubjectVM subject)
-    {
-        // AppState.RecentSubject = subject;
-        AppState.RecentSubject = subject;
-        await GetDocs(subject.Id);
-    }
-    /*void SubjectIdChanged()
-   {
-    GetDocs();
-   }*/
-
-    async Task GetDocs(string? subjectId = "")
-    {
-        // docs = !ApplicationState.TryTakeFromJson<HashSet<Doc>?>("Docs", out var restored) 
-        docs = !ApplicationState.TryTakeFromJson<HashSet<DocVM>?>("Docs", out var restored)
-            ? (await DocsService.GetDocBySubject(subjectId)).Data
-            : restored!;
-
-        /*        try
-        {
-        var sw = Stopwatch.StartNew();
-            if (ApplicationState.TryTakeFromJson<HashSet<DocVM>>("Docs", out var restored))
-            {
-                docs = restored;
-                Log.Error("REESTORED");
-            }
-            else
-            {
-                docs = (await DocsService.GetDocBySubject(subjectId)).data;
-                Log.Error("DB");
-            }
-        }
-        finally
-        {
-            sw.Stop();
-            Log.Warning($" POMIAR DOCSÓW: {sw.ElapsedMilliseconds} ms");
-        }*/
-    }
-
-
-    void AddDoc()
-    {
-        NavigationManager.NavigateTo("/add-doc");
-    }
-
-    // void Edit(Doc contextItem)
-    void Edit(DocVM contextItem)
-    {
-        AppState.DocToEdit = contextItem;
-        NavigationManager.NavigateTo($"/edit-doc/{contextItem.Id}");
-    }
-
-    async Task Remove(string contextItemId)
-    {
-        bool? dialogResult = await DialogService.ShowMessageBox(
-            "uwaga",
-            "Czy na pewno skasować dokument?",
-            yesText: "Skasuj!", cancelText: "Anuluj");
-
-        var state = dialogResult == null ? "Canceled" : "Deleted!";
-        if (state.Equals("Canceled")) return;
-        var result = await DocsService.DeleteDoc(contextItemId);
-        var snackbar = result.Success ? Snackbar.Add(result.Message, Severity.Warning) : Snackbar.Add(result.Message, Severity.Error);
-        await GetDocs();
-    }
-
-    Func<DocVM, bool> SearchFilter => x =>
-    {
-        if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (x.Title is not null && x.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.ShortDescription is not null && x.ShortDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (x.Description is not null && x.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        return false;
-    };
-
-    public void Dispose()=>stateSubscription.Dispose();
-
-}

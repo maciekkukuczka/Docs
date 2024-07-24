@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Images;
+﻿using Docs.Modules.Common.Models;
+
+namespace Docs.Modules.Items.Models;
 
 public class Image:BaseModel
 {

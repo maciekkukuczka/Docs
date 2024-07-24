@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Docs;
+﻿using Docs.Modules.Common.Models;
+
+namespace Docs.Modules.Items.Models;
 
 // [ComplexType]
 public class DocPath:BaseModel

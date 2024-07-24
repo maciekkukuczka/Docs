@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Docs.Notes;
+﻿using Docs.Modules.Common.Models;
+
+namespace Docs.Modules.Items.Models;
 
 public class Note:BaseModel
 {

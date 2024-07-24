@@ -1,6 +1,6 @@
 ﻿/*using System.Linq.Expressions;
 
-namespace Docs.Modules.Docs.Services;
+namespace Docs.Modules.Items.Services;
 
 public class GenericService<TEntity,TViewModel>(IDbContextFactory<ApplicationDbContext> dbContextFactory)
     where TEntity : BaseModel, new()

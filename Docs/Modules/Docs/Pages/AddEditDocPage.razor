@@ -1,16 +1,7 @@
-﻿@namespace Docs.Modules.Docs
+﻿@namespace Docs.Modules.Items.Pages
 @page "/add-doc/{isEdited:bool=true}"
 @page "/edit-doc/{id?}"
 @page "/doc-details/{id?}"
-
-@* @inject DocsService DocsService *@
-@inject DocsVMService DocsService
-@* @inject GenericService<Doc> GenericService *@
-@inject  NavigationManager NavigationManager
-@inject AppState AppState
-@inject ISnackbar Snackbar
-@inject UserManager<ApplicationUser> UserManager;
-@implements IDisposable
 @attribute [Authorize]
 
 
@@ -41,6 +32,19 @@ else
                 <MudItem xs="12">
                     <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
                                   @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!IsEdited"/>
+                </MudItem>
+
+                // CATEGORIES
+                <MudItem xs="12">
+                    <MudSelect T="CategoryVM" ValueChanged="(cat) => OnCategoryChanged(cat)" Label="Kategorie">
+                        @if (categories is not null)
+                        {
+                            foreach (var category in categories)
+                            {
+                                <MudSelectItem Value="@category">@category.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
                 </MudItem>
             }
             else
@@ -111,90 +115,3 @@ else
 }
 
 @* ReSharper disable once InconsistentNaming *@
-@code {
-    [CascadingParameter] Task<AuthenticationState>? AuthStateTask { get; set; }
-    [Parameter] public string? Id { get; set; }
-    [Parameter] public bool IsEdited { get; set; }
-
-    // Doc? Doc { get; set; }
-    DocVM? Doc { get; set; }
-    string? userId;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        NavigationManager.LocationChanged += OnLocationChanged;
-
-        var user = (await AuthStateTask).User.Identity is { IsAuthenticated: true } ? (await AuthStateTask).User.Identity.Name : string.Empty;
-        userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user))?.Id;
-
-        // Doc = AppState.DocToEdit ?? new Doc
-        Doc = AppState.DocToEdit ?? new DocVM
-        {
-            // Subjects =new HashSet<Subject>{ AppState.RecentSubject}
-            /*Path = new DocPath(),
-            Categories = new List<Category>(),
-            Links = new List<Link>(),
-            Images = new List<Image>(),
-            Notes = new List<Note>(),
-            Tags = new List<Tag>()*/
-        };
-    }
-
-
-    async Task OnValidSubmit(EditContext context)
-    {
-        // var submittedDoc = context.Model as Doc;
-        var submittedDoc = context.Model as DocVM;
-        // submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
-        submittedDoc?.Subjects.Add(AppState.RecentSubject ??= new SubjectVM
-        {
-            Name = "Default",
-            UserId = userId
-        });
-        Result? result = null;
-        if (string.IsNullOrWhiteSpace(Id))
-        {
-            // result = await GenericService.Add(submittedDoc);
-            // result = await DocsService.AddDoc(submittedDoc);
-            if (submittedDoc != null) result = await DocsService.AddDoc(submittedDoc);
-        }
-        else
-        {
-            // result = await GenericService.Update(submittedDoc);
-            if (submittedDoc != null) result = await DocsService.UpdateDoc(submittedDoc);
-            AppState.DocToEdit = null;
-        }
-        
-        
-        if (result.Success)
-        {
-            Snackbar.Add(result.Message, Severity.Success);
-            IsEdited = false;
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            Snackbar.Add(result.Message, Severity.Error);
-        }
-    }
-
-    Task Edit()
-    {
-        IsEdited = !IsEdited;
-        return Task.CompletedTask;
-    }
-
-    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
-    {
-        AppState.DocToEdit = null;
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-        AuthStateTask?.Dispose();
-    }
-
-
-}

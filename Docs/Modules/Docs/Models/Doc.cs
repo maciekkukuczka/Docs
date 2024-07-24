@@ -1,4 +1,8 @@
-﻿namespace Docs.Modules.Docs;
+﻿
+using Docs.Modules.Categories.Models;
+using Docs.Modules.Common.Models;
+
+namespace Docs.Modules.Items.Models;
 
 public class Doc:BaseModel
 {
@@ -13,7 +17,7 @@ public class Doc:BaseModel
     // NAV
     public DocPath? Path { get; set; }
     // public ICollection<ApplicationUser> Users { get; set; } = (HashSet<ApplicationUser>) [];
-    public ICollection<Subject> Subjects { get; set; }=(HashSet<Subject>) [];
+    public ICollection<Subject.Models.Subject> Subjects { get; set; }=(HashSet<Subject.Models.Subject>) [];
     public ICollection<Category> Categories { get; set; } = (HashSet<Category>) [];
     public ICollection<Note> Notes { get; set; }=(HashSet<Note>) [];
     public ICollection<DocPath> RelatedDocs { get; set; }=(HashSet<DocPath>) [];

@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Docs;
+﻿using Docs.Modules.Common.Result;
+
+namespace Docs.Modules.Items.Services;
 
 public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactory,
     HybridCache cache)
@@ -29,7 +31,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
                 .Select(x => x.Subjects.FirstOrDefault())
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject>()}");
+            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject.Models.Subject>()}");
             
             res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
         }

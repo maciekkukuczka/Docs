@@ -1,4 +1,6 @@
-﻿namespace Docs.Modules.Subjects;
+﻿using Docs.Modules.Common.Models;
+
+namespace Docs.Modules.Subject.Models;
 
 public class Subject:BaseModel
 {

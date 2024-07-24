@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Tags;
+﻿namespace Docs.Modules.Items.Models;
 
 public class Tag : BaseModel
 {

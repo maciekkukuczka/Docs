@@ -1,4 +1,6 @@
-﻿namespace Docs.Config;
+﻿using Docs.Modules.Subject.Services;
+
+namespace Docs.Config;
 
 public static class DI
 {

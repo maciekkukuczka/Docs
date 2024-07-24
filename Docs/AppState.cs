@@ -7,13 +7,20 @@ public class AppState
     // public Doc? DocToEdit { get; set; }
     public DocVM? DocToEdit { get; set; }
     // public Subject? RecentSubject { get; set; }
-    public SubjectVM? RecentSubject { get; set; }
+    public SubjectVM? SelectedSubject { get; set; } 
+    public CategoryVM? SelectedCategory { get; set; } 
 
     // public void  SetRecentSubjectId(Subject recentSubjectId)
-    public void  SetRecentSubjectId(SubjectVM recentSubjectId)
+    public void  SelectSubject(SubjectVM selectedSubject)
     {
-        this.RecentSubject= recentSubjectId;
+        SelectedSubject= selectedSubject;
             OnChange?.Invoke();
+    }
+
+    public void SelectCategory(CategoryVM selectedCategory)
+    {
+        SelectedCategory= selectedCategory;
+        OnChange?.Invoke();
     }
   
 }

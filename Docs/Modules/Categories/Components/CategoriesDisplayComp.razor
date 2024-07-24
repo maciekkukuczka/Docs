@@ -1,102 +1,80 @@
-﻿@namespace Docs.Modules.Categories
+﻿@namespace Docs.Modules.Categories.Components
 
-@* @inject SubjectService SubjectService *@
+@inject  AppState AppState
 @inject CategoriesVMService CategoriesService
-@* @inject DocsService DocsService *@
-@* @inject AppState AppState *@
 @inject PersistentComponentState PersistantComponentState
 @implements IDisposable
 
-<MudGrid>
-    <MudItem xs="12">
-
-        <MudPaper Outlined="true" Class="pa-5">
-            @* <h3>Tematy</h3> *@
-            <MudStack Row="true">
-                @foreach (var subject in categories)
-                {
-                    <MudButton OnClick="@(() => SelectSubject(subject))" Variant="Variant.Filled" Size="Size.Small"
-                               Color="selectedCategory == subject ? Color.Primary : Color.Inherit">
-                        @subject.Name
-                    </MudButton>
-                }
-            </MudStack>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
-
+@if (SelectedCategories is null || AppState.SelectedSubject is null)
+{
+    <NoDataComp/>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper >
+                <MudTreeView T="string" Hover="true">
+                    <MudTreeViewItem Text="Kategorie" Expanded="true">
+                        @foreach (var category in SelectedCategories)
+                        {
+                            <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
+                        }
+                    </MudTreeViewItem>
+                </MudTreeView>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
 
     [CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
+    [Parameter] public EventCallback<CategoryVM> OnCategorySelected { get; set; }
+    [Parameter] public HashSet<CategoryVM>? SelectedCategories { get; set; }
+    [Parameter] public string? SelectedSubjectIId { get; set; }
+    string _prevoiusSelectedSubjectId;
 
-    // [Parameter] public EventCallback<Subject> OnSubjectSelected { get; set; }
-    [Parameter] public EventCallback<CategoryVM> OnSubjectSelected { get; set; }
-
-    // Subject selectedSubject;
     CategoryVM selectedCategory;
-
-    // HashSet<Subject> subjects = [];
-    HashSet<CategoryVM> categories = [];
     PersistingComponentStateSubscription subscription;
 
 
     protected override async Task OnInitializedAsync()
     {
-        var user = (await AuthStateTask).User.Identity is { IsAuthenticated: true } ? (await AuthStateTask).User.Identity.Name : string.Empty;
+        _prevoiusSelectedSubjectId = SelectedSubjectIId;
+        // AppState.OnChange += StateHasChanged;
+        // var user = (await AuthStateTask).User.Identity is { IsAuthenticated: true } ? (await AuthStateTask).User.Identity.Name : string.Empty;
 
         subscription = PersistantComponentState.RegisterOnPersisting(() =>
         {
-            PersistantComponentState.PersistAsJson("CategoriesInComp", categories);
+            PersistantComponentState.PersistAsJson("CategoriesInComp", SelectedCategories);
             return Task.CompletedTask;
         });
 
-        categories = PersistantComponentState.TryTakeFromJson<HashSet<CategoryVM>>("CategoriesInComp", out var restored)
+        SelectedCategories = PersistantComponentState.TryTakeFromJson<HashSet<CategoryVM>>("CategoriesInComp", out var restored)
             ? restored
-            : (await CategoriesService.GetCategories(user)).Data;
-
-        if (categories != null) selectedCategory = categories.FirstOrDefault();
-        await OnSubjectSelected.InvokeAsync(selectedCategory);
-        /*
-        try
-        var sw = Stopwatch.StartNew();
-        {
-            if (PersistantComponentState.TryTakeFromJson<HashSet<SubjectVM>>("SubjectsInComp", out var restored))
-            {
-                subjects = restored;
-                Log.Error("RESTORED (SubjectComp)");
-            }
-            else
-            {
-                subjects = (await SubjectService.GetSubjects(user)).data;
-                Log.Error("DB (SubjectComp)");
-            }
-        }
-        finally
-        {
-            sw.Stop();
-            Log.Warning($"POMIAR KOMPONENT TEMATÓW: {sw.ElapsedMilliseconds} ms");
-        }
-    */
+            : await GetCategories();
     }
 
-    // async Task SelectSubject(Subject? subject)
-    async Task SelectSubject(CategoryVM? category)
+    
+    protected override async Task OnParametersSetAsync()
     {
-        if (category != null) selectedCategory = category;
-        await OnSubjectSelected.InvokeAsync(selectedCategory);
-
-        /*await  InvokeAsync(() =>
-          {
-              AppState.SetRecentSubjectId(subjectId);
-              StateHasChanged();
-          });*/
+        if (SelectedSubjectIId != _prevoiusSelectedSubjectId) SelectedCategories = await GetCategories();
     }
+
+
+    async Task<HashSet<CategoryVM>?> GetCategories()
+    {
+        return (await CategoriesService.GetCategoriesBySubject(SelectedSubjectIId)).Data;
+        // return (await CategoriesService.GetCategoriesBySubject(AppState.SelectedSubject?.Id)).Data;
+    }
+    
 
     public void Dispose()
     {
         subscription.Dispose();
         AuthStateTask.Dispose();
+        // AppState.OnChange -= StateHasChanged;
     }
 
 }

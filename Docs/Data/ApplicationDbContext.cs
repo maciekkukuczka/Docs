@@ -1,3 +1,6 @@
+using Docs.Modules.Categories.Models;
+using Docs.Modules.Subject.Models;
+
 namespace Docs.Data;
 
 public class ApplicationDbContext(

@@ -1,4 +1,4 @@
-﻿@namespace Docs.Modules.Categories
+﻿@namespace Docs.Modules.Categories.Components
 
 @inject PersistentComponentState PersistentComponentState 
 @inject CategoriesVMService CategoriesService
@@ -43,9 +43,8 @@
                                     docs = string.Join(", ", doc.Title);
                                     @* <span @key="doc.Id">@doc.Title</span> *@
                                 }
-
-                                <span>@docs</span>
                             }
+                            <span>@docs</span>
                         </CellTemplate>
                     </TemplateColumn>
                     <TemplateColumn CellClass="d-flex justify-end">
@@ -68,6 +67,7 @@
         }
     </MudPaper >
 </MudItem >
+
 
 @code {
     [CascadingParameter] public Task<AuthenticationState>? AuthStateTask { get; set; }
@@ -138,10 +138,10 @@
         // contextModel.UserId = currentUserId;
         // var result = isToEdit ? await SubjectService.UpdateSubject(contextSubject) : await GenericService.Add(contextSubject);
         var result = isToEdit ? await CategoriesService?.UpdateCategory(contextModel)! : await CategoriesService?.AddCategory(contextModel)!;
-            
 
-        if (result.Success)categories = (await CategoriesService?.GetCategories(currentUserName)).Data!;
-        Snackbar.Add(result.Message,result.Success? Severity.Success : Severity.Error);
+
+        if (result.Success) categories = (await CategoriesService?.GetCategories(currentUserName)).Data!;
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
 
         isToEdit = false;
         category = new();

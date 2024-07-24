@@ -1,9 +1,11 @@
-﻿namespace Docs.Modules.Subjects;
+﻿using Docs.Modules.Common.Result;
+
+namespace Docs.Modules.Subject.Services;
 
 public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFactory) 
 {
     // GET
-    public async Task<Result<HashSet<Subject>>> GetSubjects(string? userName)
+    public async Task<Result<HashSet<Models.Subject>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Subjects
@@ -12,12 +14,12 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
             .AsNoTracking()
             .ToHashSetAsync();
 
-        if (result is null||result.Count <= 0) return Result.Error<HashSet<Subject>>($"{Errors.ObjectNotFound<HashSet<Subject>>()}");
+        if (result is null||result.Count <= 0) return Result.Error<HashSet<Models.Subject>>($"{Errors.ObjectNotFound<HashSet<Models.Subject>>()}");
         return Result.OK(result);
     }
     
     // ADD
-    public async Task<Result> AddSubject(Subject subject)
+    public async Task<Result> AddSubject(Models.Subject subject)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
@@ -26,42 +28,42 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {subject.Name}");
-            return Result.OK($"{Errors.ObjectSaved<Subject>()}:{subject.Name}");
+            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            return Result.OK($"{Errors.ObjectSaved<Models.Subject>()}:{subject.Name}");
         }
         catch (DbUpdateException e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}:{subject.Name}\n {e.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}:{subject.Name}\n {e.Message}");
         }
         catch (Exception e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}:{subject.Name}\n {e.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}:{subject.Name}\n {e.Message}");
         }
     }
 
 
 //UPDATE
-    public async Task<Result> UpdateSubject(Subject subject)
+    public async Task<Result> UpdateSubject(Models.Subject subject)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Subjects.FindAsync(subject.Id);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Subject>()}: {subject.Name}");
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Models.Subject>()}: {subject.Name}");
 
         db.Subjects.Entry(exist).CurrentValues.SetValues(subject);
 
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {subject.Name}");
-            return Result.OK($"{Errors.ObjectSaved<Subject>()}: {subject.Name}");
+            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            return Result.OK($"{Errors.ObjectSaved<Models.Subject>()}: {subject.Name}");
         }
         catch (DbUpdateException ex)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {ex.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Subject>()}: {ex.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Models.Subject>()}: {ex.Message}");
         }
     }
 
@@ -72,12 +74,12 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Subjects.Include(x => x.Docs)
             .FirstOrDefaultAsync(x => x.Id.Equals(subjectId));
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Subject>()}: {subjectId}");
+        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Models.Subject>()}: {subjectId}");
 
         var relatedDocsNames = string.Join(",", exist.Docs.Select(x => x.Title));
 
         if (exist.Docs.Any())
-            return Result.Error($"{Errors.ObjectCannotBeDeletedHasRelatedEntities<Subject>()}: {subjectId}\n" +
+            return Result.Error($"{Errors.ObjectCannotBeDeletedHasRelatedEntities<Models.Subject>()}: {subjectId}\n" +
                                 $"Powiązane encje: {relatedDocsNames}");
 
         db.Subjects.Remove(exist);
@@ -85,16 +87,16 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         try
         {
             if (await db.SaveChangesAsync() <= 0)
-                return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}");
-            return Result.OK($"{Errors.ObjectDeleted<Subject>()}: {subjectId}");
+                return Result.Error($"{Errors.ObjectCannotBeDeleted<Models.Subject>()}: {subjectId}");
+            return Result.OK($"{Errors.ObjectDeleted<Models.Subject>()}: {subjectId}");
         }
         catch (DbUpdateException e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeDeleted<Models.Subject>()}: {subjectId}\n\n{e.Message}");
         }
         catch (Exception e)
         {
-            return Result.Error($"{Errors.ObjectCannotBeDeleted<Subject>()}: {subjectId}\n\n{e.Message}");
+            return Result.Error($"{Errors.ObjectCannotBeDeleted<Models.Subject>()}: {subjectId}\n\n{e.Message}");
         }
     }
 }

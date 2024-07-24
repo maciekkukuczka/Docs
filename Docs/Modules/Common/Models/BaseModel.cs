@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Common;
+﻿namespace Docs.Modules.Common.Models;
 
 public class BaseModel
 {

@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Categories;
+﻿namespace Docs.Modules.Categories.Models;
 
 public class Category:BaseModel
 {

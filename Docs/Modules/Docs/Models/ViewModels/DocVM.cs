@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Docs;
+﻿namespace Docs.Modules.Items.Models.ViewModels;
 
 public class DocVM:BaseModel
 {
@@ -17,27 +17,30 @@ public class DocVM:BaseModel
     public ICollection<CategoryVM> Categories { get; set; } = (HashSet<CategoryVM>) [];
 
 
-    public static DocVM ToVM(Doc doc, bool includeSubjects=true) =>
+    public static DocVM ToVM(Doc doc, bool includeDescendants=true) =>
         new()
         {
             Id = doc.Id,
             Title = doc.Title,
             ShortDescription = doc.ShortDescription,
             Description = doc.Description,
-            Subjects =includeSubjects?
-                doc.Subjects.Select(x=>SubjectVM.ToVm(x, false)).ToHashSet():new()
-                
+            Subjects =includeDescendants?
+                doc.Subjects.Select(x=>SubjectVM.ToVm(x, false)).ToHashSet(): [],
+            Categories = includeDescendants?
+                doc.Categories.Select(x=>CategoryVM.ToVm(x,false)).ToHashSet(): []
+
         };
 
-    public static Doc ToModel(DocVM docVm, bool includeSubjects=true) =>
+    public static Doc ToModel(DocVM docVm, bool includeDescendants=true) =>
         new()
         {
             Id = docVm.Id,
             Title = docVm.Title,
             ShortDescription = docVm.ShortDescription,
             Description = docVm.Description,
-            Subjects =includeSubjects?
-                docVm.Subjects.Select(x=>SubjectVM.ToModel(x,false)).ToHashSet():
-                new HashSet<Subject>()
+            Subjects =includeDescendants?
+                docVm.Subjects.Select(x=>SubjectVM.ToModel(x,false)).ToHashSet(): [],
+            Categories = includeDescendants?
+                docVm.Categories.Select(x=>CategoryVM.ToModel(x,false)).ToHashSet(): []
         };
 }
