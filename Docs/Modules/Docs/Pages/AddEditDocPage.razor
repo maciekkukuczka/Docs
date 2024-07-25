@@ -8,9 +8,12 @@
 <SectionContent SectionId="MainLayout.TopBarSectionRight">
     @if (!string.IsNullOrWhiteSpace(Id))
     {
-        <MudButton Variant="Variant.Filled" Color="@(IsEdited ? Color.Warning : Color.Info)" OnClick="Edit">
+        @*<MudButton Variant="Variant.Filled" Color="@(IsEdited ? Color.Warning : Color.Info)" OnClick="Edit">
             @(IsEdited ? "Wyjdź z edycji" : "Edytuj")
-        </MudButton>
+        </MudButton>*@
+    <EditButton Colored="true" EditMode="@IsEdited" Text="@(IsEdited ? "Wyjdź z edycji" : "Edytuj")"  OnClick="Edit">
+            
+        </EditButton>
     }
 </SectionContent>
 

@@ -1,0 +1,38 @@
+﻿@namespace Docs.Modules.Controls
+
+@if (Small)
+{
+    <MudIconButton ButtonType="ButtonType.Submit"
+                   Icon="@Icons.Material.Filled.AddTask"
+                   Color="@(Colored ? Color.Success : Color.Inherit)"
+                   Class="@Class"
+                   Style="@Style"
+
+                   aria-label="potwierdź"/>
+}
+else
+{
+    <MudButton ButtonType="ButtonType.Submit"
+               Variant="Variant.Filled"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.AddTask"
+               Color="@(Colored ? Color.Success : Color.Inherit)"
+               Class="@Class"
+               Style="@Style"
+
+               aria-label="potwierdź">
+
+        @(!string.IsNullOrWhiteSpace(Text)?Text:"Potwierdź")
+        
+    </MudButton>
+}
+
+@code {
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public bool Colored { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Text { get; set; }
+
+
+}

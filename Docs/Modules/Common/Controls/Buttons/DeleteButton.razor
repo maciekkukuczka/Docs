@@ -1,0 +1,41 @@
+﻿@namespace Docs.Modules.Controls
+
+@if (Small)
+{
+    <MudIconButton ButtonType="ButtonType.Button"
+                   Icon="@Icons.Material.Filled.DeleteForever"
+                   Color="@(Colored ? Color.Error : Color.Inherit)"
+                   Class="@Class"
+                   Style="@Style"
+
+                   OnClick="OnClick"
+                   aria-label="usuń"/>
+}
+else
+{
+    <MudButton ButtonType="ButtonType.Button"
+               Variant="Variant.Filled"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.DeleteForever"
+               Color="@(Colored ? Color.Error : Color.Inherit)"
+               Class="@Class"
+               Style="@Style"
+
+               OnClick="@OnClick"
+               aria-label="usuń">
+
+        @(!string.IsNullOrWhiteSpace(Text) ? Text : "Usuń")
+
+    </MudButton>
+}
+
+@code {
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public bool Colored { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Text { get; set; }
+
+
+}

@@ -18,8 +18,8 @@
             <DataAnnotationsValidator/>
             <MudTextField @bind-Value="category.Name" Label="Tytuł" For="@(() => category.Name)"/>
             <MudTextField @bind-Value="category.Description" Label="Opis" For="@(() => category.Name)" Lines="2"/>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Success" Class="d-flex mt-3 ml-auto">Zapisz</MudButton>
-        </EditForm>
+            <SubmitButton Colored="true" Small="false" Text="Zapisz Kategorię" Class="d-flex mt-3 ml-auto" />
+            </EditForm>
     </MudPaper>
 </MudItem>
 
@@ -50,14 +50,8 @@
                     <TemplateColumn CellClass="d-flex justify-end">
                         <CellTemplate>
                             <MudStack Row="true">
-                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Warning" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
-                                           OnClick="() => Edit(context.Item)">
-                                    Edytuj
-                                </MudButton>
-                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Size="Size.Small" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever"
-                                           OnClick="async () => await Delete(context.Item)">
-                                    Usuń
-                                </MudButton>
+                                <EditButton Small="true" OnClick="()=>Edit(context.Item)"/>
+                                <DeleteButton Small="true" OnClick="async ()=>Delete(context.Item)"/>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>

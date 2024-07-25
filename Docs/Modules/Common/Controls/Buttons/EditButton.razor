@@ -1,0 +1,43 @@
+﻿@namespace Docs.Modules.Controls
+
+@if (Small)
+{
+    <MudIconButton ButtonType="ButtonType.Button"
+                   Icon="@Icons.Material.Filled.Edit"
+                   Color="@(Colored ?(EditMode?Color.Warning:Color.Info): (EditMode?Color.Warning:Color.Inherit))"
+                   Class="@Class"
+                   Style="@Style"
+
+                   OnClick="OnClick"
+                   aria-label="edytuj"/>
+}
+else
+{
+    <MudButton ButtonType="ButtonType.Button"
+               Variant="Variant.Filled"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.Edit"
+               Color="@(Colored ?(EditMode?Color.Warning:Color.Info): (EditMode?Color.Warning:Color.Inherit))"
+               Class="@Class"
+               Style="@Style"
+
+               OnClick="@OnClick"
+               aria-label="edytuj">
+
+        @(!string.IsNullOrWhiteSpace(Text) ? Text : "Edytuj")
+
+    </MudButton>
+}
+
+@code {
+    // [Parameter] RenderFragment? RenderFragment { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public bool EditMode { get; set; }
+    [Parameter] public bool Colored { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Text { get; set; }
+
+
+}

@@ -7,7 +7,7 @@
 <PageTitle>Docs</PageTitle>
 
 <SectionContent SectionId="@MainLayout.TopBarSectionRight">
-    <MudButton OnClick="AddDoc" Variant="Variant.Filled"Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">Dodaj</MudButton>
+    <AddButton Small="false" Colored="true" OnClick="AddDoc"/>
 </SectionContent>
 
 <MudGrid>
@@ -40,11 +40,8 @@
                     @* Title *@
                     <TemplateColumn Title="Nazwa">
                         <CellTemplate>
+                            <LinkButton  Colored="true"  Text="@context.Item.Title" OnClick="()=>Edit(context.Item)"/>
                             @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
-                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
-                                       OnClick="@(() => Edit(context.Item))">
-                                @context.Item.Title
-                            </MudButton>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
@@ -77,10 +74,8 @@
                                            OnClick="@(() => Edit(context.Item))">
                                     Edytuj
                                 </MudButton>*@
-                                <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" StartIcon="@Icons.Material.Filled.DeleteForever"
-                                           OnClick="@(() => Remove(context.Item.Id))">
-                                    Usuń
-                                </MudButton>
+                                <DeleteButton Colored="true" Small="true" OnClick="@(() => Remove(context.Item.Id))"/>
+                       
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
