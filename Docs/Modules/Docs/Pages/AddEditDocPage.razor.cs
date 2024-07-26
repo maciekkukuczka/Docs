@@ -16,8 +16,11 @@ public partial class AddEditDocPage : IDisposable
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
     string? userId;
-    HashSet<CategoryVM>? categories;
+    HashSet<CategoryVM>? allCategories;
     CategoryVM? selectedCategory;
+    IEnumerable<CategoryVM> categoryOptions = new HashSet<CategoryVM>();
+
+     MudBlazor.Converter<CategoryVM?> converter = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -29,7 +32,7 @@ public partial class AddEditDocPage : IDisposable
             : string.Empty;
         userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user))?.Id;
 
-        await GetCategories();
+        await GetAllCategories();
         // Doc = AppState.DocToEdit ?? new Doc
         Doc = AppState.DocToEdit ?? new DocVM
         {
@@ -41,6 +44,11 @@ public partial class AddEditDocPage : IDisposable
             Notes = new List<Note>(),
             Tags = new List<Tag>()*/
         };
+        Doc.Categories.ToHashSet();
+
+
+        converter.SetFunc = cat => cat?.Name;
+        converter.GetFunc = text => allCategories?.FirstOrDefault(x => x.Name.Equals(text));
     }
 
 
@@ -80,20 +88,26 @@ public partial class AddEditDocPage : IDisposable
     }
 
 
-    async Task GetCategories()
+    async Task GetAllCategories()
     {
-        categories = (await CategoriesService.GetCategories(userId)).Data;
-
+        allCategories = (await CategoriesService.GetCategories(userId)).Data;
     }
+
     async Task Edit()
     {
         IsEdited = !IsEdited;
     }
 
-    Task OnCategoryChanged(CategoryVM category)
+    Task OnCategorySelected(IEnumerable<CategoryVM> selectedCategories)
     {
-        Doc.Categories.Clear();
-        Doc.Categories.Add(category);
+
+        Doc.Categories = selectedCategories.ToList();
+        /*Doc.Categories.Clear();
+        foreach (var category in selectedCategories)
+        {
+            Doc.Categories.Add(category);
+        }*/
+
         return Task.CompletedTask;
     }
 
@@ -101,6 +115,8 @@ public partial class AddEditDocPage : IDisposable
     {
         AppState.DocToEdit = null;
     }
+    
+    
 
     public void Dispose()
     {

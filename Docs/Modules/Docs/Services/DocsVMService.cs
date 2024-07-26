@@ -7,6 +7,7 @@ public class DocsVMService(
     HybridCache cache = cache;
 
 
+// GET
     public async Task<Result<HashSet<DocVM>>> GetDocsByFilter(
         // CategoryVM category
         HashSet<Expression<Func<Doc, bool>>>? filters
@@ -36,7 +37,6 @@ public class DocsVMService(
             {
                 // query = query.Where(                 x => x.Subjects.Any(x=>string.Equals(x.Id,"d1ba5577-08cf-41c5-9f48-7d08e372b996"))
                 query = query.Where(filter);
-
             }
         }
 
@@ -68,6 +68,7 @@ public class DocsVMService(
         if (exist == null) return Result.Error<Doc>($"{Errors.ObjectNotFound<Doc>()}: {id}");
         return Result.OK(exist);
     }
+
 
     //ADD
     public async Task<Result> AddDoc(DocVM newDocVM)
@@ -104,37 +105,82 @@ public class DocsVMService(
         return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
+
     // UPDATE
-    public async Task<Result> UpdateDoc(DocVM? docVM)
+    public async Task<Result> UpdateDoc(DocVM? newDocVM)
     {
-        var doc = DocVM.ToModel(docVM);
+        var newDoc = DocVM.ToModel(newDocVM);
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var exist = await dbContext.Docs.FindAsync(doc.Id);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {doc.Title}");
+        var existDoc = await dbContext.Docs
+            .Include(x => x.Categories)
+            .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
-        exist.Title = doc.Title;
-        exist.ShortDescription = doc.ShortDescription;
-        exist.Description = doc.Description;
+        if (existDoc is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {newDoc.Title}");
 
-        var existCategory = await dbContext.Categories.FindAsync(doc.Categories.FirstOrDefault()?.Id);
+        existDoc.Title = newDoc.Title;
+        existDoc.ShortDescription = newDoc.ShortDescription;
+        existDoc.Description = newDoc.Description;
 
-        if (existCategory is null)
+        newDoc.Categories = newDoc.Categories.DistinctBy(x => x.Id).ToHashSet();
+
+        var existCategories = dbContext.Categories.AsQueryable();
+
+        await existCategories.ForEachAsync(e =>
         {
-            exist.Categories = doc.Categories;
-        }
-        else
+            if (newDoc.Categories.Any(n => n.Id == e.Id))
+                // && !existDoc.Categories.Any(ed => ed.Id == e.Id))
+            {
+                var untracked = newDoc.Categories.FirstOrDefault(n => n.Id == e.Id);
+                newDoc.Categories.Remove(untracked);
+                newDoc.Categories.Add(e);
+            }
+        });
+
+        existDoc.Categories = newDoc.Categories.ToHashSet();
+
+        /*
+        Stopwatch sw = new();
+        try
         {
-            exist.Categories.Clear();
-            exist.Categories.Add(existCategory);
+            sw.Start();
         }
+        finally
+        {
+            sw.Stop();
+            Console.WriteLine($"SPEED! Updated Doc: {sw.ElapsedMilliseconds}ms");
+        }
+        */
+
+        dbContext.Update(existDoc);
+
+        try
+        {
+            // dbContext.Entry(exist).State = EntityState.Modified;
+            /*
+            foreach (var entry in dbContext.ChangeTracker.Entries())
+            {
+                Debug.WriteLine($"Entity: {entry.Entity.GetType().Name}, State: {entry.State}");
+            }
+            */
 
 
-        var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {doc.Title}");
-        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {doc.Title}");
+            var saveResult = await dbContext.SaveChangesAsync();
+            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+            return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+        }
     }
 
+
+    // DELETE
     public async Task<Result> DeleteDoc(string docId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

@@ -11,8 +11,8 @@
         @*<MudButton Variant="Variant.Filled" Color="@(IsEdited ? Color.Warning : Color.Info)" OnClick="Edit">
             @(IsEdited ? "Wyjdź z edycji" : "Edytuj")
         </MudButton>*@
-    <EditButton Colored="true" EditMode="@IsEdited" Text="@(IsEdited ? "Wyjdź z edycji" : "Edytuj")"  OnClick="Edit">
-            
+        <EditButton Colored="true" EditMode="@IsEdited" Text="@(IsEdited ? "Wyjdź z edycji" : "Edytuj")" OnClick="Edit">
+
         </EditButton>
     }
 </SectionContent>
@@ -39,10 +39,11 @@ else
 
                 // CATEGORIES
                 <MudItem xs="12">
-                    <MudSelect T="CategoryVM" ValueChanged="(cat) => OnCategoryChanged(cat)" Label="Kategorie">
-                        @if (categories is not null)
+                    <MudSelect T="CategoryVM"  Label="Kategorie"
+                               MultiSelection="true"  SelectedValues="@Doc.Categories" SelectedValuesChanged = "OnCategorySelected" Converter="@converter">
+                        @if (allCategories is not null)
                         {
-                            foreach (var category in categories)
+                            foreach (var category in allCategories)
                             {
                                 <MudSelectItem Value="@category">@category.Name</MudSelectItem>
                             }
