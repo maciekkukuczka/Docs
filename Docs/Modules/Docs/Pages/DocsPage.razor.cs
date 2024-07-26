@@ -133,6 +133,8 @@ public partial class DocsPage : IDisposable
             x.ShortDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
         if (x.Description is not null &&
             x.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (x.Categories is not null &&
+            x.Categories.Any(x=>x.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))) return true;
         return false;
     };
 

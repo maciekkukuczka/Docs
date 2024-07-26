@@ -16,6 +16,7 @@ else
             <MudPaper >
                 <MudTreeView T="string" Hover="true">
                     <MudTreeViewItem Text="Kategorie" Expanded="true">
+                        <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(null))" Text="Wszystkie" Expanded/>
                         @foreach (var category in SelectedCategories)
                         {
                             <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
@@ -56,7 +57,7 @@ else
             : await GetCategories();
     }
 
-    
+
     protected override async Task OnParametersSetAsync()
     {
         if (SelectedSubjectIId != _prevoiusSelectedSubjectId) SelectedCategories = await GetCategories();
@@ -68,7 +69,7 @@ else
         return (await CategoriesService.GetCategoriesBySubject(SelectedSubjectIId)).Data;
         // return (await CategoriesService.GetCategoriesBySubject(AppState.SelectedSubject?.Id)).Data;
     }
-    
+
 
     public void Dispose()
     {
