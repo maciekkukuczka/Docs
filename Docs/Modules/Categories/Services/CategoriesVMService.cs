@@ -22,7 +22,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Categories
-            .Where(x => x.Docs.Any(x=>x.Subjects.Any(x=>x.Id==subjectId)))
+            .Where(x => x.Docs.Any(x => x.Subjects.Any(x => x.Id == subjectId)))
             .AsNoTracking()
             .ToHashSetAsync();
 
@@ -63,8 +63,11 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         var exist = await db.Categories.FindAsync(category.Id);
         if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Category>()}: {category.Name}");
 
-        db.Categories.Entry(exist).CurrentValues.SetValues(category);
-
+        exist.Name = category.Name;
+        exist.Descritpion = category.Description;
+        // db.Categories.Entry(exist).CurrentValues.SetValues(category);
+        db.Categories.Update(exist);
+        
         try
         {
             var saveResult = await db.SaveChangesAsync();

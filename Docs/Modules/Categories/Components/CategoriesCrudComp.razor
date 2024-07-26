@@ -34,6 +34,7 @@
             <MudDataGrid @ref="grid" Items="categories">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tytuł"/>
+                    <PropertyColumn Property="x => x.Description" Title="Opis"/>
                     <TemplateColumn Title="Dokumenty">
                         <CellTemplate>
                             @{
@@ -50,8 +51,8 @@
                     <TemplateColumn CellClass="d-flex justify-end">
                         <CellTemplate>
                             <MudStack Row="true">
-                                <EditButton Small="true" OnClick="()=>Edit(context.Item)"/>
-                                <DeleteButton Small="true" OnClick="async ()=>Delete(context.Item)"/>
+                                <EditButton Small="true" Colored="true"  OnClick="()=>Edit(context.Item)"/>
+                                <DeleteButton Small="true"  Colored="true" OnClick="async ()=>Delete(context.Item)"/>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
