@@ -60,7 +60,6 @@ public partial class DocsPage : IDisposable
 
         // subjects = docs.SelectMany(x => x.Subjects).ToHashSet();
         // selectedCategories = docs.SelectMany(x => x.Categories).ToHashSet();
-
         /*        try
         {
         var sw = Stopwatch.StartNew();
