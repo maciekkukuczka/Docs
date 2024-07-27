@@ -1,6 +1,5 @@
-﻿::deep {
 
-    .lds-hourglass,
+   /* .lds-hourglass,
     .lds-hourglass:after {
         box-sizing: border-box;
     }
@@ -77,11 +76,10 @@
         100% {
             transform: rotate(1800deg);
         }
-    }
-}
+    }*/
 
 
-/*::deep {
+
     .loader {
         transform: rotateZ(45deg);
         perspective: 1000px;
@@ -156,7 +154,7 @@
             box-shadow: .2em -.2em 0 0 currentcolor;
         }
     }
-}*/
+
 
 
    

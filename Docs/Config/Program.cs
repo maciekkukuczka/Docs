@@ -9,7 +9,7 @@ Log.Logger = new LoggerConfiguration().SerilogConfig(configuration);
 try
 {
     Log.Logger.Information("DOCS STARTED!");
-    
+
     var builder = WebApplication.CreateBuilder(args);
     builder.Configuration.AddConfiguration(configuration);
 
@@ -36,10 +36,10 @@ try
     // app.UseStaticFiles();
     app.MapStaticAssets();
     app.UseSerilogRequestLogging();
-    
+
     app.UseAuthentication();
     app.UseAuthorization();
-    
+
     app.UseAntiforgery();
 
     app.MapRazorComponents<App>()
