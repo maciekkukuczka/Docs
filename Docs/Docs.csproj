@@ -24,6 +24,11 @@
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2-dev-00338" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Modules\Links\Services\" />
+  </ItemGroup>
+
 <!--
   <ItemGroup>
     <Folder Include="Modules\Docs\Components\" />
