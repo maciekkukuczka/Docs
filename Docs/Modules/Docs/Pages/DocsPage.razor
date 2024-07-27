@@ -41,7 +41,7 @@
                     @* Title *@
                     <TemplateColumn Title="Nazwa">
                         <CellTemplate>
-                            <LinkButton  Colored="true"  Text="@context.Item.Title" OnClick="()=>Edit(context.Item)"/>
+                            <LinkButton  Colored="true"  Text="@context.Item.Title"  Style="text-align: left;" OnClick="()=>Edit(context.Item)"/>
                             @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
                         </CellTemplate>
                     </TemplateColumn>
