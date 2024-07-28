@@ -186,7 +186,7 @@ namespace Docs.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Docs.Modules.Categories.Category", b =>
+            modelBuilder.Entity("Docs.Modules.Categories.Models.Category", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -212,7 +212,7 @@ namespace Docs.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Items.Doc", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.Doc", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -244,7 +244,7 @@ namespace Docs.Migrations
                     b.ToTable("Docs");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Items.DocPath", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.DocPath", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -273,7 +273,7 @@ namespace Docs.Migrations
                     b.ToTable("DocPaths");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Images.Image", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.Image", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -302,30 +302,7 @@ namespace Docs.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Links.Link", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("ModifyDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Links");
-                });
-
-            modelBuilder.Entity("Docs.Modules.Notes.Note", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.Note", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -350,7 +327,60 @@ namespace Docs.Migrations
                     b.ToTable("Notes");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Subjects.Subject", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.Tag", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ModifyDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("Docs.Modules.Links.Models.Link", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ModifyDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Links");
+                });
+
+            modelBuilder.Entity("Docs.Modules.Subjects.Models.Subject", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -380,29 +410,6 @@ namespace Docs.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Subjects");
-                });
-
-            modelBuilder.Entity("Docs.Modules.Tags.Tag", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("ModifyDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -535,13 +542,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("CategoryDoc", b =>
                 {
-                    b.HasOne("Docs.Modules.Categories.Category", null)
+                    b.HasOne("Docs.Modules.Categories.Models.Category", null)
                         .WithMany()
                         .HasForeignKey("CategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -550,13 +557,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocDocPath", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Items.DocPath", null)
+                    b.HasOne("Docs.Modules.Items.Models.DocPath", null)
                         .WithMany()
                         .HasForeignKey("RelatedDocsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -565,13 +572,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocImage", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Images.Image", null)
+                    b.HasOne("Docs.Modules.Items.Models.Image", null)
                         .WithMany()
                         .HasForeignKey("ImagesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -580,13 +587,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocLink", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Links.Link", null)
+                    b.HasOne("Docs.Modules.Links.Models.Link", null)
                         .WithMany()
                         .HasForeignKey("LinksId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -595,13 +602,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocNote", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Notes.Note", null)
+                    b.HasOne("Docs.Modules.Items.Models.Note", null)
                         .WithMany()
                         .HasForeignKey("NotesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -610,13 +617,13 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocSubject", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Subjects.Subject", null)
+                    b.HasOne("Docs.Modules.Subjects.Models.Subject", null)
                         .WithMany()
                         .HasForeignKey("SubjectsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -625,29 +632,29 @@ namespace Docs.Migrations
 
             modelBuilder.Entity("DocTag", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", null)
+                    b.HasOne("Docs.Modules.Items.Models.Doc", null)
                         .WithMany()
                         .HasForeignKey("DocsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Docs.Modules.Tags.Tag", null)
+                    b.HasOne("Docs.Modules.Items.Models.Tag", null)
                         .WithMany()
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Docs.Modules.Items.DocPath", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.DocPath", b =>
                 {
-                    b.HasOne("Docs.Modules.Items.Doc", "Doc")
+                    b.HasOne("Docs.Modules.Items.Models.Doc", "Doc")
                         .WithOne("Path")
-                        .HasForeignKey("Docs.Modules.Items.DocPath", "DocId");
+                        .HasForeignKey("Docs.Modules.Items.Models.DocPath", "DocId");
 
                     b.Navigation("Doc");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Subjects.Subject", b =>
+            modelBuilder.Entity("Docs.Modules.Subjects.Models.Subject", b =>
                 {
                     b.HasOne("Docs.Data.ApplicationUser", "User")
                         .WithMany("Subjects")
@@ -712,7 +719,7 @@ namespace Docs.Migrations
                     b.Navigation("Subjects");
                 });
 
-            modelBuilder.Entity("Docs.Modules.Items.Doc", b =>
+            modelBuilder.Entity("Docs.Modules.Items.Models.Doc", b =>
                 {
                     b.Navigation("Path");
                 });

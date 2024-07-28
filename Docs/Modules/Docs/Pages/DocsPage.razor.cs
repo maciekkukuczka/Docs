@@ -54,7 +54,7 @@ public partial class DocsPage : IDisposable
         docs = (await DocsService.GetDocsByFilter(filters,
             (HashSet<Expression<Func<Doc, object>>>)
             [
-                x => x.Categories, x => x.Subjects
+                x => x.Categories, x => x.Subjects,x=>x.Links
             ]
         )).Data;
 

@@ -9,7 +9,6 @@ public class DocsVMService(
 
 // GET
     public async Task<Result<HashSet<DocVM>>> GetDocsByFilter(
-        // CategoryVM category
         HashSet<Expression<Func<Doc, bool>>>? filters
         , HashSet<Expression<Func<Doc, object>>>? includes
         , CancellationToken cancellationToken = default
@@ -67,6 +66,8 @@ public class DocsVMService(
         var newDoc = DocVM.ToModel(newDocVM);
         var existSubjects = dbContext.Subjects;
 
+
+        // Subjects
         foreach (var existSubject in existSubjects)
         {
             if (newDoc.Subjects.Any(x => x.Id == existSubject.Id))
@@ -77,6 +78,8 @@ public class DocsVMService(
             }
         }
 
+
+        // Categories
         var existCategories = dbContext.Categories;
         foreach (var existCategory in existCategories)
         {
@@ -88,10 +91,27 @@ public class DocsVMService(
             }
         }
 
+
+        // Links
+        dbContext.Links.AddRangeAsync(newDoc.Links);
+
         dbContext.Add(newDoc);
-        var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
-        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
+
+        try
+        {
+            var saveResult = await dbContext.SaveChangesAsync();
+            return saveResult < 0
+                ? Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}")
+                : Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Id}");
+        }
+        catch (DbUpdateException e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}\n\n{e.Message}");
+        }
+        catch (Exception e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}\n\n{e.Message}");
+        }
     }
 
 
@@ -107,11 +127,15 @@ public class DocsVMService(
 
         if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");
 
+        //Common
         existDoc.Title = newDoc.Title;
         existDoc.ShortDescription = newDoc.ShortDescription;
         existDoc.Description = newDoc.Description;
 
-        newDoc.Categories = newDoc.Categories.DistinctBy(x => x.Id).ToHashSet();
+
+        //Categories
+//! UWAGA SPRAWDZIC CZY POTRZEBNE
+        // newDoc.Categories = newDoc.Categories.DistinctBy(x => x.Id).ToHashSet();
 
         var existCategories = dbContext.Categories.AsQueryable();
 
@@ -128,6 +152,18 @@ public class DocsVMService(
 
         existDoc.Categories = newDoc.Categories.ToHashSet();
 
+        //Links
+        var existLinks = dbContext.Links.AsQueryable();
+        existLinks.ForEachAsync(e =>
+        {
+            if (newDoc.Links.Any(n => n.Id == e.Id))
+            {
+                var untracked = newDoc.Links.FirstOrDefault(n => n.Id == e.Id);
+                newDoc.Links.Remove(untracked);
+                newDoc.Links.Add(e);
+            }
+        });
+
         /*
         Stopwatch sw = new();
         try
@@ -140,6 +176,8 @@ public class DocsVMService(
             Console.WriteLine($"SPEED! Updated Doc: {sw.ElapsedMilliseconds}ms");
         }
         */
+
+        existDoc.Links = newDoc.Links.ToHashSet();
 
         dbContext.Update(existDoc);
 

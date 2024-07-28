@@ -1,0 +1,90 @@
+﻿@typeparam T where T : class, new()
+<MudGrid>
+    <MudItem xs="6">
+
+        @if (Edited)
+        {
+            <MudPaper Outlined="true" Class="pa-5">
+                <PageHeaderComp Name="@Name"/>
+
+                <MudStack Row="false">
+
+                    @* EDIT *@
+                    <EditForm Model="@Model" OnValidSubmit="Submit">
+                        <DataAnnotationsValidator/>
+                        <MudStack Row="true" Context="mud">
+                            @ChildContent
+                            <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdit ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
+                        </MudStack>
+                    </EditForm>
+
+                    @if (Items is not null)
+                    {
+                        foreach (var item in Items)
+                        {
+                            <MudStack Row="true" Justify="Justify.SpaceBetween">
+
+                                @NoEditedItemsTemplate(item)
+
+                                <div>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="() => Edit(item)"></MudIconButton>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
+                                </div>
+                            </MudStack>
+                        }
+                    }
+
+                </MudStack>
+            </MudPaper>
+        }
+        else
+        {
+            // NOT EDITED
+
+            if (Items is not null && Items.Count > 0)
+            {
+                <MudPaper Outlined="true" Class="pa-5">
+                <PageHeaderComp Name="@Name"/>
+                    @foreach (var item in Items)
+                    {
+                        <MudStack Row="true">
+                            @NoEditedItemsTemplate(item)
+                        </MudStack>
+                    }
+                </MudPaper>
+            }
+        }
+
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    [Parameter] public string Name { get; set; }
+    [Parameter, EditorRequired] public EventCallback<T> OnAddItem { get; set; }
+    [Parameter, EditorRequired] public EventCallback<T> OnEditItem { get; set; }
+    [Parameter, EditorRequired] public EventCallback<T> OnRemoveItem { get; set; }
+    [Parameter, EditorRequired] public T Model { get; set; } = new();
+    [Parameter, EditorRequired] public HashSet<T> Items { get; set; }
+    [Parameter, EditorRequired] public bool Edited { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter, EditorRequired] public RenderFragment<T>? NoEditedItemsTemplate { get; set; }
+
+    // [Parameter, EditorRequired] public Func<T, string> GetUrl { get; set; }
+    bool isEdit;
+
+
+    async Task Submit(EditContext context)
+    {
+        var item = (context.Model as T);
+        await OnAddItem.InvokeAsync(item);
+        isEdit = false;
+    }
+
+    async Task Edit(T item)
+    {
+        isEdit = true;
+        await OnEditItem.InvokeAsync(item);
+    }
+
+}

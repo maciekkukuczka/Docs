@@ -1,8 +1,7 @@
 ﻿namespace Docs.Modules.Items.Models.ViewModels;
 
-public class DocVM:BaseModel
+public class DocVM : BaseModel
 {
-
     [Required(ErrorMessage = "Tytul jest wymagany")]
     [MaxLength(200, ErrorMessage = "Tytuł jest za długi. Max. 200 znaków")]
     public string Title { get; set; } = string.Empty;
@@ -15,32 +14,31 @@ public class DocVM:BaseModel
 
     public ICollection<SubjectVM> Subjects { get; set; } = (HashSet<SubjectVM>) [];
     public ICollection<CategoryVM> Categories { get; set; } = (HashSet<CategoryVM>) [];
-    public ICollection<LinkVM> Links { get; set; } = (HashSet<LinkVM>)[];
+    public ICollection<LinkVM> Links { get; set; } = (HashSet<LinkVM>) [];
 
-    public static DocVM ToVM(Doc doc, bool includeDescendants=true) =>
+    public static DocVM ToVM(Doc doc, bool includeDescendants = true) =>
         new()
         {
             Id = doc.Id,
             Title = doc.Title,
             ShortDescription = doc.ShortDescription,
             Description = doc.Description,
-            Subjects =includeDescendants?
-                doc.Subjects.Select(x=>SubjectVM.ToVm(x, false)).ToHashSet(): [],
-            Categories = includeDescendants?
-                doc.Categories.Select(x=>CategoryVM.ToVm(x,false)).ToHashSet(): []
-
+            Subjects = includeDescendants ? doc.Subjects.Select(x => SubjectVM.ToVm(x, false)).ToHashSet() : [],
+            Categories = includeDescendants ? doc.Categories.Select(x => CategoryVM.ToVm(x, false)).ToHashSet() : [],
+            Links = includeDescendants ? doc.Links.Select(x => LinkVM.ToVM(x, false)).ToHashSet() : [],
         };
 
-    public static Doc ToModel(DocVM docVm, bool includeDescendants=true) =>
+    public static Doc ToModel(DocVM docVm, bool includeDescendants = true) =>
         new()
         {
             Id = docVm.Id,
             Title = docVm.Title,
             ShortDescription = docVm.ShortDescription,
             Description = docVm.Description,
-            Subjects =includeDescendants?
-                docVm.Subjects.Select(x=>SubjectVM.ToModel(x,false)).ToHashSet(): [],
-            Categories = includeDescendants?
-                docVm.Categories.Select(x=>CategoryVM.ToModel(x,false)).ToHashSet(): []
+            Subjects = includeDescendants ? docVm.Subjects.Select(x => SubjectVM.ToModel(x, false)).ToHashSet() : [],
+            Categories = includeDescendants
+                ? docVm.Categories.Select(x => CategoryVM.ToModel(x, false)).ToHashSet()
+                : [],
+            Links = includeDescendants ? docVm.Links.Select(x => LinkVM.ToModel(x, false)).ToHashSet() : []
         };
 }

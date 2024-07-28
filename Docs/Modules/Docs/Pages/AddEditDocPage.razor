@@ -24,7 +24,7 @@
 }
 else
 {
-    <EditForm Model="@Doc" OnValidSubmit="OnValidSubmit">
+    <EditForm Model="@Doc" OnValidSubmit="Submit">
         <DataAnnotationsValidator/>
 
         <MudGrid>
@@ -92,7 +92,6 @@ else
                 </MudItem>
             }
             else if (!string.IsNullOrWhiteSpace(Doc.Description))
-
             {
                 <MudItem xs="6">
                     <MudPaper Outlined="true" Class="pa-3 ma-3">
@@ -104,8 +103,22 @@ else
             }
 
             @* LINKS *@
-                <MiniCrudComp Disabled="@(!IsEdited)"  T="LinkVM" Items="Doc.Links.ToHashSet()" OnAddItem="(link) => OnAddLink(link)" OnRemoveItem="(link) => OnRemoveLink(link)"/>
-                
+            <MiniCrudComp Name="Linki" T="LinkVM" Model="@linkModel" Items="Doc.Links.ToHashSet()"Edited="@(IsEdited)" 
+                          OnAddItem="(link) => AddLink(link)" OnEditItem="EditLink" OnRemoveItem="RemoveLink">
+
+                <ChildContent>
+                    <MudTextField Label="Url" @bind-Value="linkModel.Url" For="() => linkModel.Url"/>
+                    <MudTextField Label="Nazwa" @bind-Value="linkModel.Name "/>
+                    <MudTextField Label="Opis" @bind-Value="linkModel.Description"/>
+                </ChildContent>
+
+                <NoEditedItemsTemplate Context="link">
+                    <MudLink Target="_blank" Href="@link.Url" Typo="Typo.body2">@(string.IsNullOrWhiteSpace(link.Name) ? link.Url : link.Name)</MudLink>
+                    <MudText >@link.Description</MudText>
+                </NoEditedItemsTemplate>
+
+            </MiniCrudComp>
+
 
             @* SUBMIT *@
             @if (IsEdited)

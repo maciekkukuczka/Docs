@@ -15,6 +15,7 @@ public partial class AddEditDocPage : IDisposable
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
+    private LinkVM? linkModel=new(); 
     string? userId;
     HashSet<CategoryVM>? allCategories;
     CategoryVM? selectedCategory;
@@ -52,9 +53,8 @@ public partial class AddEditDocPage : IDisposable
     }
 
 
-    async Task OnValidSubmit(EditContext context)
+    async Task Submit(EditContext context)
     {
-        // var submittedDoc = context.Model as Doc;
         var submittedDoc = context.Model as DocVM;
         // submittedDoc.Subjects.Add(AppState.RecentSubject??=new Subject
         submittedDoc?.Subjects.Add(AppState.SelectedSubject ??= new SubjectVM
@@ -63,6 +63,9 @@ public partial class AddEditDocPage : IDisposable
             UserId = userId
         });
         // submittedDoc.Categories = Doc.Categories;
+        
+        submittedDoc.Links = Doc.Links;
+        
         Result? result = null;
         if (string.IsNullOrWhiteSpace(Id))
         {
@@ -111,14 +114,23 @@ public partial class AddEditDocPage : IDisposable
     }
 
     
-     void OnAddLink(LinkVM link)
+     void AddLink(LinkVM link)
     {
         Doc.Links.Add(link);
+        linkModel = new();
     }
 
-     void OnRemoveLink(LinkVM link)
+    void EditLink(LinkVM link)
     {
         Doc.Links.Remove(link);
+        Doc.Links.Add(link);
+        linkModel = link;
+    }
+
+     void RemoveLink(LinkVM link)
+    {
+        Doc.Links.Remove(link);
+        linkModel = new();
     }
 
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
