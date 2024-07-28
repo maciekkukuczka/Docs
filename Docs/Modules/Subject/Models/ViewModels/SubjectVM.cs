@@ -1,4 +1,4 @@
-﻿namespace Docs.Modules.Subject.Models.ViewModels;
+﻿namespace Docs.Modules.Subjects.Models.ViewModels;
 
 public class SubjectVM : BaseModel
 {

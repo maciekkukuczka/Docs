@@ -1,4 +1,4 @@
-﻿using Docs.Modules.Common.Result;
+﻿/*using Docs.Modules.Common.Result;
 
 namespace Docs.Modules.Items.Services;
 
@@ -19,7 +19,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         CancellationToken cancellationToken = default)
     {
         /*return await cache.GetOrCreateAsync(
-            $"Docs", async cancel=>*/
+            $"Docs", async cancel=>#1#
         
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         // HashSet<Doc> result;
@@ -31,7 +31,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
                 .Select(x => x.Subjects.FirstOrDefault())
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Errors.ObjectNotExist<Subject.Models.Subject>()}");
+            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Messages.ObjectNotExist<Subjects.Models.Subject>()}");
             
             res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
         }
@@ -54,7 +54,7 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(id);
-        if (exist == null) return Result.Error<Doc>($"{Errors.ObjectNotFound<Doc>()}: {id}");
+        if (exist == null) return Result.Error<Doc>($"{Messages.ObjectNotFound<Doc>()}: {id}");
         return Result.OK(exist);
     }
 
@@ -76,35 +76,35 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
 
         dbContext.Add(newDoc);
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
-        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
+        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
     public async Task<Result> UpdateDoc(Doc? doc)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        if (doc is null) return Result.Error($"{Errors.ObjectNotExist<Doc>()}: {doc?.Title}");
+        if (doc is null) return Result.Error($"{Messages.ObjectNotExist<Doc>()}: {doc?.Title}");
 
         var exist = await dbContext.Docs.FindAsync(doc.Id);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {doc.Title}");
+        if (exist is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {doc.Title}");
 
         exist.Title = doc.Title;
         exist.ShortDescription = doc.ShortDescription;
         exist.Description = doc.Description;
 
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {doc.Title}");
-        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {doc.Title}");
+        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {doc.Title}");
+        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {doc.Title}");
     }
 
     public async Task<Result> DeleteDoc(string? docId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(docId);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist?.Title}");
+        if (exist is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}:  {exist?.Title}");
         dbContext.Docs.Remove(exist);
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");
-        return Result.OK($"{Errors.ObjectDeleted<Doc>()}: {exist.Title}");
+        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");
+        return Result.OK($"{Messages.ObjectDeleted<Doc>()}: {exist.Title}");
     }
-}
+}*/

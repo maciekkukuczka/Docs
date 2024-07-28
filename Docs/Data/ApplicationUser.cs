@@ -1,4 +1,4 @@
-using Docs.Modules.Subject.Models;
+using Docs.Modules.Subjects.Models;
 
 namespace Docs.Data;
 

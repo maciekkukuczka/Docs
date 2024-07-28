@@ -1,4 +1,4 @@
-﻿using Docs.Modules.Subject.Services;
+﻿using Docs.Modules.Subjects.Services;
 
 namespace Docs.Config;
 
@@ -39,11 +39,11 @@ public static class DI
         // APP
         services.AddScoped<AppState>();
         // services.AddScoped(typeof(GenericService<,>));
-        services.AddScoped<DocsService>();
         services.AddScoped<DocsVMService>();
         services.AddScoped<SubjectService>();
         services.AddScoped<SubjectVMService>();
         services.AddScoped<CategoriesVMService>();
+        services.AddScoped(typeof(LinksService<>));
 
         return services;
     }

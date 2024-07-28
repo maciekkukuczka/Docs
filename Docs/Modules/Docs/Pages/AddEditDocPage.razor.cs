@@ -20,7 +20,7 @@ public partial class AddEditDocPage : IDisposable
     CategoryVM? selectedCategory;
     IEnumerable<CategoryVM> categoryOptions = new HashSet<CategoryVM>();
 
-     MudBlazor.Converter<CategoryVM?> converter = new();
+    MudBlazor.Converter<CategoryVM?> converter = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -100,7 +100,6 @@ public partial class AddEditDocPage : IDisposable
 
     Task OnCategorySelected(IEnumerable<CategoryVM> selectedCategories)
     {
-
         Doc.Categories = selectedCategories.ToList();
         /*Doc.Categories.Clear();
         foreach (var category in selectedCategories)
@@ -111,12 +110,22 @@ public partial class AddEditDocPage : IDisposable
         return Task.CompletedTask;
     }
 
+    
+     void OnAddLink(LinkVM link)
+    {
+        Doc.Links.Add(link);
+    }
+
+     void OnRemoveLink(LinkVM link)
+    {
+        Doc.Links.Remove(link);
+    }
+
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
     {
         AppState.DocToEdit = null;
     }
-    
-    
+
 
     public void Dispose()
     {

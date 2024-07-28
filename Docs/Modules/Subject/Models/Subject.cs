@@ -1,6 +1,4 @@
-﻿using Docs.Modules.Common.Models;
-
-namespace Docs.Modules.Subject.Models;
+﻿namespace Docs.Modules.Subjects.Models;
 
 public class Subject:BaseModel
 {

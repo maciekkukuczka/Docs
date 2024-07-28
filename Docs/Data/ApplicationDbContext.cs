@@ -1,5 +1,5 @@
 using Docs.Modules.Categories.Models;
-using Docs.Modules.Subject.Models;
+using Docs.Modules.Subjects.Models;
 
 namespace Docs.Data;
 

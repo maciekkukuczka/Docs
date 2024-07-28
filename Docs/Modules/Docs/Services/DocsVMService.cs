@@ -35,24 +35,13 @@ public class DocsVMService(
         {
             foreach (var filter in filters)
             {
-                // query = query.Where(                 x => x.Subjects.Any(x=>string.Equals(x.Id,"d1ba5577-08cf-41c5-9f48-7d08e372b996"))
                 query = query.Where(filter);
             }
         }
 
-        /*if (category is not null)
-        {
-            query = query.Where(x => x.Categories.Any(x=>x.Id == category.Id));
-        }*/
-
-        // else query = query.Where(x => x.Subjects != null && x.Subjects.FirstOrDefault() != null);
-
-        // query = query.Where(x => x.Categories.FirstOrDefault() == new Category());
-
 
         var queryResult = await query
             .AsNoTracking()
-            // .ToListAsync();
             .ToHashSetAsync(cancellationToken: cancellationToken);
 
 
@@ -65,7 +54,7 @@ public class DocsVMService(
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(id);
-        if (exist == null) return Result.Error<Doc>($"{Errors.ObjectNotFound<Doc>()}: {id}");
+        if (exist == null) return Result.Error<Doc>($"{Messages.ObjectNotFound<Doc>()}: {id}");
         return Result.OK(exist);
     }
 
@@ -101,8 +90,8 @@ public class DocsVMService(
 
         dbContext.Add(newDoc);
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
-        return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
+        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
     }
 
 
@@ -116,7 +105,7 @@ public class DocsVMService(
             .Include(x => x.Categories)
             .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
-        if (existDoc is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}: {newDoc.Title}");
+        if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");
 
         existDoc.Title = newDoc.Title;
         existDoc.ShortDescription = newDoc.ShortDescription;
@@ -166,16 +155,16 @@ public class DocsVMService(
 
 
             var saveResult = await dbContext.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
-            return Result.OK($"{Errors.ObjectSaved<Doc>()}: {newDoc.Title}");
+            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+            return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
         }
         catch (DbUpdateException ex)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result.Error($"{Errors.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
         }
     }
 
@@ -185,11 +174,11 @@ public class DocsVMService(
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(docId);
-        if (exist is null) return Result.Error($"{Errors.ObjectNotFound<Doc>()}:  {exist?.Title}");
+        if (exist is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}:  {exist?.Title}");
         dbContext.Docs.Remove(exist);
         var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Errors.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");
-        return Result.OK($"{Errors.ObjectDeleted<Doc>()}: {exist.Title}");
+        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");
+        return Result.OK($"{Messages.ObjectDeleted<Doc>()}: {exist.Title}");
     }
 
     // ------------------------------------
@@ -223,7 +212,7 @@ public class DocsVMService(
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (firstSubject is null)
-                return Result.Error<HashSet<DocVM>>($"{Errors.ObjectNotExist<Subject.Models.Subject>()}");
+                return Result.Error<HashSet<DocVM>>($"{Messages.ObjectNotExist<Subjects.Models.Subject>()}");
 
             res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
         }

@@ -1,5 +1,130 @@
-﻿<h3>LinksCrudComp</h3>
+﻿@*@namespace Docs.Modules.Links.Components
+@typeparam T where T : LinkVM, new()
+@inject PersistentComponentState PersistentComponentState 
+@inject LinksService<LinkVM> CrudService
+@inject ISnackbar Snackbar
+@implements  IDisposable
+$1$
+<SectionContent SectionId="MainLayout.TopBarSectionRight">
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AddSubject">Dodaj Temat</MudButton>
+</SectionContent>
+#1#
+
+<MudItem xs="12">
+    <PageHeaderComp Name="Linki"/>
+    <MudPaper Outlined="true" Class="pa-5 ">
+        <EditForm Model="@model" OnValidSubmit="Submit">
+            <DataAnnotationsValidator/>
+            <MudTextField @bind-Value="model.Url" Label="Tytuł" For="@(() => model.Url)"/>
+            <MudTextField @bind-Value="model.Description" Label="Opis" For="@(() => model.Url)" Lines="2"/>
+            <SubmitButton Colored="true" Small="true" Class="d-flex mt-3 ml-auto"/>
+        </EditForm>
+    </MudPaper>
+</MudItem>
+
+<MudItem xs="12">
+    <MudPaper Outlined="true" Class="pa-5">
+        @if (models is null || !models.Any())
+        {
+            <NoDataComp/>
+        }
+        else
+        {
+            <MudDataGrid @ref="grid" Items="models">
+                <Columns>
+                    <PropertyColumn Property="x => x.Url" Title="Link"/>
+                    <PropertyColumn Property="x => x.Description" Title="Opis"/>
+                    <TemplateColumn Title="Dokumenty">
+                        <CellTemplate>
+                            @{
+                                string docs = String.Empty;
+                                foreach (var doc in context.Item.Docs)
+                                {
+                                    docs = string.Join(", ", doc.Title);
+                                    $1$ <span @key="doc.Id">@doc.Title</span> #1#
+                                }
+                            }
+                            <span>@docs</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudStack Row="true">
+                                <EditButton Small="true" Colored="true" OnClick="() => Edit(context.Item)"/>
+                                <DeleteButton Small="true" Colored="true" OnClick="async () => Delete(context.Item)"/>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                </Columns>
+            </MudDataGrid>
+            <NoDataComp/>
+        }
+    </MudPaper >
+</MudItem >
+
+    
+
 
 @code {
+    PersistingComponentStateSubscription stateSubscription;
+    HashSet<T> models = [];
+    T model = new();
+    MudDataGrid<T>? grid;
+    bool isToEdit = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        {
+            PersistentComponentState.PersistAsJson(nameof(T), models);
+            return Task.CompletedTask;
+        });
+
+        await GetModels();
+    }
+
+    private async Task GetModels()
+    {
+        models = (PersistentComponentState.TryTakeFromJson<HashSet<T>>
+            (nameof(T), out var restored)
+            ? restored
+            : (await CrudService?.GetLinks()).Data as HashSet<T>);
+    }
+
+    async Task Submit(EditContext context)
+    {
+        var contextModel = (T)context.Model;
+        var result = isToEdit ? await CrudService?.UpdateLink(contextModel)! : await CrudService?.AddLink(contextModel)!;
+
+
+        if (result.Success) models = (await CrudService?.GetLinks()).Data!;
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+
+        isToEdit = false;
+        model = new();
+    }
+
+
     
-}
+    
+    void Edit(T? model)
+    {
+        isToEdit = true;
+        if (model is not null) this.model = model;
+    }
+
+
+    async Task Delete(T? model)
+    {
+        var result = (await CrudService?.DeleteLink(model?.Id)!);
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+        await GetModels();
+    }
+
+    public void Dispose() => stateSubscription.Dispose();
+
+
+
+}*@

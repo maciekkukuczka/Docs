@@ -1,41 +1,24 @@
-﻿namespace Docs.Modules.Categories.Services;
+﻿namespace Docs.Modules.Links.Services;
 
-public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+public class LinksService<T>(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+    : GenericService<T>(dbContextFactory)
+    where T : BaseModel, new()
 {
     // GET
-    public async Task<Result<HashSet<CategoryVM>>> GetCategories(string? userName)
+    public async Task<Result<HashSet<LinkVM>>> GetLinks(
+        HashSet<Expression<Func<T, object>>>? includes = null
+        , HashSet<Expression<Func<T, bool>>>? filters = null)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Categories
-            .Include(x => x.Docs)
-            // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking()
-            .ToHashSetAsync();
+        var models = await Get(includes) as Result<HashSet<Link>>;
 
-        if (result is null || result.Count <= 0)
-            return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
-        var resultVms = result.Select(x => CategoryVM.ToVm(x)).ToHashSet();
-        return Result.OK(resultVms);
+        return models.Success
+            ? Result.OK(models.Data.Select(x => LinkVM.ToVM(x)).ToHashSet())
+            : Result.Error<HashSet<LinkVM>>($"{Messages.ObjectCannotBeGet<HashSet<LinkVM>>()}");
     }
 
-    
-    public async Task<Result<HashSet<CategoryVM>>> GetCategoriesBySubject(string? subjectId)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Categories
-            .Where(x => x.Docs.Any(x => x.Subjects.Any(x => x.Id == subjectId)))
-            .AsNoTracking()
-            .ToHashSetAsync();
 
-        if (result is null || result.Count <= 0)
-            return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
-        var resultVms = result.Select(x => CategoryVM.ToVm(x)).ToHashSet();
-        return Result.OK(resultVms);
-    }
-
-    
-    // ADD
-    public async Task<Result> AddCategory(CategoryVM categoryVM)
+    /*// ADD
+    public async Task<Result> AddLink(CategoryVM categoryVM)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
@@ -58,9 +41,9 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         }
     }
 
-    
+
 //UPDATE
-    public async Task<Result> UpdateCategory(CategoryVM category)
+    public async Task<Result> UpdateLink(CategoryVM category)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Categories.FindAsync(category.Id);
@@ -70,7 +53,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         exist.Descritpion = category.Description;
         // db.Categories.Entry(exist).CurrentValues.SetValues(category);
         db.Categories.Update(exist);
-        
+
         try
         {
             var saveResult = await db.SaveChangesAsync();
@@ -87,9 +70,9 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         }
     }
 
-    
+
     // DELETE
-    public async Task<Result> DeleteCategory(string categoryId)
+    public async Task<Result> DeleteLink(string categoryId)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var exist = await db.Categories.Include(x => x.Docs)
@@ -119,4 +102,5 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
             return Result.Error($"{Messages.ObjectCannotBeDeleted<Category>()}: {categoryId}\n\n{e.Message}");
         }
     }
+*/
 }

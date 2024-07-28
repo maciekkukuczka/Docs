@@ -99,7 +99,7 @@
 
         stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
         {
-            PersistentComponentState.PersistAsJson("Subjects", categories);
+            PersistentComponentState.PersistAsJson("Categories", categories);
             return Task.CompletedTask;
         });
 
@@ -110,7 +110,7 @@
     {
         // subjects = PersistentComponentState.TryTakeFromJson<HashSet<Subject>>
         categories = (PersistentComponentState.TryTakeFromJson<HashSet<CategoryVM>>
-            ("Subjects", out var restored)
+            ("Categories", out var restored)
             ? restored
             // : (await GenericService.GetAll()).data;
             : (await CategoriesService?.GetCategories(currentUserName)).Data);
@@ -146,17 +146,17 @@
 
 
     // async Task Edit(Subject? contextSubject)
-    void Edit(CategoryVM? contextSubject)
+    void Edit(CategoryVM? category)
     {
         isToEdit = true;
-        if (contextSubject is not null) category = contextSubject;
+        if (category is not null) this.category = category;
     }
 
 
     // async Task Delete(Subject? contextSubject)
-    async Task Delete(CategoryVM? contextSubject)
+    async Task Delete(CategoryVM? category)
     {
-        var result = (await CategoriesService?.DeleteCategory(contextSubject?.Id)!);
+        var result = (await CategoriesService?.DeleteCategory(category?.Id)!);
         Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
         await GetSubjects();
     }
