@@ -24,7 +24,8 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         await using var db = await dbContextFactory.CreateDbContextAsync();
         var result = await db.Categories
             .Where(x => x.Docs.Any(x => x.Subjects.Any(x => x.Id == subjectId)))
-            .AsNoTracking()
+            .Include(x=>x.Docs)
+            // .AsNoTracking()
             .ToHashSetAsync();
 
         if (result is null || result.Count <= 0)

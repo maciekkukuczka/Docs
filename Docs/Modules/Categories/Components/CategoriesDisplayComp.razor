@@ -16,10 +16,22 @@ else
             <MudPaper >
                 <MudTreeView T="string" Hover="true">
                     <MudTreeViewItem Text="Kategorie" Expanded="true">
-                        <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(null))" Text="Wszystkie" Expanded/>
+
+                        @{ var allCategoriesCount = SelectedCategories.Sum(x => x.Docs.Count()); }
+
+                        <MudBadge Content="@allCategoriesCount" Overlap="true" Class="mx-6 my-4" Color="Color.Primary">
+                            <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(null))" Text="Wszystkie" Expanded/>
+                        </MudBadge>
+
                         @foreach (var category in SelectedCategories)
                         {
-                            <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
+                            @*
+                            //Counter for each category- not working because thenIncude in service is destroy by the casting to VMs.
+                            // var perCategoryCount = SelectedCategories.Sum(x => x.Docs.Count(x => x.Categories.Any(x => x.Id == category.Id)));
+                            <MudBadge Content="@perCategoryCount" Overlap="true" Class="mx-6 my-4" Color="Color.Primary">
+                            </MudBadge>
+                        *@
+                                <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
                         }
                     </MudTreeViewItem>
                 </MudTreeView>
