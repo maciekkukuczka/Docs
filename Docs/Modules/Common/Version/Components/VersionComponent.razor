@@ -60,12 +60,12 @@
             VersionFrom switch
             {
                 GetVersionFrom.Appsettings =>
-                    $"{appsettingVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
+                    appsettingVersion,
                 GetVersionFrom.Assembly =>
                     assemblyVersion,
                     // $"{assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
                 GetVersionFrom.Manual =>
-                    $"{ManualVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
+                    ManualVersion,
 
                 _ => ""
             };
