@@ -1,5 +1,4 @@
-﻿@using _Imports = MudBlazor._Imports
-@using System.Reflection
+﻿@using System.Reflection
 @namespace Docs.Modules.Common.Version.Components
 @inject IConfiguration Configuration
 @* @inject IOptions<AppOptions> appOptions *@
@@ -7,10 +6,10 @@
 @* #if DEBUG  *@
 @* #endif *@
 <div class="d-flex justify-xs-center justify-lg-end align-center justify-center">
-        <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
-
-@version
-        </span>
+    <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
+        @Name ver. @version by &copy;@By @DateTime.Now.Year<br/>
+        <span style="font-style: italic; color:white;">(dev @(isDebug?assemblyRevision:""))</span> 
+    </span>
 
 
     @*<span class=" l-3 fw-lighter" style="font-size: 0.7rem">
@@ -51,25 +50,25 @@
         assemblyVersionAll = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         var versionArray = assemblyVersionAll.Split('.').ToArray();
-        assemblyMajor = versionArray.ElementAtOrDefault(0)??"";
-        assemblyMinor =  versionArray.ElementAtOrDefault(1)??"";
-        assemblyBuild=versionArray.ElementAtOrDefault(2)??"";
-        assemblyRevision =versionArray.ElementAtOrDefault(3)??"";
+        assemblyMajor = versionArray.ElementAtOrDefault(0) ?? "";
+        assemblyMinor = versionArray.ElementAtOrDefault(1) ?? "";
+        assemblyBuild = versionArray.ElementAtOrDefault(2) ?? "";
+        assemblyRevision = versionArray.ElementAtOrDefault(3) ?? "";
         assemblyVersion = $"{assemblyMajor}.{assemblyMinor}.{assemblyBuild}";
 
         version =
             VersionFrom switch
             {
                 GetVersionFrom.Appsettings =>
-                    $"{Name} ver. {appsettingVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+                    $"{appsettingVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
                 GetVersionFrom.Assembly =>
-                    $"{Name} ver. {assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+                    assemblyVersion,
+                    // $"{assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
                 GetVersionFrom.Manual =>
-                    $"{Name} ver. {ManualVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+                    $"{ManualVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
 
                 _ => ""
             };
-
     }
 
     public enum GetVersionFrom
