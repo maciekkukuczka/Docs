@@ -4,7 +4,7 @@
 public partial class DocsPage : IDisposable
 {
     [Inject] public NavigationManager NavigationManager { get; set; }
-    [Inject] public DocsVMService DocsService { get; set; }
+    [Inject] public DocsService DocsService { get; set; }
     [Inject] public CategoriesVMService CategoriesService { get; set; }
     [Inject] public PersistentComponentState ApplicationState { get; set; }
     [Inject] public AppState AppState { get; set; }

@@ -4,8 +4,8 @@ public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContext
 {
     // GET
     protected async Task<Result<HashSet<T>>> Get(
-         HashSet<Expression<Func<T, object>>>? includes=null
-        ,HashSet<Expression<Func<T, bool>>>? filters=null
+        HashSet<Expression<Func<T, object>>>? includes = null
+        , HashSet<Expression<Func<T, bool>>>? filters = null
         , CancellationToken cancellationToken = default
     )
     {
@@ -21,7 +21,7 @@ public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContext
             }
         }
 
-        if (filters is not null&&filters.Count > 0)
+        if (filters is not null && filters.Count > 0)
         {
             foreach (var expression in filters)
             {

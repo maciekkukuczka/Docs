@@ -1,52 +1,51 @@
-﻿/*using Docs.Modules.Common.Result;
+﻿namespace Docs.Modules.Items.Services;
 
-namespace Docs.Modules.Items.Services;
-
-public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactory,
+public class DocsService(
+    IDbContextFactory<ApplicationDbContext> dbContextFactory,
     HybridCache cache)
 {
-     HybridCache cache = cache;
-    public async Task<Result<List<Doc>>> GetAllDocs()
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = Result.OK(await dbContext.Docs
-            .AsNoTracking()
-            .ToListAsync());
-        return res;
-    }
+    HybridCache cache = cache;
 
-    public async Task<Result<HashSet<Doc>>> GetDocBySubject(string? subjectId, 
-        CancellationToken cancellationToken = default)
+
+// GET
+    public async Task<Result<HashSet<DocVM>>> GetDocsByFilter(
+        HashSet<Expression<Func<Doc, bool>>>? filters
+        , HashSet<Expression<Func<Doc, object>>>? includes
+        , CancellationToken cancellationToken = default
+    )
     {
         /*return await cache.GetOrCreateAsync(
-            $"Docs", async cancel=>#1#
-        
+            $"Docs", async cancel=>*/
+
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        // HashSet<Doc> result;
-        IQueryable<Doc> res;
-        if (string.IsNullOrWhiteSpace(subjectId))
-        {
-            var firstSubject = await db.Docs
-                // .Where(x=>x.Subjects.Any())
-                .Select(x => x.Subjects.FirstOrDefault())
-                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        IQueryable<Doc> query = db.Docs;
 
-            if (firstSubject is null) return Result.Error<HashSet<Doc>>($"{Messages.ObjectNotExist<Subjects.Models.Subject>()}");
-            
-            res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
-        }
-        else
+        //Includes
+        if (includes is not null && includes.Count > 0)
         {
-            res =db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId));
-            // .ToHashSetAsync();
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
         }
 
-        var result=await res
-            .Include(x => x.Subjects)
+        //Filters
+        if (filters is not null && filters.Count > 0)
+        {
+            foreach (var filter in filters)
+            {
+                query = query.Where(filter);
+            }
+        }
+
+
+        var queryResult = await query
             .AsNoTracking()
             .ToHashSetAsync(cancellationToken: cancellationToken);
-        
-        return Result.OK(result);
+
+
+        var resultVM = queryResult.Select(x => DocVM.ToVM(x)).ToHashSet();
+        return Result.OK(resultVM);
     }
 
 
@@ -58,12 +57,17 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         return Result.OK(exist);
     }
 
-    public async Task<Result> AddDoc(Doc newDoc)
+
+    //ADD
+    public async Task<Result> AddDoc(DocVM newDocVM)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+        var newDoc = DocVM.ToModel(newDocVM);
         var existSubjects = dbContext.Subjects;
 
+
+        // Subjects
         foreach (var existSubject in existSubjects)
         {
             if (newDoc.Subjects.Any(x => x.Id == existSubject.Id))
@@ -74,30 +78,130 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
             }
         }
 
+
+        // Categories
+        var existCategories = dbContext.Categories;
+        foreach (var existCategory in existCategories)
+        {
+            if (newDoc.Categories.Any(x => x.Id == existCategory.Id))
+            {
+                var untracked = newDoc.Categories.FirstOrDefault(x => x.Id == existCategory.Id);
+                if (untracked != null) newDoc.Categories.Remove(untracked);
+                newDoc.Categories.Add(existCategory);
+            }
+        }
+
+
+        // Links
+        dbContext.Links.AddRangeAsync(newDoc.Links);
+
         dbContext.Add(newDoc);
-        var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
-        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
+
+        try
+        {
+            var saveResult = await dbContext.SaveChangesAsync();
+            return saveResult < 0
+                ? Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}")
+                : Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Id}");
+        }
+        catch (DbUpdateException e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}\n\n{e.Message}");
+        }
+        catch (Exception e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Id}\n\n{e.Message}");
+        }
     }
 
-    public async Task<Result> UpdateDoc(Doc? doc)
+
+    // UPDATE
+    public async Task<Result> UpdateDoc(DocVM? newDocVM)
     {
+        var newDoc = DocVM.ToModel(newDocVM);
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        if (doc is null) return Result.Error($"{Messages.ObjectNotExist<Doc>()}: {doc?.Title}");
 
-        var exist = await dbContext.Docs.FindAsync(doc.Id);
-        if (exist is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {doc.Title}");
+        var existDoc = await dbContext.Docs
+            .Include(x => x.Categories)
+            .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
-        exist.Title = doc.Title;
-        exist.ShortDescription = doc.ShortDescription;
-        exist.Description = doc.Description;
+        if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");
 
-        var saveResult = await dbContext.SaveChangesAsync();
-        if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {doc.Title}");
-        return Result.OK($"{Messages.ObjectSaved<Doc>()}: {doc.Title}");
+        //Common
+        existDoc.Title = newDoc.Title;
+        existDoc.ShortDescription = newDoc.ShortDescription;
+        existDoc.Description = newDoc.Description;
+
+
+        //Categories
+//! UWAGA SPRAWDZIC CZY POTRZEBNE
+        // newDoc.Categories = newDoc.Categories.DistinctBy(x => x.Id).ToHashSet();
+
+        var existCategories = dbContext.Categories.AsQueryable();
+
+        await existCategories.ForEachAsync(e =>
+        {
+            if (newDoc.Categories.Any(n => n.Id == e.Id))
+                // && !existDoc.Categories.Any(ed => ed.Id == e.Id))
+            {
+                var untracked = newDoc.Categories.FirstOrDefault(n => n.Id == e.Id);
+                newDoc.Categories.Remove(untracked);
+                newDoc.Categories.Add(e);
+            }
+        });
+
+        existDoc.Categories = newDoc.Categories.ToHashSet();
+
+        //Links
+        var existLinks = dbContext.Links.AsQueryable();
+        existLinks.ForEachAsync(e =>
+        {
+            if (newDoc.Links.Any(n => n.Id == e.Id))
+            {
+                var untracked = newDoc.Links.FirstOrDefault(n => n.Id == e.Id);
+                newDoc.Links.Remove(untracked);
+                newDoc.Links.Add(e);
+            }
+        });
+
+        /*
+        Stopwatch sw = new();
+        try
+        {
+            sw.Start();
+        }
+        finally
+        {
+            sw.Stop();
+            Console.WriteLine($"SPEED! Updated Doc: {sw.ElapsedMilliseconds}ms");
+        }
+        */
+
+        existDoc.Links = newDoc.Links.ToHashSet();
+
+        dbContext.Update(existDoc);
+
+        try
+        {
+            // dbContext.Entry(exist).State = EntityState.Modified;
+            
+            var saveResult = await dbContext.SaveChangesAsync();
+            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
+            return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {ex.Message}");
+        }
     }
 
-    public async Task<Result> DeleteDoc(string? docId)
+
+    // DELETE
+    public async Task<Result> DeleteDoc(string docId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var exist = await dbContext.Docs.FindAsync(docId);
@@ -107,4 +211,56 @@ public class DocsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
         if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeDeleted<Doc>()}: {exist.Title}");
         return Result.OK($"{Messages.ObjectDeleted<Doc>()}: {exist.Title}");
     }
-}*/
+
+    // ------------------------------------
+
+    #region Another
+
+    public async Task<Result<HashSet<DocVM>>> GetAllDocs()
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var res = await dbContext.Docs
+            .AsNoTracking()
+            .ToHashSetAsync();
+
+        var resultVM = res.Select(x => DocVM.ToVM(x)).ToHashSet();
+        return Result.OK(resultVM);
+    }
+
+    public async Task<Result<HashSet<DocVM>>> GetDocBySubject(string? subjectId,
+        CancellationToken cancellationToken = default)
+    {
+        /*return await cache.GetOrCreateAsync(
+            $"Docs", async cancel=>*/
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        IQueryable<Doc> res;
+        if (string.IsNullOrWhiteSpace(subjectId))
+        {
+            var firstSubject = await db.Docs
+                // .Where(x=>x.Subjects.Any())
+                .Select(x => x.Subjects.FirstOrDefault())
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            if (firstSubject is null)
+                return Result.Error<HashSet<DocVM>>($"{Messages.ObjectNotExist<Subjects.Models.Subject>()}");
+
+            res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == firstSubject.Id));
+        }
+        else
+        {
+            res = db.Docs.Where(x => x.Subjects.Any(x => x.Id == subjectId));
+            // .ToHashSetAsync();
+        }
+
+        var result = await res
+            .Include(x => x.Subjects)
+            .AsNoTracking()
+            .ToHashSetAsync(cancellationToken: cancellationToken);
+
+        var resultVM = result.Select(x => DocVM.ToVM(x)).ToHashSet();
+        return Result.OK(resultVM);
+    }
+
+    #endregion
+}

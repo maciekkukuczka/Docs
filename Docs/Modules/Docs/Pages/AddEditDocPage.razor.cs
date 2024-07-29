@@ -3,7 +3,7 @@
 public partial class AddEditDocPage : IDisposable
 {
     [CascadingParameter] Task<AuthenticationState>? AuthStateTask { get; set; }
-    [Inject] public DocsVMService DocsService { get; set; }
+    [Inject] public DocsService DocsService { get; set; }
     [Inject] public CategoriesVMService CategoriesService { get; set; }
     [Inject] public NavigationManager NavigationManager { get; set; }
     [Inject] public AppState AppState { get; set; }
@@ -15,13 +15,13 @@ public partial class AddEditDocPage : IDisposable
 
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
-    private LinkVM? linkModel=new(); 
+    LinkVM? linkModel = new();
     string? userId;
     HashSet<CategoryVM>? allCategories;
     CategoryVM? selectedCategory;
     IEnumerable<CategoryVM> categoryOptions = new HashSet<CategoryVM>();
 
-    MudBlazor.Converter<CategoryVM?> converter = new();
+    Converter<CategoryVM?> converter = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -63,9 +63,9 @@ public partial class AddEditDocPage : IDisposable
             UserId = userId
         });
         // submittedDoc.Categories = Doc.Categories;
-        
+
         submittedDoc.Links = Doc.Links;
-        
+
         Result? result = null;
         if (string.IsNullOrWhiteSpace(Id))
         {
@@ -113,8 +113,8 @@ public partial class AddEditDocPage : IDisposable
         return Task.CompletedTask;
     }
 
-    
-     void AddLink(LinkVM link)
+
+    void AddLink(LinkVM link)
     {
         Doc.Links.Add(link);
         linkModel = new();
@@ -127,13 +127,13 @@ public partial class AddEditDocPage : IDisposable
         linkModel = link;
     }
 
-     void RemoveLink(LinkVM link)
+    void RemoveLink(LinkVM link)
     {
         Doc.Links.Remove(link);
         linkModel = new();
     }
 
-    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    void OnLocationChanged(object sender, LocationChangedEventArgs e)
     {
         AppState.DocToEdit = null;
     }

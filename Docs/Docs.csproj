@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Docs-52dc8798-79f0-4698-ae30-25acf0f6990f</UserSecretsId>
     <LangVersion>preview</LangVersion>
+
+    <Deterministic>false</Deterministic>
+    <Version>4.3.2.1</Version>
+<!--    <AssemblyVersion>1.0.*</AssemblyVersion>-->
   </PropertyGroup>
 
 

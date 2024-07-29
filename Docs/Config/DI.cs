@@ -39,7 +39,7 @@ public static class DI
         // APP
         services.AddScoped<AppState>();
         // services.AddScoped(typeof(GenericService<,>));
-        services.AddScoped<DocsVMService>();
+        services.AddScoped<DocsService>();
         services.AddScoped<SubjectService>();
         services.AddScoped<SubjectVMService>();
         services.AddScoped<CategoriesVMService>();

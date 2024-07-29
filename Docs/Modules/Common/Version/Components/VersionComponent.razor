@@ -1,31 +1,82 @@
-﻿@namespace Docs.Modules.Common.Version.Components
+﻿@using _Imports = MudBlazor._Imports
+@using System.Reflection
+@namespace Docs.Modules.Common.Version.Components
 @inject IConfiguration Configuration
 @* @inject IOptions<AppOptions> appOptions *@
+@* IConfiguration *@
 @* #if DEBUG  *@
 @* #endif *@
 <div class="d-flex justify-xs-center justify-lg-end align-center justify-center">
-    
+        <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
 
-    @* IConfiguration *@
-    <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
-        @($"{Name} ver. {(IsVersionFromAppSetings ? Configuration.GetChildren().FirstOrDefault(section=>section.Key=="Version")?.Value : Version)}") by &copy; @By @DateTime.Now.Year
-    </span>
+@version
+        </span>
+
+
+    @*<span class=" l-3 fw-lighter" style="font-size: 0.7rem">
+                @($"{Name} ver. {(IsVersionFromAppSetings ? Configuration.GetChildren().FirstOrDefault(section => section.Key == "Version")?.Value : Version)}") by &copy; @By @DateTime.Now.Year
+            </span>*@
 
     @* IOptions *@
     @* <div class="mx-4 l-3 fw-lighter" style="font-size: 0.7rem">@($"{Name} ver. {(IsVersionFromAppSetings ? appOptions.Value.Version : Version)}") by &copy; @By @DateTime.Now.Year</div> *@
 </div>
 
 
-
 @code {
 
-    [Parameter]
-    public bool IsVersionFromAppSetings { get; set; } = true;
-    [Parameter]
-    public string? Name { get; set; } = string.Empty;
-    [Parameter]
-    public string? Version { get; set; } = string.Empty;
-    [Parameter]
-    public string? By { get; set; } =string.Empty;
+    [Parameter] public GetVersionFrom VersionFrom { get; set; } = GetVersionFrom.Assembly;
+    [Parameter] public string? Name { get; set; } = string.Empty;
+    [Parameter] public string? ManualVersion { get; set; } = string.Empty;
+    [Parameter] public string? By { get; set; } = string.Empty;
+
+    string? version;
+    bool isDebug;
+    string? assemblyVersion;
+    string? build;
+    string? appsettingVersion;
+    string? assemblyVersionAll;
+    string? assemblyMajor;
+    string? assemblyMinor;
+    string? assemblyBuild;
+    string? assemblyRevision;
+
+    protected override void OnInitialized()
+    {
+#if DEBUG
+        isDebug = true;
+#else
+        isDebug = false;
+#endif
+        appsettingVersion = Configuration?.GetChildren().FirstOrDefault(section => section.Key == "Version").Value;
+        assemblyVersionAll = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        var versionArray = assemblyVersionAll.Split('.').ToArray();
+        assemblyMajor = versionArray.ElementAtOrDefault(0)??"";
+        assemblyMinor =  versionArray.ElementAtOrDefault(1)??"";
+        assemblyBuild=versionArray.ElementAtOrDefault(2)??"";
+        assemblyRevision =versionArray.ElementAtOrDefault(3)??"";
+        assemblyVersion = $"{assemblyMajor}.{assemblyMinor}.{assemblyBuild}";
+
+        version =
+            VersionFrom switch
+            {
+                GetVersionFrom.Appsettings =>
+                    $"{Name} ver. {appsettingVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+                GetVersionFrom.Assembly =>
+                    $"{Name} ver. {assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+                GetVersionFrom.Manual =>
+                    $"{Name} ver. {ManualVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")} by &copy; {By} {DateTime.Now.Year}",
+
+                _ => ""
+            };
+
+    }
+
+    public enum GetVersionFrom
+    {
+        Appsettings,
+        Assembly,
+        Manual
+    }
 
 }

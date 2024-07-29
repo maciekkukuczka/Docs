@@ -1,12 +1,10 @@
-﻿using Docs.Modules.Common.Models;
-
-namespace Docs.Modules.Items.Models;
+﻿namespace Docs.Modules.Items.Models;
 
 // [ComplexType]
-public class DocPath:BaseModel
+public class DocPath : BaseModel
 {
-    public string Path { get; set; }=string.Empty;
-    
+    public string Path { get; set; } = string.Empty;
+
     // NAV
     public string? DocId { get; set; }
     public Doc? Doc { get; set; }
