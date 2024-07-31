@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Modules\Generic\Components\CrudComponent\GenericCrudComp.razor" />
+    <_ContentIncludedByDefault Remove="Config\Json\Exceptions\Exception.razor" />
   </ItemGroup>
 
 

@@ -37,7 +37,7 @@
                     <TemplateColumn Title="Dokumenty">
                         <CellTemplate>
                             @{
-                                string docs = String.Empty;
+                                string docs = string.Empty;
                                 foreach (var doc in context.Item.Docs)
                                 {
                                     docs = string.Join(", ", doc.Title);

@@ -1,4 +1,4 @@
-﻿using Docs.Modules.Subjects.Services;
+﻿using Docs.Config.Exc;
 
 namespace Docs.Config;
 
@@ -8,6 +8,10 @@ public static class DI
     {
         //SERILOG
         services.AddSerilog();
+        
+        //GLOBAL EXCEPTION HANDLER
+        services.AddExceptionHandler<ExceptionHandlerMiddleware>();
+        services.AddProblemDetails();
 
         services.AddRazorComponents()
             .AddInteractiveServerComponents();

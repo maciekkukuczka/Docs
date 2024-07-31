@@ -1,8 +1,9 @@
-    var configuration = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(),"Config","Json"))
-            .AddJsonFile("appsettings.json")
-           .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
-            .Build();
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Config", "Json"))
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+        true)
+    .Build();
 
 Log.Logger = new LoggerConfiguration().SerilogConfig(configuration);
 
@@ -22,6 +23,8 @@ try
 // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
+        app.UseExceptionHandler("/errormid");
+
         app.UseMigrationsEndPoint();
     }
     else
@@ -36,6 +39,7 @@ try
     // app.UseStaticFiles();
     app.MapStaticAssets();
     app.UseSerilogRequestLogging();
+
 
     app.UseAuthentication();
     app.UseAuthorization();

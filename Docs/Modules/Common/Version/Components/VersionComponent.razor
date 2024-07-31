@@ -8,7 +8,7 @@
 <div class="d-flex justify-xs-center justify-lg-end align-center justify-center">
     <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
         @Name ver. @version by &copy;@By @DateTime.Now.Year<br/>
-        <span class="d-flex justify-end" style="font-style: italic; color:white;">(dev @(isDebug?assemblyRevision:""))</span> 
+        <span class="d-flex justify-end" style="font-style: italic; color:white;">(dev @(isDebug ? assemblyRevision : ""))</span>
     </span>
 
 
@@ -63,7 +63,7 @@
                     appsettingVersion,
                 GetVersionFrom.Assembly =>
                     assemblyVersion,
-                    // $"{assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
+                // $"{assemblyVersion}{(isDebug ? $".{assemblyRevision ?? ""}" : "")}",
                 GetVersionFrom.Manual =>
                     ManualVersion,
 

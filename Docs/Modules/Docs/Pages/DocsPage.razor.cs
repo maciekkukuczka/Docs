@@ -24,7 +24,6 @@ public partial class DocsPage : IDisposable
     protected override async Task OnInitializedAsync()
     {
         // AppState.OnChange += StateHasChanged;
-
         stateSubscription = ApplicationState.RegisterOnPersisting(() =>
         {
             ApplicationState.PersistAsJson("Docs", docs);

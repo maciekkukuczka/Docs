@@ -1,6 +1,6 @@
 ﻿namespace Docs.Config;
 
-public static class MudBlazor
+public static class MudBlazorConfig
 {
     public static IServiceCollection AddMudBlazorServices(this IServiceCollection services)
     {

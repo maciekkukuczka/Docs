@@ -1,0 +1,13 @@
+﻿@namespace Docs.Config.Exc
+
+@page "/errormid"
+@inject NavigationManager Navigation
+
+<h3>Wystąpił problem</h3>
+<p>Proszę spróbować ponownie później.</p>
+
+<button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/"))">Powrót do strony głównej</button>
+
+@code {
+    
+}
