@@ -1,6 +1,4 @@
-﻿using Docs.Config.Exc;
-
-namespace Docs.Config;
+﻿namespace Docs.Config;
 
 public static class DI
 {

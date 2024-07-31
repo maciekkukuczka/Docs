@@ -11,12 +11,14 @@ global using System.Text.Json.Serialization;
 global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Components.Forms;
 global using Microsoft.AspNetCore.Components.Routing;
+global using System.Text.Json;
 
 // NAMESPACES
 global using Docs.Config;
 global using Docs.Data;
 global using Docs.Components;
 global using Docs.Components.Account;
+global using Docs.Config.Exc;
 
 // 3RD PARTY
 global using MudBlazor;

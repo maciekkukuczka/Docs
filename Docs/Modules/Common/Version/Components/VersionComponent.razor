@@ -46,8 +46,16 @@
 #else
         isDebug = false;
 #endif
-        appsettingVersion = Configuration?.GetChildren().FirstOrDefault(section => section.Key == "Version").Value;
-        assemblyVersionAll = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        
+        _ = VersionFrom switch
+        {
+            GetVersionFrom.Assembly =>
+                assemblyVersionAll = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+            GetVersionFrom.Appsettings =>
+                appsettingVersion = Configuration?.GetChildren().FirstOrDefault(section => section.Key == "Version")?.Value??"",
+            _ => ""
+        };
+
 
         var versionArray = assemblyVersionAll.Split('.').ToArray();
         assemblyMajor = versionArray.ElementAtOrDefault(0) ?? "";

@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Docs.Config.Json;
+﻿namespace Docs.Config.Json;
 
 public static class JsonConfig
 {

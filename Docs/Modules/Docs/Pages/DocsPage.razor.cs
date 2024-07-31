@@ -23,6 +23,7 @@ public partial class DocsPage : IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        // throw new ArgumentException();
         // AppState.OnChange += StateHasChanged;
         stateSubscription = ApplicationState.RegisterOnPersisting(() =>
         {
