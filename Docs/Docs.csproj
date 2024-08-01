@@ -54,6 +54,12 @@
     <AdditionalFiles Include="Modules\Common\Generic\MiniCrud\Components\MiniCrudComp.razor" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20240728200616_Links.cs" />
+    <Compile Remove="Migrations\20240728200616_Links.Designer.cs" />
+  </ItemGroup>
+
 <!--
   <ItemGroup>
     <Folder Include="Modules\Docs\Components\" />

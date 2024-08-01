@@ -79,7 +79,8 @@
     }*/
 
 
-
+   /* fiolet #776BE7*/
+   
     .loader {
         transform: rotateZ(45deg);
         perspective: 1000px;
@@ -87,6 +88,8 @@
         width: 48px;
         height: 48px;
         color: #fff;
+        
+        
     }
 
     .loader:before,
@@ -104,7 +107,7 @@
     }
 
     .loader:after {
-        color: #FF3D00;
+        color:#5A4BE2 ;
         transform: rotateY(70deg);
         animation-delay: .4s;
     }
