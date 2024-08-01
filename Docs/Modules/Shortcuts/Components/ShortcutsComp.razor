@@ -1,0 +1,31 @@
+﻿@namespace Docs.Modules.Shortcuts
+@inject  ShortcutsService ShortcutsService
+@inject  ISnackbar Snackbar
+
+<MudTextField T="Shortcut" Label="Wcisnij szukany skrót" OnKeyDown="(e) => KeyPressed(e)"></MudTextField>
+
+<MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="pressedKey" Edited="true"
+              OnAddItem="ShortcutAdded" OnEditItem="ShortcutEdited" OnRemoveItem="ShortcutRemove"/>
+
+@code {
+
+    Shortcut pressedKey = new();
+    HashSet<Shortcut> shortcuts = [];
+
+
+    void KeyPressed(KeyboardEventArgs e)
+    {
+        pressedKey.Key = e.Key;
+        pressedKey.Alt = e.AltKey;
+        pressedKey.Shift = e.ShiftKey;
+        pressedKey.Ctrl = e.CtrlKey;
+    }
+
+    async Task ShortcutAdded(Shortcut shortcut) => ShowResultMessage(await ShortcutsService.Add(shortcut));
+    async Task ShortcutEdited(Shortcut shortcut) => ShowResultMessage(await ShortcutsService.Update(shortcut));
+    async Task ShortcutRemove(Shortcut shortcut)=>ShowResultMessage(( await ShortcutsService.Delete(shortcut)));
+
+    void ShowResultMessage(Result result) => Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+
+
+}

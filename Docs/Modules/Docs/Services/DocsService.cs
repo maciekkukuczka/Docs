@@ -28,6 +28,7 @@ public class DocsService(
                 query = query.Include(include);
             }
         }
+        
 
         
         //Filters
@@ -124,6 +125,7 @@ public class DocsService(
 
         var existDoc = await dbContext.Docs
             .Include(x => x.Categories)
+            .Include(x=>x.Links)
             .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
         if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");

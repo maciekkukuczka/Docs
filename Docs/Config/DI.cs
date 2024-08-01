@@ -1,4 +1,6 @@
-﻿namespace Docs.Config;
+﻿using Docs.Modules.Shortcuts;
+
+namespace Docs.Config;
 
 public static class DI
 {
@@ -48,6 +50,7 @@ public static class DI
         services.AddScoped<SubjectVMService>();
         services.AddScoped<CategoriesVMService>();
         services.AddScoped(typeof(LinksService<>));
+        services.AddScoped<ShortcutsService>();
 
         return services;
     }

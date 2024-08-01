@@ -1,3 +1,5 @@
+using Docs.Modules.Shortcuts;
+
 namespace Docs.Data;
 
 public class ApplicationDbContext(
@@ -15,6 +17,7 @@ public class ApplicationDbContext(
     public DbSet<Note> Notes { get; set; }
     public DbSet<DocPath> DocPaths { get; set; }
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<Shortcut>Shortcuts { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
