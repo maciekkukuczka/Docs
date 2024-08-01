@@ -7,6 +7,8 @@ public static class DI
         //SERILOG
         services.AddSerilog();
         
+        // OPEN TELEMETRY
+        
         //GLOBAL EXCEPTION HANDLER
         services.AddExceptionHandler<ExceptionHandlerMiddleware>();
         services.AddProblemDetails();

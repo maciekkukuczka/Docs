@@ -24,6 +24,8 @@ global using Docs.Config.Exc;
 global using MudBlazor;
 global using MudBlazor.Services;
 global using Serilog;
+global using Serilog.Sinks.OpenTelemetry;
+global using Serilog.Sinks.SystemConsole.Themes;
 
 // MODULES
 global using Docs.Modules.Generic.Services;
