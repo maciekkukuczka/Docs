@@ -2,73 +2,160 @@
 @inject  ShortcutsService ShortcutsService
 @inject  ISnackbar Snackbar
 
-<MudTextField T="Shortcut" Label="Wcisnij szukany skrót" OnKeyDown="(e) => KeyPressed(e)"
-              KeyDownPreventDefault="true">
-</MudTextField>
+<MudGrid>
+    <MudItem xs="12">
 
-@if (shortcuts is null || shortcuts.Count == 0)
-{
-    <NoDataComp/>
-}
-else
-{
-    <MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="model" Edited="true"
-                  OnAddItem="ShortcutAdded" OnEditItem="ShortcutEdited" OnRemoveItem="ShortcutRemove">
-
-        @* EDIT *@
-        <ChildContent>
-            <MudElement HtmlTag="div">
-
-                <MudStack Row="true">
-                    <MudCheckBox Label="Alt" @bind-Value="pressedKey.Alt"/>
-                    <MudCheckBox Label="Ctrl" @bind-Value="pressedKey.Ctrl"/>
-                    <MudCheckBox Label="Shift" @bind-Value="pressedKey.Shift"/>
-                </MudStack>
-                <MudElement HtmlTag="div">
-                    <MudStack Row="true" AlignItems="AlignItems.Stretch">
-                        <MudTextField Label="Klawisz" @bind-Value="pressedKey.Key"/>
-                        <MudTextField Label="Opis" @bind-Value="pressedKey.Description"/>
-                    </MudStack>
-                </MudElement>
+        @if (!string.IsNullOrWhiteSpace(shortcut.Key))
+        {
+            <MudElement HtmlTag="div" Class="d-flex justify-end">
+                @* <MudIconButton   OnClick="Clear" Color="Color.Secondary" Style="background-color:White;" Icon="@Icons.Material.Filled.Clear" Size="Size.Small"/> *@
+                <MudFab OnClick="Clear" Color="Color.Secondary" Label="Wyczyść" StartIcon="@Icons.Material.Filled.Clear" Size="Size.Small"/>
             </MudElement>
-        </ChildContent>
+        }
+        <MudTextField T="Shortcut"  Variant="Variant.Outlined" Label="Wprowadź  skrót tutaj..." OnKeyDown="(e) => KeyDown(e)"
+                      KeyDownPreventDefault="true">
+        </MudTextField>
 
-        @* NO EDIT *@
-        <NoEditedItemsTemplate>
-            <MudText> @context.Key</MudText>
-            <MudText> @context.Description</MudText>
-        </NoEditedItemsTemplate>
-    </MiniCrudComp>
-}
+        @if (shortcuts is null)
+        {
+            <NoDataComp/>
+        }
+        else
+        {
+            <MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="shortcut" EditMode="true"
+                          Edited="@((isEdit) => { edited = isEdit; })" OnSubmit="ShortcutSubmitted" OnEditItem="ShortcutEdit"OnRemoveItem="ShortcutRemove">
 
+                @* EDIT *@
+                <ChildContent>
+                    <MudElement HtmlTag="div" Class="mb-5" Style="width: 100%;">
+
+                        <MudStack Row="true">
+                            <MudCheckBox Label="Alt" @bind-Value="shortcut.Alt"/>
+                            <MudCheckBox Label="Ctrl" @bind-Value="shortcut.Ctrl"/>
+                            <MudCheckBox Label="Shift" @bind-Value="shortcut.Shift"/>
+                        </MudStack>
+                        <MudElement HtmlTag="div">
+                            <MudStack Row StretchItems="StretchItems.End" >
+                                <MudTextField Label="Skrót" @bind-Value="shortcut.Key" Class="flex-none"/>
+                                <MudTextField Label="Aplikacja" @bind-Value="shortcut.Application" Class="flex-none"/>
+                                <MudTextField Label="Opis" @bind-Value="shortcut.Description"/>
+                            </MudStack>
+                        </MudElement>
+                    </MudElement>
+                </ChildContent>
+
+                @* NO EDIT *@
+                <NoEditedItemsTemplate>
+                    <MudText Style="font-style: italic; font-weight: bold" Color="Color.Primary"> @context.FullShortcut</MudText>
+                    <MudText Color="Color.Info"> @context.Application</MudText>
+                    <MudText> @context.Description</MudText>
+                </NoEditedItemsTemplate>
+            </MiniCrudComp>
+        }
+    </MudItem>
+</MudGrid>
 
 @code {
+    /*bool isAltPressed = false;
+    bool isCtrlPressed = false;
+    bool isShiftPressed = false;
+    string lastKeyPressed = null;*/
 
-    Shortcut model = new();
-    Shortcut pressedKey = new();
+    Shortcut shortcut = new();
     HashSet<Shortcut> shortcuts = [];
+    bool edited = false;
 
-    protected override async Task OnInitializedAsync()=>await GetShortcuts();
+    protected override async Task OnInitializedAsync() => await GetShortcuts();
 
-    async Task GetShortcuts()=> shortcuts = (await ShortcutsService.Get()).Data;
+    async Task GetShortcuts() => shortcuts = (await ShortcutsService.Get()).Data;
 
-    async Task KeyPressed(KeyboardEventArgs e)
+    async Task KeyDown(KeyboardEventArgs e)
     {
-        model.Key = e.Key;
-        model.Alt = e.AltKey;
-        model.Shift = e.ShiftKey;
-        model.Ctrl = e.CtrlKey;
+        /*
+        if (e.Key == "Alt") isAltPressed = true;
+        if (e.Key == "Control") isCtrlPressed = true;
+        if (e.Key == "Shift") isShiftPressed = true;
+        lastKeyPressed = e.Key;
+        */
+
+
+        shortcut.Key = e.Key;
+        shortcut.Alt = e.AltKey;
+        shortcut.Shift = e.ShiftKey;
+        shortcut.Ctrl = e.CtrlKey;
+        shortcut.FullShortcut = $"{(e.AltKey ? "Alt + " : "")}{(e.CtrlKey ? "Ctrl + " : "")}{(e.ShiftKey ? "Shift + " : "")}{e.Key}";
+
+        await Task.Delay(1000);
+        shortcuts = shortcuts.Where(x =>
+            x.Key.Equals(shortcut.Key, StringComparison.OrdinalIgnoreCase) &&
+            x.Alt == shortcut.Alt &&
+            x.Shift == shortcut.Shift &&
+            x.Ctrl == shortcut.Ctrl
+        ).ToHashSet();
+
+
+        /*if (!string.IsNullOrWhiteSpace(model.Key) && !model.Alt && !model.Ctrl && !model.Shift)
+        {
+            shortcuts = shortcuts.Where(x =>
+                x.Key.Equals(model.Key, StringComparison.OrdinalIgnoreCase) &&
+                x.Alt == isAltPressed &&
+                x.Shift == isShiftPressed &&
+                x.Ctrl == isCtrlPressed
+            ).ToHashSet();
+        }
+
+        if (model.Alt) sb.Append("Alt + ");
+        if (model.Ctrl) sb.Append("Ctrl + ");
+        if (model.Shift) sb.Append("Shift + ");
+        if (string.IsNullOrWhiteSpace(model.Key))
+        {
+            sb.Append(model.Key);
+            model.FullShortcut = sb.Append(model.Key).ToString();
+        }
+
+        if (!string.IsNullOrWhiteSpace(model.Key) && !model.Alt && !model.Ctrl && !model.Shift)
+        {
+            shortcuts = shortcuts.Where(x =>
+                x.Key.Contains(e.Key, StringComparison.OrdinalIgnoreCase)
+                && x.Alt.Equals(e.AltKey)
+                && x.Ctrl.Equals(e.CtrlKey)
+                && x.Shift.Equals(e.ShiftKey)
+            ).ToHashSet();
+        }*/
     }
 
-    async Task ShortcutAdded(Shortcut shortcut) =>await ShowResultMessage(await ShortcutsService.Add(shortcut));
-    async Task ShortcutEdited(Shortcut shortcut)
+    /*Task KeyUp(KeyboardEventArgs e)
     {
-        
-        await ShowResultMessage(await ShortcutsService.Update(shortcut));
+        if (e.Key == "Alt") isAltPressed = false;
+        if (e.Key == "Control") isCtrlPressed = false;
+        if (e.Key == "Shift") isShiftPressed = false;
+        return Task.CompletedTask;
+    }*/
+
+
+    async Task ShortcutSubmitted(Shortcut shortcut)
+    {
+        if (edited)
+        {
+            this.shortcut = shortcut;
+            await ShowResultMessage(await ShortcutsService.Update(shortcut));
+        }
+        else
+        {
+            await ShowResultMessage(await ShortcutsService.Add(shortcut));
+        }
+
+        this.shortcut = new();
     }
 
-    async Task ShortcutRemove(Shortcut shortcut) =>await ShowResultMessage((await ShortcutsService.Delete(shortcut)));
-    
+    async Task ShortcutEdit(Shortcut shortcut)
+    {
+        this.shortcut = shortcut;
+        // await ShowResultMessage((await ShortcutsService.Delete(shortcut)));
+    }
+
+    async Task ShortcutRemove(Shortcut shortcut) => await ShowResultMessage((await ShortcutsService.Delete(shortcut)));
+
 
     async Task ShowResultMessage(Result result)
     {
@@ -76,5 +163,11 @@ else
         await GetShortcuts();
     }
 
+
+    async Task Clear()
+    {
+        shortcut = new();
+        await GetShortcuts();
+    }
 
 }

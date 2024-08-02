@@ -1,7 +1,11 @@
 ﻿@namespace Docs.Modules.Common.DecorativeComponents
 
-<MudText Typo="Typo.h6" Color="Color.Primary" Class="ms-5 mb-5" Style="text-decoration-line: underline">@Name</MudText>
+<MudText Typo="Typo.h6" Color="Color.Primary" Class="@($"mb-5 {Class}")" Style="@($"{OwnStyle} {Style})")">@Name</MudText>
 
 @code {
     [Parameter] public string? Name { get; set; }
+    [Parameter] public bool Uppercase { get; set; } = true;
+    [Parameter]public string Class { get; set; }
+    [Parameter]public string Style { get; set; }
+    string OwnStyle=> $"text-decoration-line: underline; {(Uppercase ? "text-transform: uppercase;" : "")}";
 }

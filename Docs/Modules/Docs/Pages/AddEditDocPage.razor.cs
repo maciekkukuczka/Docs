@@ -13,6 +13,8 @@ public partial class AddEditDocPage : IDisposable
     [Parameter] public string? Id { get; set; }
     [Parameter] public bool IsEdited { get; set; }
 
+    bool isLinkEdited = false;
+
     // Doc? Doc { get; set; }
     DocVM? Doc { get; set; }
     LinkVM? linkModel = new();
@@ -52,7 +54,7 @@ public partial class AddEditDocPage : IDisposable
         converter.GetFunc = text => allCategories?.FirstOrDefault(x => x.Name.Equals(text));
     }
 
-
+// DOC
     async Task Submit(EditContext context)
     {
         var submittedDoc = context.Model as DocVM;
@@ -90,16 +92,18 @@ public partial class AddEditDocPage : IDisposable
         }
     }
 
+    void EditDoc()
+    {
+        IsEdited = !IsEdited;
+    }
 
+
+// CATEGORIES
     async Task GetAllCategories()
     {
         allCategories = (await CategoriesService.GetCategories(userId)).Data;
     }
 
-    async Task Edit()
-    {
-        IsEdited = !IsEdited;
-    }
 
     Task OnCategorySelected(IEnumerable<CategoryVM> selectedCategories)
     {
@@ -113,24 +117,36 @@ public partial class AddEditDocPage : IDisposable
         return Task.CompletedTask;
     }
 
+    // LINKS
+    Task SubmitLink(LinkVM link)
+    {
+        _ =isLinkEdited ? EditLink(link) : AddLink(link);
 
-    void AddLink(LinkVM link)
+        return Task.CompletedTask;
+    }
+
+    Task AddLink(LinkVM link)
     {
         Doc.Links.Add(link);
         linkModel = new();
+        return Task.CompletedTask;
     }
 
-    void EditLink(LinkVM link)
+    Task EditLink(LinkVM link)
     {
         Doc.Links.Remove(link);
         Doc.Links.Add(link);
         linkModel = link;
+        return Task.CompletedTask;
+
     }
 
-    void RemoveLink(LinkVM link)
+Task RemoveLink(LinkVM link)
     {
         Doc.Links.Remove(link);
         linkModel = new();
+        return Task.CompletedTask;
+
     }
 
     void OnLocationChanged(object sender, LocationChangedEventArgs e)

@@ -1,20 +1,20 @@
 ﻿@typeparam T where T : class, new()
-<MudGrid>
-    <MudItem xs="6">
+@*<MudGrid>
+    <MudItem xs="6">*@
 
-        @if (Edited)
+        @if (EditMode)
         {
+            @* EDIT *@
             <MudPaper Outlined="true" Class="pa-5">
-                <PageHeaderComp Name="@Name"/>
+                <PageHeaderComp Name="@Name" Class="ms-0"/>
 
                 <MudStack Row="false">
 
-                    @* EDIT *@
                     <EditForm Model="@Model" OnValidSubmit="Submit">
                         <DataAnnotationsValidator/>
                         <MudStack Row="true" Context="mud">
                             @ChildContent
-                            <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdit ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
+                            <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdited ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
                         </MudStack>
                     </EditForm>
 
@@ -44,7 +44,7 @@
             if (Items is not null && Items.Count > 0)
             {
                 <MudPaper Outlined="true" Class="pa-5">
-                <PageHeaderComp Name="@Name"/>
+                    <PageHeaderComp Name="@Name"/>
                     @foreach (var item in Items)
                     {
                         <MudStack Row="true">
@@ -55,36 +55,38 @@
             }
         }
 
-    </MudItem>
-</MudGrid>
+    @*</MudItem>
+</MudGrid>*@
 
 
 @code {
     [Parameter] public string Name { get; set; }
-    [Parameter, EditorRequired] public EventCallback<T> OnAddItem { get; set; }
-    [Parameter, EditorRequired] public EventCallback<T> OnEditItem { get; set; }
-    [Parameter, EditorRequired] public EventCallback<T> OnRemoveItem { get; set; }
+    [Parameter] public EventCallback<T> OnSubmit { get; set; }
+    [Parameter] public EventCallback<T> OnEditItem { get; set; }
+    [Parameter] public EventCallback<T> OnRemoveItem { get; set; }
     [Parameter, EditorRequired] public T Model { get; set; } = new();
     [Parameter, EditorRequired] public HashSet<T> Items { get; set; }
-    [Parameter, EditorRequired] public bool Edited { get; set; }
+    [Parameter] public EventCallback<bool> Edited { get; set; }
+    [Parameter, EditorRequired] public bool EditMode { get; set; }
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter, EditorRequired] public RenderFragment<T>? NoEditedItemsTemplate { get; set; }
 
+    bool isEdited;
     // [Parameter, EditorRequired] public Func<T, string> GetUrl { get; set; }
-    bool isEdit;
 
 
     async Task Submit(EditContext context)
     {
         var item = (context.Model as T);
-        await OnAddItem.InvokeAsync(item);
-        isEdit = false;
+        await Edited.InvokeAsync(isEdited);
+        await OnSubmit.InvokeAsync(item);
+        isEdited = false;
     }
 
     async Task Edit(T item)
     {
-        isEdit = true;
-        Model = item;
+        isEdited = true;
+        await Edited.InvokeAsync(isEdited);
         await OnEditItem.InvokeAsync(item);
     }
 

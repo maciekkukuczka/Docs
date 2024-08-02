@@ -4,12 +4,13 @@
 <MudNavMenu Class="d-flex flex-column flex-grow-1 justify-space-between">
     <div>
         <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.DocumentScanner">Docs</MudNavLink>
-        <MudNavLink Href="/subjects" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Subject">Tematy</MudNavLink>
-        <MudNavLink Href="/categories" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Category">Kategorie</MudNavLink>
         <MudNavLink Href="/shortcuts" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Shortcut">Skróty</MudNavLink>
         @* <MudNavLink Href="auth" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Lock">Auth Required</MudNavLink> *@
     </div>
     <div>
+        <MudNavLink Href="/subjects" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Subject">Tematy</MudNavLink>
+        <MudNavLink Href="/categories" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Category">Kategorie</MudNavLink>
+        <MudDivider Class="my-4"/>
         <MudNavLink Href="/release-notes" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.NewReleases">
             <MudText Typo="Typo.caption">
                 Release Notes
