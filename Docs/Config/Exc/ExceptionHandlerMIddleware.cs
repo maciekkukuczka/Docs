@@ -12,7 +12,7 @@ public class ExceptionHandlerMiddleware : IExceptionHandler
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = "Server Error FROM MIDLEWARE!",
-            Type = ""
+            Detail = exception.Message,
         };
         
         httpContext.Response.StatusCode = problemDetails.Status.Value;

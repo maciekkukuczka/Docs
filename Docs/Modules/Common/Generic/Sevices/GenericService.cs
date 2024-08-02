@@ -3,7 +3,7 @@
 public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContextFactory) where T : BaseModel, new()
 {
     // GET
-    protected async Task<Result<HashSet<T>>> Get(
+    public async Task<Result<HashSet<T>>> Get(
         HashSet<Expression<Func<T, object>>>? includes = null
         , HashSet<Expression<Func<T, bool>>>? filters = null
         , CancellationToken cancellationToken = default

@@ -2,30 +2,79 @@
 @inject  ShortcutsService ShortcutsService
 @inject  ISnackbar Snackbar
 
-<MudTextField T="Shortcut" Label="Wcisnij szukany skrót" OnKeyDown="(e) => KeyPressed(e)"></MudTextField>
+<MudTextField T="Shortcut" Label="Wcisnij szukany skrót" OnKeyDown="(e) => KeyPressed(e)"
+              KeyDownPreventDefault="true">
+</MudTextField>
 
-<MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="pressedKey" Edited="true"
-              OnAddItem="ShortcutAdded" OnEditItem="ShortcutEdited" OnRemoveItem="ShortcutRemove"/>
+@if (shortcuts is null || shortcuts.Count == 0)
+{
+    <NoDataComp/>
+}
+else
+{
+    <MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="model" Edited="true"
+                  OnAddItem="ShortcutAdded" OnEditItem="ShortcutEdited" OnRemoveItem="ShortcutRemove">
+
+        @* EDIT *@
+        <ChildContent>
+            <MudElement HtmlTag="div">
+
+                <MudStack Row="true">
+                    <MudCheckBox Label="Alt" @bind-Value="pressedKey.Alt"/>
+                    <MudCheckBox Label="Ctrl" @bind-Value="pressedKey.Ctrl"/>
+                    <MudCheckBox Label="Shift" @bind-Value="pressedKey.Shift"/>
+                </MudStack>
+                <MudElement HtmlTag="div">
+                    <MudStack Row="true" AlignItems="AlignItems.Stretch">
+                        <MudTextField Label="Klawisz" @bind-Value="pressedKey.Key"/>
+                        <MudTextField Label="Opis" @bind-Value="pressedKey.Description"/>
+                    </MudStack>
+                </MudElement>
+            </MudElement>
+        </ChildContent>
+
+        @* NO EDIT *@
+        <NoEditedItemsTemplate>
+            <MudText> @context.Key</MudText>
+            <MudText> @context.Description</MudText>
+        </NoEditedItemsTemplate>
+    </MiniCrudComp>
+}
+
 
 @code {
 
+    Shortcut model = new();
     Shortcut pressedKey = new();
     HashSet<Shortcut> shortcuts = [];
 
+    protected override async Task OnInitializedAsync()=>await GetShortcuts();
 
-    void KeyPressed(KeyboardEventArgs e)
+    async Task GetShortcuts()=> shortcuts = (await ShortcutsService.Get()).Data;
+
+    async Task KeyPressed(KeyboardEventArgs e)
     {
-        pressedKey.Key = e.Key;
-        pressedKey.Alt = e.AltKey;
-        pressedKey.Shift = e.ShiftKey;
-        pressedKey.Ctrl = e.CtrlKey;
+        model.Key = e.Key;
+        model.Alt = e.AltKey;
+        model.Shift = e.ShiftKey;
+        model.Ctrl = e.CtrlKey;
     }
 
-    async Task ShortcutAdded(Shortcut shortcut) => ShowResultMessage(await ShortcutsService.Add(shortcut));
-    async Task ShortcutEdited(Shortcut shortcut) => ShowResultMessage(await ShortcutsService.Update(shortcut));
-    async Task ShortcutRemove(Shortcut shortcut)=>ShowResultMessage(( await ShortcutsService.Delete(shortcut)));
+    async Task ShortcutAdded(Shortcut shortcut) =>await ShowResultMessage(await ShortcutsService.Add(shortcut));
+    async Task ShortcutEdited(Shortcut shortcut)
+    {
+        
+        await ShowResultMessage(await ShortcutsService.Update(shortcut));
+    }
 
-    void ShowResultMessage(Result result) => Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+    async Task ShortcutRemove(Shortcut shortcut) =>await ShowResultMessage((await ShortcutsService.Delete(shortcut)));
+    
+
+    async Task ShowResultMessage(Result result)
+    {
+        Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+        await GetShortcuts();
+    }
 
 
 }

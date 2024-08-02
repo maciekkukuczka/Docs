@@ -5,7 +5,7 @@
 @inject PersistentComponentState PersistantComponentState
 @implements IDisposable
 
-@if (Subjects is null)
+@if (Subjects is null||Subjects.Count==0)
 {
     <NoDataComp/>
 }
@@ -55,7 +55,7 @@ else
             ? restored
             : (await SubjectService.GetSubjects(user)).Data;
 
-        if (selectedSubject is null)
+        if (selectedSubject is null&&(Subjects is not null&&Subjects.Count>0))
         {
             selectedSubject = Subjects.FirstOrDefault();
             await SelectSubject();

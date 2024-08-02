@@ -54,5 +54,13 @@ public class ApplicationDbContext(
             
             builder.Entity<Subject>().HasQueryFilter(x=>x.UserId == currentUserId);
         }
+        
+        /*
+        builder.Entity<Subject>(x=>
+        {
+            x.Property(w => w.Id).ValueGeneratedOnAdd();
+            x.Property(w => w.Name).;
+        });
+    */
     }
 }

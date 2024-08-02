@@ -60,6 +60,11 @@
     <Compile Remove="Migrations\20240728200616_Links.Designer.cs" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
 <!--
   <ItemGroup>
     <Folder Include="Modules\Docs\Components\" />
