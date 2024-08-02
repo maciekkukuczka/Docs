@@ -27,12 +27,12 @@ else
     <EditForm Model="@Doc" OnValidSubmit="Submit">
         <DataAnnotationsValidator/>
 
-        <MudGrid>
+        <MudGrid Spacing="20">
             @* <MudItem xs="12"> *@
             @* <MudPaper> *@
             @if (IsEdited)
             {
-                <MudItem xs="12">
+                <MudItem xs="12" >
                     <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
                                   @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!IsEdited"/>
                 </MudItem>
@@ -53,8 +53,8 @@ else
             }
             else
             {
-                <MudItem xs="12">
-                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                <MudItem xs="12" sm="6" md="12">
+                    <MudPaper Outlined="true" Class="pa-5 ">
                         <MudText Typo="Typo.h5">
                             @Doc.Title
                         </MudText>
@@ -74,8 +74,8 @@ else
             }
             else if (!string.IsNullOrWhiteSpace(Doc.ShortDescription))
             {
-                <MudItem xs="6">
-                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                <MudItem xs="12" md="6">
+                    <MudPaper Outlined="true" Class="pa-5">
                         <MudText>
                             @Doc.ShortDescription
                         </MudText>
@@ -93,8 +93,8 @@ else
             }
             else if (!string.IsNullOrWhiteSpace(Doc.Description))
             {
-                <MudItem xs="6">
-                    <MudPaper Outlined="true" Class="pa-3 ma-3">
+                <MudItem xs="12" md="6">
+                    <MudPaper Outlined="true" Class="pa-5">
                         <MudText>
                             @Doc.Description
                         </MudText>
@@ -103,7 +103,6 @@ else
             }
 
             @* LINKS *@
-            <MudGrid>
                 <MudItem xs="6">
 
                     <MiniCrudComp Name="Linki" T="LinkVM" Model="@linkModel" Items="Doc.Links.ToHashSet()"EditMode="@(IsEdited)"
@@ -128,7 +127,6 @@ else
                     </MiniCrudComp>
 
                 </MudItem>
-            </MudGrid>
 
             @* SUBMIT *@
             @if (IsEdited)

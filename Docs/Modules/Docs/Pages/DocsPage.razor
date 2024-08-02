@@ -23,65 +23,70 @@
         else
         {
             // GRID
-            <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="SearchFilter">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">Docsy</MudText>
-                    <MudSpacer/>
-                    <MudTextField @bind-Value="searchString" Placeholder="Szukaj" Adornment="Adornment.Start" Immediate="true"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
-                    </MudTextField>
-                </ToolBarContent>
-                <Columns>
-                    <TemplateColumn >
-                        <CellTemplate >
-                            @* @(docs.IndexOf(context.Item) + 1) *@
-                        </CellTemplate>
-                    </TemplateColumn>
-                    
-                    @* Title *@
-                    <TemplateColumn Title="Nazwa">
-                        <CellTemplate>
-                            <LinkButton  Colored="true"  Text="@context.Item.Title"  Style="text-align: left;" OnClick="()=>Edit(context.Item)"/>
-                            @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
 
-                    @* Subjects *@
-                    <TemplateColumn TItle="Tematy">
-                        <CellTemplate>
-                            @foreach (var subject in context.Item?.Subjects)
-                            {
-                                <span>@subject.Name</span>
-                            }
-                        </CellTemplate>
-                    </TemplateColumn>
-                    
-                    @* Categories *@
-                    <TemplateColumn TItle="Kategorie">
-                        <CellTemplate>
-                            @foreach (var category in context.Item?.Categories)
-                            {
-                                <span>@category.Name</span>
-                            }
-                        </CellTemplate>
-                    </TemplateColumn>
-                    
-                    @* Buttons *@
-                    <TemplateColumn CellClass="d-flex justify-end">
-                        <CellTemplate>
-                            <MudStack Row>
-                                @*<MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
+            <MudPaper Outlined="true">
+                <MudDataGrid @ref="dataGrid" Items="@docs" QuickFilter="SearchFilter"Elevation="0">
+
+                    <ToolBarContent >
+                        <PageHeaderComp Name="Dokumenty" Class="ps-1 pt-5"/>
+                        <MudSpacer/>
+                        <MudTextField @bind-Value="searchString" Placeholder="Szukaj" Adornment="Adornment.Start" Immediate="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+                        </MudTextField>
+                    </ToolBarContent>
+
+                    <Columns>
+                        <TemplateColumn >
+                            <CellTemplate >
+                                @* @(docs.IndexOf(context.Item) + 1) *@
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                        @* Title *@
+                        <TemplateColumn Title="Nazwa">
+                            <CellTemplate>
+                                <LinkButton Colored="true" Text="@context.Item.Title" Style="text-align: left;" OnClick="() => Edit(context.Item)"/>
+                                @* <MudLink Href="@($"/doc-details/{context.Item.Id}")" Underline="Underline.Always">@context.Item.Title</MudLink> *@
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <PropertyColumn Property="x => x.ShortDescription" Title="Krótki opis"/>
+
+                        @* Subjects *@
+                        <TemplateColumn TItle="Tematy">
+                            <CellTemplate>
+                                @foreach (var subject in context.Item?.Subjects)
+                                {
+                                    <span>@subject.Name</span>
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                        @* Categories *@
+                        <TemplateColumn TItle="Kategorie">
+                            <CellTemplate>
+                                @foreach (var category in context.Item?.Categories)
+                                {
+                                    <span>@category.Name</span>
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+
+                        @* Buttons *@
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <CellTemplate>
+                                <MudStack Row>
+                                    @*<MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Custom.Uncategorized.Radioactive"
                                            OnClick="@(() => Edit(context.Item))">
                                     Edytuj
                                 </MudButton>*@
-                                <DeleteButton Colored="true" Small="true" OnClick="@(() => Remove(context.Item.Id))"/>
-                       
-                            </MudStack>
-                        </CellTemplate>
-                    </TemplateColumn>
-                </Columns>
-            </MudDataGrid>
+                                    <DeleteButton Colored="true" Small="true" OnClick="@(() => Remove(context.Item.Id))"/>
+
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudPaper>
         }
     </MudItem>
 </MudGrid>

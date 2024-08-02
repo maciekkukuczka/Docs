@@ -13,7 +13,8 @@ else
 {
     <MudGrid>
         <MudItem xs="12">
-            <MudPaper >
+            <MudPaper Outlined="true" Class="my-5 pa-5">
+                <PageHeaderComp Name="Kategorie" />
                 <MudTreeView T="string" Hover="true">
                     <MudTreeViewItem Text="Kategorie" Expanded="true">
 
@@ -31,7 +32,7 @@ else
                             <MudBadge Content="@perCategoryCount" Overlap="true" Class="mx-6 my-4" Color="Color.Primary">
                             </MudBadge>
                         *@
-                                <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
+                            <MudTreeViewItem OnClick="@(async () => await OnCategorySelected.InvokeAsync(category))" Text="@category.Name" Expanded/>
                         }
                     </MudTreeViewItem>
                 </MudTreeView>
