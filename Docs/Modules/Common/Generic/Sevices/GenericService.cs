@@ -80,20 +80,38 @@ public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContext
         }
         catch (DbUpdateException e)
         {
-            return Result.Error($"{Messages.ObjectCannotBeSaved<T>()}\n\nID {entity.Id}\n\n{e.Message}");
+            return Result.Error($"{Messages.ObjectCannotBeSaved<T>()}\nID {entity.Id}\n{e.Message}");
         }
         catch (Exception e)
         {
-            return Result.Error($"{Messages.ObjectCannotBeSaved<T>()}\n\nID {entity.Id}\n\n{e.Message}");
+            return Result.Error($"{Messages.ObjectCannotBeSaved<T>()}\nID {entity.Id}\n{e.Message}");
         }
     }
-    
+
     //DELETE
     public async Task<Result> Delete(T entity)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        return Result.OK();
+        var exist = await db.Set<T>().FindAsync(entity.Id);
+        if (exist is null) return Result.Error($"{Messages.ObjectNotFound<T>()}\n {entity.Id}");
+
+        db.Set<T>().Remove(exist);
+
+        try
+        {
+            var saveResult = await db.SaveChangesAsync();
+            if (saveResult <= 0) return Result.Error<T>(Messages.ObjectCannotBeDeleted<T>());
+            return Result.OK($"{Messages.ObjectDeleted<T>()}: {entity.Id}");
+        }
+        catch (DbUpdateException e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeDeleted<T>()}\nID {entity.Id}\n{e.Message}");
+        }
+        catch (Exception e)
+        {
+            return Result.Error($"{Messages.ObjectCannotBeDeleted<T>()}\nID {entity.Id}\n{e.Message}");
+        }
+
         // if (entity is null)
     }
-    
 }
