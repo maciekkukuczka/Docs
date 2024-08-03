@@ -1,62 +1,57 @@
 ﻿@typeparam T where T : class, new()
-@*<MudGrid>
-    <MudItem xs="6">*@
 
-        @if (EditMode)
-        {
-            @* EDIT *@
-            <MudPaper Outlined="true" Class="pa-5">
-                <PageHeaderComp Name="@Name" />
-                @HeaderContent
-                <MudStack Row="false">
+@if (EditMode)
+{
+    @* EDIT *@
+    <MudPaper Outlined="true" Class="pa-5">
+        <PageHeaderComp Name="@Name"/>
+        @HeaderContent
+        <MudStack Row="false">
 
-                    <EditForm Model="@Model" OnValidSubmit="Submit">
-                        <DataAnnotationsValidator/>
-                        <MudStack Row="true" Context="mud">
-                            @EditFormContent
-                            <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdited ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
-                        </MudStack>
-                    </EditForm>
-
-                    @if (Items is not null)
-                    {
-                        foreach (var item in Items)
-                        {
-                            <MudStack Row="true" Justify="Justify.SpaceBetween">
-
-                                @NoEditedItemsTemplate(item)
-
-                                <div>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="() => Edit(item)"></MudIconButton>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
-                                </div>
-                            </MudStack>
-                        }
-                    }
-
+            <EditForm Model="@Model" OnValidSubmit="Submit">
+                <DataAnnotationsValidator/>
+                <MudStack Row="true" Context="mud">
+                    @EditFormContent
+                    <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdited ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
                 </MudStack>
-            </MudPaper>
-        }
-        else
-        {
-            // NOT EDITED
+            </EditForm>
 
-            if (Items is not null && Items.Count > 0)
+            @if (Items is not null)
             {
-                <MudPaper Outlined="true" Class="pa-5">
-                    <PageHeaderComp Name="@Name"/>
-                    @foreach (var item in Items)
-                    {
-                        <MudStack Row="true">
-                            @NoEditedItemsTemplate(item)
-                        </MudStack>
-                    }
-                </MudPaper>
-            }
-        }
+                foreach (var item in Items)
+                {
+                    <MudStack Row="true" Justify="Justify.SpaceBetween">
 
-    @*</MudItem>
-</MudGrid>*@
+                        @NoEditedItemsTemplate(item)
+
+                        <div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="() => Edit(item)"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
+                        </div>
+                    </MudStack>
+                }
+            }
+
+        </MudStack>
+    </MudPaper>
+}
+else
+{
+    // NOT EDITED
+
+    if (Items is not null && Items.Count > 0)
+    {
+        <MudPaper Outlined="true" Class="pa-5">
+            <PageHeaderComp Name="@Name"/>
+            @foreach (var item in Items)
+            {
+                <MudStack Row="true">
+                    @NoEditedItemsTemplate(item)
+                </MudStack>
+            }
+        </MudPaper>
+    }
+}
 
 
 @code {
@@ -68,13 +63,11 @@
     [Parameter, EditorRequired] public HashSet<T> Items { get; set; }
     [Parameter] public EventCallback<bool> Edited { get; set; }
     [Parameter, EditorRequired] public bool EditMode { get; set; }
-    [Parameter, EditorRequired] public RenderFragment? HeaderContent { get; set; }
-    [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
-    [Parameter, EditorRequired] public RenderFragment<T>? NoEditedItemsTemplate { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter] public RenderFragment? EditFormContent { get; set; }
+    [Parameter] public RenderFragment<T>? NoEditedItemsTemplate { get; set; }
 
     bool isEdited;
-    // [Parameter, EditorRequired] public Func<T, string> GetUrl { get; set; }
-
 
     async Task Submit(EditContext context)
     {
