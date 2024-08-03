@@ -8,7 +8,16 @@
 <div class="d-flex justify-xs-center justify-lg-end align-center justify-center">
     <span class=" l-3 fw-lighter" style="font-size: 0.7rem">
         @Name ver. @version by &copy;@By @DateTime.Now.Year<br/>
-        <span class="d-flex justify-end" style="font-style: italic; color:white;">(dev @(isDebug ? assemblyRevision : ""))</span>
+
+        @* REVISION *@
+        <span class="d-flex justify-end" style="font-style: italic; color:white;">
+
+            @if (isDebug)
+            {
+                @($"{(assemblyRevision=="0" ? "" :$"dev { assemblyRevision}")}")
+            }
+
+        </span>
     </span>
 
 
@@ -46,13 +55,13 @@
 #else
         isDebug = false;
 #endif
-        
+
         _ = VersionFrom switch
         {
             GetVersionFrom.Assembly =>
                 assemblyVersionAll = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
             GetVersionFrom.Appsettings =>
-                appsettingVersion = Configuration?.GetChildren().FirstOrDefault(section => section.Key == "Version")?.Value??"",
+                appsettingVersion = Configuration?.GetChildren().FirstOrDefault(section => section.Key == "Version")?.Value ?? "",
             _ => ""
         };
 
@@ -62,6 +71,7 @@
         assemblyMinor = versionArray.ElementAtOrDefault(1) ?? "";
         assemblyBuild = versionArray.ElementAtOrDefault(2) ?? "";
         assemblyRevision = versionArray.ElementAtOrDefault(3) ?? "";
+
         assemblyVersion = $"{assemblyMajor}.{assemblyMinor}.{assemblyBuild}";
 
         version =

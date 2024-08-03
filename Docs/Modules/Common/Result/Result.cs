@@ -16,7 +16,7 @@ public record Result(bool Success, string? Message)
         if (isLog) LogError(message);
         return new Result<T>(default, false, message);
     }
-    static void LogError(string e) => Log.Logger.Error(e);
+    static void LogError(string e) => Log.Logger.ForContext<Result>().Error(e);
 }
 
 public record Result<T>(T? Data, bool Success, string? Message) : Result(Success, Message);

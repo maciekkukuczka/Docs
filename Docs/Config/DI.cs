@@ -35,11 +35,15 @@ public static class DI
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // DATASEED
+        services.AddTransient<DataSeed>();
+        
         // IDENTITY2
         services.AddIdentityServices2();
 
         // CACHE
         services.AddHybridCache();
+        
         // MUDBLAZOR
         services.AddMudBlazorServices();
 

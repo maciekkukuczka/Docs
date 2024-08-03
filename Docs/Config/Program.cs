@@ -53,6 +53,12 @@ try
 // Add additional endpoints required by the Identity /Account Razor components.
     app.MapAdditionalIdentityEndpoints();
 
+    
+    //SEED
+    var scope = app.Services.CreateScope();
+    var service = scope.ServiceProvider.GetRequiredService<DataSeed>();
+    await service.Seed(deleteDbBeforeSeed:false);
+    
     app.Run();
 }
 catch (Exception e)
