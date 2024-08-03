@@ -20,6 +20,7 @@ public static class DI
 
         // IDENTITY
         services.AddIdentityServices();
+        services.AddCascadingAuthenticationState();
 
         //HTTP
         services.AddHttpContextAccessor();

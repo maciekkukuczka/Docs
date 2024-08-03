@@ -17,7 +17,6 @@ try
 //DI
  
     builder.Services.AddServices(builder.Configuration);
-
     var app = builder.Build();
 
 

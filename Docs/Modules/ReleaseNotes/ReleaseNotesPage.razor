@@ -1,12 +1,35 @@
 ﻿@namespace Docs.Modules.ReleaseNotes
 
 @page "/release-notes"
+@attribute [Authorize]
 
 <PageHeaderComp Name="Release notes"/>
 @* <MudStack Row="false"> *@
 <MudGrid>
 
+    <MudItem xs="8">
+        <MudPaper Outlined="true" Class="ma-5 pa-5 ">
+            <MudText Class="pb-3">
+                <MudLink Color="Color.Primary" Typo="Typo.h6" Underline="Underline.Always" Class="pb-3" Target="_blank"
+                         href="https://github.com/users/maciekkukuczka/projects/3/views/11?sliceBy%5Bvalue%5D=0.5.0">
+                    v.0.5.0
+                </MudLink>
+            </MudText>
+            <p>- Dodano Linki.</p>
+            <p>- Dodano Skróty klawiszowe.</p>
+            <p>- Dodano Telemetrię.</p>
+            <p>- Dodano Seq.</p>
+            <p>- Dodano centralne przechwytywanie  wyjątków.</p>
+            <p>- Licznik kategorii (wszystkie).</p>
+            <p>- Dodano Seq.</p>
+            <p>- Dodano spinner dla loadingów.</p>
+            <p>- Dodano wersjonowanie z assembly oraz wersjonowanie dziennych buildów.</p>
+            <p>- Dodano Autentykacje dla brakujących zasobów.</p>
+            <p>- Ulepszenia wizualne.</p>
 
+
+        </MudPaper>
+    </MudItem>
     <MudFlexBreak/>
 
     <MudItem xs="8">
@@ -19,7 +42,7 @@
             </MudText>
             <p>- Dodano kategorię.</p>
             <p>- Dodano nowe przyciski edycji o uwspólnionym wyglądzie.</p>
-          
+
 
         </MudPaper>
     </MudItem>
