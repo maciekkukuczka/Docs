@@ -9,14 +9,13 @@ public class DataSeed(
 {
     public async Task Seed(bool deleteDbBeforeSeed)
     {
-
+    // CONFIG
         if (deleteDbBeforeSeed)
         {
             await dbContext.Database.EnsureDeletedAsync();
             await dbContext.Database.EnsureCreatedAsync();
         }
 
-        // MIGRATIONS
         var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
 
 #if DEBUG

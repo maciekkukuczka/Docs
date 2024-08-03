@@ -7,13 +7,13 @@
             @* EDIT *@
             <MudPaper Outlined="true" Class="pa-5">
                 <PageHeaderComp Name="@Name" />
-
+                @HeaderContent
                 <MudStack Row="false">
 
                     <EditForm Model="@Model" OnValidSubmit="Submit">
                         <DataAnnotationsValidator/>
                         <MudStack Row="true" Context="mud">
-                            @ChildContent
+                            @EditFormContent
                             <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdited ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
                         </MudStack>
                     </EditForm>
@@ -68,7 +68,8 @@
     [Parameter, EditorRequired] public HashSet<T> Items { get; set; }
     [Parameter] public EventCallback<bool> Edited { get; set; }
     [Parameter, EditorRequired] public bool EditMode { get; set; }
-    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? HeaderContent { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
     [Parameter, EditorRequired] public RenderFragment<T>? NoEditedItemsTemplate { get; set; }
 
     bool isEdited;

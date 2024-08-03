@@ -112,11 +112,11 @@ else
                                   OnRemoveItem="RemoveLink">
 
                         @* Edit *@
-                        <ChildContent>
+                        <EditFormContent>
                             <MudTextField Label="Url" @bind-Value="linkModel.Url" For="() => linkModel.Url"/>
                             <MudTextField Label="Nazwa" @bind-Value="linkModel.Name "/>
                             <MudTextField Label="Opis" @bind-Value="linkModel.Description"/>
-                        </ChildContent>
+                        </EditFormContent>
 
                         @* No edit *@
                         <NoEditedItemsTemplate Context="link">

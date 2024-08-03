@@ -5,16 +5,6 @@
 <MudGrid>
     <MudItem xs="12">
 
-        @if (!string.IsNullOrWhiteSpace(shortcut.Key))
-        {
-            <MudElement HtmlTag="div" Class="d-flex justify-end">
-                @* <MudIconButton   OnClick="Clear" Color="Color.Secondary" Style="background-color:White;" Icon="@Icons.Material.Filled.Clear" Size="Size.Small"/> *@
-                <MudFab OnClick="Clear" Color="Color.Secondary" Label="Wyczyść" StartIcon="@Icons.Material.Filled.Clear" Size="Size.Small"/>
-            </MudElement>
-        }
-        <MudTextField T="Shortcut"  Variant="Variant.Outlined" Label="Wprowadź  skrót tutaj..." OnKeyDown="(e) => KeyDown(e)"
-                      KeyDownPreventDefault="true">
-        </MudTextField>
 
         @if (shortcuts is null)
         {
@@ -25,8 +15,40 @@
             <MiniCrudComp T="Shortcut" Name="Skróty klawiszowe" Items="shortcuts" Model="shortcut" EditMode="true"
                           Edited="@((isEdit) => { edited = isEdit; })" OnSubmit="ShortcutSubmitted" OnEditItem="ShortcutEdit"OnRemoveItem="ShortcutRemove">
 
+
+
+                @* SEARCH *@
+                <HeaderContent>
+
+                    <MudElement HtmlTag="div">
+
+                        @if (!string.IsNullOrWhiteSpace(shortcut.Key))
+                        {
+                            <MudElement HtmlTag="div" Class="d-flex justify-end">
+                                @* <MudIconButton   OnClick="Clear" Color="Color.Secondary" Style="background-color:White;" Icon="@Icons.Material.Filled.Clear" Size="Size.Small"/> *@
+                                <MudFab OnClick="Clear" Color="Color.Secondary" Label="Wyczyść" StartIcon="@Icons.Material.Filled.Clear" Size="Size.Small"/>
+                            </MudElement>
+                        }
+
+                        <MudStack Row="true" StretchItems="StretchItems.Start">
+
+                            <MudTextField T="string" Label="Wprowadź fragment opisu..." Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                                          DebounceInterval="500" OnDebounceIntervalElapsed="OnSearch"/>
+
+                            <MudText Inline="false" Color="Color.Info" Class="d-flex align-center ">LUB</MudText>
+
+                            <MudTextField T="Shortcut" Variant="Variant.Outlined" Label="Wprowadź  skrót tutaj..." Class="flex-none"
+                                          OnKeyDown="(e) => OnKeyDown(e)"
+                                          KeyDownPreventDefault="true">
+                            </MudTextField>
+                        </MudStack>
+                    </MudElement>
+                </HeaderContent>
+
+
                 @* EDIT *@
-                <ChildContent>
+                <EditFormContent>
+
                     <MudElement HtmlTag="div" Class="mb-5" Style="width: 100%;">
 
                         <MudStack Row="true">
@@ -35,14 +57,15 @@
                             <MudCheckBox Label="Shift" @bind-Value="shortcut.Shift"/>
                         </MudStack>
                         <MudElement HtmlTag="div">
-                            <MudStack Row StretchItems="StretchItems.End" >
+                            <MudStack Row StretchItems="StretchItems.End">
                                 <MudTextField Label="Skrót" @bind-Value="shortcut.Key" Class="flex-none"/>
                                 <MudTextField Label="Aplikacja" @bind-Value="shortcut.Application" Class="flex-none"/>
                                 <MudTextField Label="Opis" @bind-Value="shortcut.Description"/>
                             </MudStack>
                         </MudElement>
                     </MudElement>
-                </ChildContent>
+
+                </EditFormContent>
 
                 @* NO EDIT *@
                 <NoEditedItemsTemplate>
@@ -54,6 +77,7 @@
         }
     </MudItem>
 </MudGrid>
+
 
 @code {
     /*bool isAltPressed = false;
@@ -69,7 +93,18 @@
 
     async Task GetShortcuts() => shortcuts = (await ShortcutsService.Get()).Data;
 
-    async Task KeyDown(KeyboardEventArgs e)
+    async Task OnSearch(string searchValue)
+    {
+        if (string.IsNullOrWhiteSpace(searchValue)) GetShortcuts();
+
+        shortcuts = shortcuts
+            .Where(x =>
+                (x.Description?.Contains(searchValue, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (x.Application?.Contains(searchValue, StringComparison.OrdinalIgnoreCase) ?? false))
+            .ToHashSet();
+    }
+
+    async Task OnKeyDown(KeyboardEventArgs e)
     {
         /*
         if (e.Key == "Alt") isAltPressed = true;
