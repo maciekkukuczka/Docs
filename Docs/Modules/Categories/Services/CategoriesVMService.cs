@@ -6,11 +6,11 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
     public async Task<Result<HashSet<CategoryVM>>> GetCategories(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Categories
+        var result =  db.Categories
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
             .AsNoTracking()
-            .ToHashSetAsync();
+            .ToHashSet();
 
         if (result is null || result.Count <= 0)
             return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
@@ -22,12 +22,11 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
     public async Task<Result<HashSet<CategoryVM>>> GetCategoriesBySubject(string? subjectId)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Categories
+        var result =  db.Categories
             .Where(x => x.Docs.Any(x => x.Subjects.Any(x => x.Id == subjectId)))
             .Include(x=>x.Docs)
             // .AsNoTracking()
-            .ToHashSetAsync();
-
+            .ToHashSet();
         if (result is null || result.Count <= 0)
             return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
         var resultVms = result.Select(x => CategoryVM.ToVm(x)).ToHashSet();

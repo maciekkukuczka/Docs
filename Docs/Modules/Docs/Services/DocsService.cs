@@ -1,11 +1,8 @@
 ﻿namespace Docs.Modules.Items.Services;
 
 public class DocsService(
-    IDbContextFactory<ApplicationDbContext> dbContextFactory,
-    HybridCache cache)
+    IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
-    HybridCache cache = cache;
-
 
 // GET
     public async Task<Result<HashSet<DocVM>>> GetDocsByFilter(
@@ -41,9 +38,9 @@ public class DocsService(
         }
 
 
-        var queryResult = await query
+        var queryResult =  query
             .AsNoTracking()
-            .ToHashSetAsync(cancellationToken: cancellationToken);
+            .ToHashSet();
 
 
         var resultVM = queryResult.Select(x => DocVM.ToVM(x)).ToHashSet();
@@ -222,10 +219,10 @@ public class DocsService(
     public async Task<Result<HashSet<DocVM>>> GetAllDocs()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var res = await dbContext.Docs
+        var res = dbContext.Docs
             .AsNoTracking()
-            .ToHashSetAsync();
-
+            .ToHashSet();
+        
         var resultVM = res.Select(x => DocVM.ToVM(x)).ToHashSet();
         return Result.OK(resultVM);
     }
@@ -256,10 +253,10 @@ public class DocsService(
             // .ToHashSetAsync();
         }
 
-        var result = await res
+        var result =  res
             .Include(x => x.Subjects)
             .AsNoTracking()
-            .ToHashSetAsync(cancellationToken: cancellationToken);
+            .ToHashSet();
 
         var resultVM = result.Select(x => DocVM.ToVM(x)).ToHashSet();
         return Result.OK(resultVM);

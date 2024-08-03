@@ -38,8 +38,6 @@ public static class DI
         // IDENTITY2
         services.AddIdentityServices2();
 
-        // CACHE
-        services.AddHybridCache();
         // MUDBLAZOR
         services.AddMudBlazorServices();
 
