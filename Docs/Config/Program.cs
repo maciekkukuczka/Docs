@@ -54,9 +54,9 @@ try
     app.MapAdditionalIdentityEndpoints();
 
     // SEED
-    /*var scope=app.Services.CreateScope();
+    var scope=app.Services.CreateScope();
     var db=scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();*/
+    db.Database.EnsureCreated();
 
 
     app.Run();
