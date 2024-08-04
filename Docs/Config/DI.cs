@@ -31,6 +31,7 @@ public static class DI
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         
+        /*
         if (environment.IsDevelopment())
         {
             services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
@@ -42,7 +43,10 @@ public static class DI
             services.AddDbContextFactory<ApplicationDbContext>(options => { options.UseSqlServer(connectionString); });
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
         }
+        */
 
+        services.AddDbContextFactory<ApplicationDbContext>(options => { options.UseSqlServer(connectionString); });
+        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
