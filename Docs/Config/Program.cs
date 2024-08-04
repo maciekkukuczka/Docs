@@ -56,9 +56,10 @@ try
     // SEED
     var scope=app.Services.CreateScope();
     var db=scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
-    if ((await db.Database.GetPendingMigrationsAsync()).Any()) await db.Database.MigrateAsync();
-
+    // db.Database.EnsureCreated();
+    // if ((await db.Database.GetPendingMigrationsAsync()).Any()) await db.Database.MigrateAsync();
+    await db.Database.MigrateAsync();
+    
 
     app.Run();
 }
