@@ -57,6 +57,7 @@ try
     var scope=app.Services.CreateScope();
     var db=scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.EnsureCreated();
+    if ((await db.Database.GetPendingMigrationsAsync()).Any()) await db.Database.MigrateAsync();
 
 
     app.Run();
