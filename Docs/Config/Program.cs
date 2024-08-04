@@ -15,8 +15,8 @@ try
     builder.Configuration.AddConfiguration(configuration);
 
 //DI
- 
-    builder.Services.AddServices(builder.Configuration);
+
+    builder.Services.AddServices(builder.Configuration, builder.Environment);
     var app = builder.Build();
 
 
@@ -57,8 +57,8 @@ try
     /*var scope=app.Services.CreateScope();
     var db=scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.EnsureCreated();*/
-    
-    
+
+
     app.Run();
 }
 catch (Exception e)

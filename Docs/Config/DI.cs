@@ -4,13 +4,14 @@ namespace Docs.Config;
 
 public static class DI
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         //SERILOG
         services.AddSerilog();
-        
+
         // OPEN TELEMETRY
-        
+
         //GLOBAL EXCEPTION HANDLER
         services.AddExceptionHandler<ExceptionHandlerMiddleware>();
         services.AddProblemDetails();
@@ -26,12 +27,22 @@ public static class DI
         services.AddHttpContextAccessor();
 
         // DB
+
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        
+        if (environment.IsDevelopment())
+        {
+            services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
+                lifetime: ServiceLifetime.Scoped);
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+        }
+        else
+        {
+            services.AddDbContextFactory<ApplicationDbContext>(options => { options.UseSqlServer(connectionString); });
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+        }
 
-        services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
-            lifetime: ServiceLifetime.Scoped);
-        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
