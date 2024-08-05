@@ -27,7 +27,7 @@ jobs:
       - name: List installed packages
         id: list-packages
         run: |
-          cd Docs
+          cd ..
           dir
           dotnet list package
 
