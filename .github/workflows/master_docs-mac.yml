@@ -28,11 +28,11 @@ jobs:
       - name: List installed packages
         id: list-packages
         run: |
-          dir
           dotnet list  package
 
       - name: Conditionally remove and update NuGet packages
         run: |
+          cd Docs
           has_version_9=false
           
           if dotnet list package | grep -q "Microsoft.AspNetCore.Components.Authorization.*9\."; then
