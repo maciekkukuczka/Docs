@@ -54,7 +54,7 @@ jobs:
             has_version_9=true
           fi
           
-          dotnet remove package Microsoft.EntityFrameworkCore.Sqlite
+
           
           
           if [ "$has_version_9" = true ]; then
