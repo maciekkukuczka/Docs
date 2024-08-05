@@ -28,7 +28,7 @@ jobs:
         id: list-packages
         run: |
           dir
-          dotnet list package
+          dotnet list solution package
 
       - name: Conditionally remove and update NuGet packages
         run: |
