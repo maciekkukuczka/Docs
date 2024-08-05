@@ -1,4 +1,5 @@
 var configuration = new ConfigurationBuilder()
+    
     .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Config", "Json"))
     .AddJsonFile("appsettings.json")
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
@@ -21,7 +22,7 @@ try
 
 
 // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment()||app.Environment.IsStaging())
     {
         app.UseExceptionHandler("/errormid");
 
