@@ -27,7 +27,7 @@ jobs:
         
       - name: List installed packages
         id: list-packages
-        run: dotnet list Docs.csproj package
+        run: dotnet list solution package
 
       - name: Conditionally remove and update NuGet packages
         run: |
