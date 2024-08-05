@@ -60,7 +60,8 @@ try
     // db.Database.EnsureCreated();
     // if ((await db.Database.GetPendingMigrationsAsync()).Any()) await db.Database.MigrateAsync();
     // await db.Database.EnsureDeletedAsync();
-    await db.Database.MigrateAsync();
+    await db.Database.EnsureCreatedAsync();
+    // await db.Database.MigrateAsync();
     
 
     app.Run();

@@ -18,6 +18,8 @@ global using Docs.Data;
 global using Docs.Components;
 global using Docs.Components.Account;
 global using Docs.Config.Exc;
+/*global using Docs.Migrations.Sqlite;
+global using Docs.Migrations.SqlServer;*/
 
 // 3RD PARTY
 global using MudBlazor;

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Docs.Migrations
+namespace Docs.Migrations.SqlServer
 {
     /// <inheritdoc />
     public partial class mig1 : Migration
