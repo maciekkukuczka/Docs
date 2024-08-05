@@ -22,13 +22,14 @@ jobs:
           dotnet-version: '8.0.x'
       
       # DOWNGRADE
-    
+      - name: Restore dependencies
+        run: dotnet restore
         
       - name: List installed packages
         id: list-packages
         run: |
           dir
-          dotnet list solution package
+          dotnet list  package
 
       - name: Conditionally remove and update NuGet packages
         run: |
