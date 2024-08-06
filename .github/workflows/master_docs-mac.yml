@@ -48,7 +48,7 @@ jobs:
              has_version9=false
           #                 echo "has_version_9=false" >> $GITHUB_ENV
           else
-          has_version9=false
+          has_version9=true
           #                 echo "has_version_9=true" >> $GITHUB_ENV
           fi
           
@@ -75,6 +75,9 @@ jobs:
           
           if [ "$has_version_9" = true ]; then
           # Zmiana TargetFramework na net8.0
+          
+          echo ${{env.PATH_TO_PROJECT}}
+          ls -la 
           sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{env.PATH_TO_PROJECT}}
           
           dotnet remove package Microsoft.AspNetCore.Components.Authorization
@@ -91,7 +94,7 @@ jobs:
           dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.x
           dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.x
           fi
-
+          
 
       - name: Restore dependencies again
         run: dotnet restore
