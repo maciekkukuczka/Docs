@@ -7,7 +7,7 @@ public class ExceptionHandlerMiddleware : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, System.Exception exception, CancellationToken cancellationToken)
     {
-        Log.Error(exception, "Unhandled exception FROM MIDDLEWARE");
+        Log.ForContext<ExceptionHandlerMiddleware>().Error(exception, "Unhandled exception FROM MIDDLEWARE");
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status500InternalServerError,

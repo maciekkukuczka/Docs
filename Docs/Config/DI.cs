@@ -9,9 +9,9 @@ public static class DI
     {
         //SERILOG
         services.AddSerilog();
-
+        
         // OPEN TELEMETRY
-
+        
         //GLOBAL EXCEPTION HANDLER
         services.AddExceptionHandler<ExceptionHandlerMiddleware>();
         services.AddProblemDetails();
@@ -27,7 +27,6 @@ public static class DI
         services.AddHttpContextAccessor();
 
         // DB
-
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -77,9 +76,15 @@ public static class DI
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // DATASEED
+        services.AddTransient<DataSeed>();
+        
         // IDENTITY2
         services.AddIdentityServices2();
 
+        // CACHE
+        services.AddHybridCache();
+        
         // MUDBLAZOR
         services.AddMudBlazorServices();
 

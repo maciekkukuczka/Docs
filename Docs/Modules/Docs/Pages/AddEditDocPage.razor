@@ -2,6 +2,7 @@
 @page "/add-doc/{isEdited:bool=true}"
 @page "/edit-doc/{id?}"
 @page "/doc-details/{id?}"
+
 @attribute [Authorize]
 
 
@@ -27,12 +28,16 @@ else
     <EditForm Model="@Doc" OnValidSubmit="Submit">
         <DataAnnotationsValidator/>
 
-        <MudGrid Spacing="20">
+
+        @* -----------FLEX-------- *@
+        <MudElement HtmlTag="div" Class="d-flex flex-column gap-4" Style="height: 85vh;">
+
+
             @* <MudItem xs="12"> *@
             @* <MudPaper> *@
             @if (IsEdited)
             {
-                <MudItem xs="12" >
+                <MudItem xs="12">
                     <MudTextField Label="Tytuł" HelperText="Wymagane. Max 200 znaków"
                                   @bind-Value="@Doc.Title" For="@(() => Doc.Title)" Disabled="!IsEdited"/>
                 </MudItem>
@@ -53,57 +58,68 @@ else
             }
             else
             {
-                <MudItem xs="12" sm="6" md="12">
+                <MudElement HtmlTag="div">
+
                     <MudPaper Outlined="true" Class="pa-5 ">
                         <MudText Typo="Typo.h5">
                             @Doc.Title
                         </MudText>
                     </MudPaper>
-                </MudItem>
-                @* <PageHeaderComp Name="@Doc.Title"/> *@
-                <MudFlexBreak/>
+                    @* <PageHeaderComp Name="@Doc.Title"/> *@
+                </MudElement>
             }
 
-            @* SHORT DESCRIPTION *@
-            @if (IsEdited)
-            {
+            <MudElement HtmlTag="div" Class="d-flex flex-column flex-wrap-reverse align-content-space-between gap-4" Style="height: auto;">
+
+              
+
+                @* DESCRIPTION *@
+                @if (IsEdited)
+                {
+                    <MudItem xs="12">
+                        <MudTextField Label="Opis" HelperText="Max 5000 znaków" Lines="15"
+                                      @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!IsEdited"/>
+                    </MudItem>
+                }
+                else if (!string.IsNullOrWhiteSpace(Doc.Description))
+                {
+                    <MudElement HtmlTag="div"  Style="width: 46%; min-height: auto; overflow-y: hidden;">
+
+                        <MudPaper Outlined="true" Class="pa-5">
+                            <MudText>
+                                @Doc.Description
+                            </MudText>
+                        </MudPaper>
+                    </MudElement>
+                    
+                    <MudFlexBreak/>
+                    
+                }
+                @* <MudFlexBreak /> *@
+                
+                @* SHORT DESCRIPTION *@
+                @if (IsEdited)
+                {
                 <MudItem xs="12">
                     <MudTextField Label="Krótki opis" HelperText="Max 1000 znaków" Lines="5"
                                   @bind-Value="@Doc.ShortDescription" For="@(() => Doc.ShortDescription)" Disabled="!IsEdited"/>
                 </MudItem>
-            }
-            else if (!string.IsNullOrWhiteSpace(Doc.ShortDescription))
-            {
-                <MudItem xs="12" md="6">
+                }
+                else if (!string.IsNullOrWhiteSpace(Doc.ShortDescription))
+                {
+                <MudElement HtmlTag="div" Style="width: 46%"  >
+
                     <MudPaper Outlined="true" Class="pa-5">
                         <MudText>
                             @Doc.ShortDescription
                         </MudText>
                     </MudPaper>
-                </MudItem>
-            }
-
-            @* DESCRIPTION *@
-            @if (IsEdited)
-            {
-                <MudItem xs="12">
-                    <MudTextField Label="Opis" HelperText="Max 5000 znaków" Lines="15"
-                                  @bind-Value="@Doc.Description" For="@(() => Doc.Description)"Disabled="!IsEdited"/>
-                </MudItem>
-            }
-            else if (!string.IsNullOrWhiteSpace(Doc.Description))
-            {
-                <MudItem xs="12" md="6">
-                    <MudPaper Outlined="true" Class="pa-5">
-                        <MudText>
-                            @Doc.Description
-                        </MudText>
-                    </MudPaper>
-                </MudItem>
-            }
-
-            @* LINKS *@
-                <MudItem xs="6">
+                </MudElement>
+                }
+                
+                
+                @* LINKS *@
+                <MudElement HtmlTag="div" Style="width: 46%" >
 
                     <MiniCrudComp Name="Linki" T="LinkVM" Model="@linkModel" Items="Doc.Links.ToHashSet()"EditMode="@(IsEdited)"
                                   Edited="link => isLinkEdited = link"
@@ -112,11 +128,11 @@ else
                                   OnRemoveItem="RemoveLink">
 
                         @* Edit *@
-                        <ChildContent>
+                        <EditFormContent>
                             <MudTextField Label="Url" @bind-Value="linkModel.Url" For="() => linkModel.Url"/>
                             <MudTextField Label="Nazwa" @bind-Value="linkModel.Name "/>
                             <MudTextField Label="Opis" @bind-Value="linkModel.Description"/>
-                        </ChildContent>
+                        </EditFormContent>
 
                         @* No edit *@
                         <NoEditedItemsTemplate Context="link">
@@ -125,8 +141,11 @@ else
                         </NoEditedItemsTemplate>
 
                     </MiniCrudComp>
+                </MudElement>
 
-                </MudItem>
+
+            </MudElement>
+
 
             @* SUBMIT *@
             @if (IsEdited)
@@ -135,6 +154,8 @@ else
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Warning">Zapisz</MudButton>
                 </MudItem>
             }
-        </MudGrid>
+        </MudElement>
+
+
     </EditForm>
 }

@@ -29,6 +29,8 @@ global using Serilog.Sinks.OpenTelemetry;
 global using Serilog.Sinks.SystemConsole.Themes;
 
 // MODULES
+global using Mac.Modules.DataSeed;
+
 global using Docs.Modules.Generic.Services;
 
 global using Docs.Modules.Common.Models;

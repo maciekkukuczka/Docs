@@ -1,5 +1,4 @@
 var configuration = new ConfigurationBuilder()
-    
     .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Config", "Json"))
     .AddJsonFile("appsettings.json")
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
@@ -54,16 +53,12 @@ try
 // Add additional endpoints required by the Identity /Account Razor components.
     app.MapAdditionalIdentityEndpoints();
 
-    // SEED
-    var scope=app.Services.CreateScope();
-    var db=scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    // db.Database.EnsureCreated();
-    // if ((await db.Database.GetPendingMigrationsAsync()).Any()) await db.Database.MigrateAsync();
-    // await db.Database.EnsureDeletedAsync();
-    await db.Database.EnsureCreatedAsync();
-    // await db.Database.MigrateAsync();
     
-
+    //SEED
+    var scope = app.Services.CreateScope();
+    var service = scope.ServiceProvider.GetRequiredService<DataSeed>();
+    await service.Seed(deleteDbBeforeSeed:false);
+    
     app.Run();
 }
 catch (Exception e)
