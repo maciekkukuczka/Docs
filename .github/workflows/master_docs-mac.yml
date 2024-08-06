@@ -25,27 +25,22 @@ jobs:
               with:
                   dotnet-version: '8.0.x'
             
-            # RESTORE DEPENDENCIES
-            - name: Restore dependencies
-              run: dotnet restore ${{ env.PATH_TO_PROJECT }}
-            
-            # LIST INSTALLED PACKAGES
-            - name: List installed packages
-              id: list-packages
-              run: dotnet list ${{ env.PATH_TO_PROJECT }} package
-            
             # GET TARGET FRAMEWORK AND SET TO VARIABLE
             - name: Get target framework and set to variable
               id: get-framework
               run: |
                   has_version_9=false
                   target_framework=$(grep -oP '(?<=<TargetFramework>)[^<]+' ${{ env.PATH_TO_PROJECT }})
-                  echo "TARGET FRAMEWORK: $target_framework"
+                  echo "TARGET_FRAMEWORK: ${{ env.target_framework }}"
                   echo "target_framework=$target_framework" >> $GITHUB_ENV
                   if [ "$target_framework" != "net8.0" ]; then
                     has_version9=true
                   fi
                   echo "has_version9=$has_version9" >> $GITHUB_ENV
+                  
+            # RESTORE DEPENDENCIES
+            - name: Restore dependencies
+              run: dotnet restore ${{ env.PATH_TO_PROJECT }}
             
             # LOG DEBUG INFORMATION
             - name: Log debug information
@@ -55,6 +50,12 @@ jobs:
                   echo "TARGET_FRAMEWORK: ${{ env.target_framework }}"
                   echo "HAS_VERSION_9: ${{ env.has_version9 }}"
                   ls -la
+                  
+            # LIST INSTALLED PACKAGES
+            - name: List installed packages
+              id: list-packages
+              if: env.has_version9 == 'true'
+              run: dotnet list ${{ env.PATH_TO_PROJECT }} package
             
             # SET TARGET FRAMEWORK IN DOCS.CSPROJ
             - name: Set target framework in Docs.csproj
@@ -88,6 +89,7 @@ jobs:
             # RESTORE DEPENDENCIES AGAIN
             - name: Restore dependencies again
               run: dotnet restore ${{ env.PATH_TO_PROJECT }}
+            
             
             # BUILD WITH DOTNET
             - name: Build with dotnet
