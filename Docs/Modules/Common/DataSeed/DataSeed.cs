@@ -9,29 +9,23 @@ public class DataSeed(
 {
     public async Task Seed(bool deleteDbBeforeSeed)
     {
-    // CONFIG
-        if (deleteDbBeforeSeed)
-        {
-            await dbContext.Database.EnsureDeletedAsync();
-            await dbContext.Database.EnsureCreatedAsync();
-        }
-
-        var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-
-#if DEBUG
-        /*if (pendingMigrations is not null && pendingMigrations.Any())
-        {
-            await dbContext.Database.MigrateAsync();
-        }*/
-#endif
-
-        if (await dbContext.Users.AnyAsync()) return;
-
-
+        // CONFIG
+        if (deleteDbBeforeSeed) await dbContext.Database.EnsureDeletedAsync(); 
+        await dbContext.Database.EnsureCreatedAsync();
         var isDbOk = await dbContext.Database.CanConnectAsync();
 
         if (isDbOk)
         {
+#if DEBUG
+            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+            /*if (pendingMigrations is not null && pendingMigrations.Any())
+            {
+                await dbContext.Database.MigrateAsync();
+            }*/
+#endif
+
+            if (await dbContext.Users.AnyAsync()) return;
+
             // ADD ROLE
             var roleName = "Admin";
 
