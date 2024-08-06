@@ -38,6 +38,13 @@ jobs:
                   fi
                   echo "has_version9=$has_version9" >> $GITHUB_ENV
                   
+            # SET TARGET FRAMEWORK IN DOCS.CSPROJ
+            - name: Set target framework in Docs.csproj
+              if: env.has_version9 == 'true'
+              run: |
+                  echo "Updating target framework to net8.0..."
+                  sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{ env.PATH_TO_PROJECT }}
+                  
             # RESTORE DEPENDENCIES
             - name: Restore dependencies
               run: dotnet restore ${{ env.PATH_TO_PROJECT }}
@@ -56,13 +63,6 @@ jobs:
               id: list-packages
               if: env.has_version9 == 'true'
               run: dotnet list ${{ env.PATH_TO_PROJECT }} package
-            
-            # SET TARGET FRAMEWORK IN DOCS.CSPROJ
-            - name: Set target framework in Docs.csproj
-              if: env.has_version9 == 'true'
-              run: |
-                  echo "Updating target framework to net8.0..."
-                  sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{ env.PATH_TO_PROJECT }}
             
             # REMOVE DEPENDENCIES IF DOTNET 9
             - name: Remove dependencies if using .NET 9
