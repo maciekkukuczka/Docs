@@ -46,8 +46,8 @@ jobs:
                   sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{ env.PATH_TO_PROJECT }}
                   
             # RESTORE DEPENDENCIES
-            - name: Restore dependencies
-              run: dotnet restore ${{ env.PATH_TO_PROJECT }}
+#            - name: Restore dependencies
+#              run: dotnet restore ${{ env.PATH_TO_PROJECT }}
             
             # LOG DEBUG INFORMATION
             - name: Log debug information
