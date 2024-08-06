@@ -2,22 +2,24 @@
 
 namespace Docs.Modules.Subjects.Services;
 
-public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFactory) 
+public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
     // GET
-    public async Task<Result<HashSet<Models.Subject>>> GetSubjects(string? userName)
+    public async Task<Result<HashSet<Subject>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result =  db.Subjects
+        var queryable = db.Subjects
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking()
-            .ToHashSet();
+            .AsNoTracking();
 
-        if (result is null||result.Count <= 0) return Result.Error<HashSet<Models.Subject>>($"{Messages.ObjectNotFound<HashSet<Models.Subject>>()}");
+        var result = await queryable.ToHashSetByEnvironment();
+        
+        if (result is null || result.Any())
+            return Result.Error<HashSet<Subject>>($"{Messages.ObjectNotFound<HashSet<Models.Subject>>()}");
         return Result.OK(result);
     }
-    
+
     // ADD
     public async Task<Result> AddSubject(Models.Subject subject)
     {
@@ -28,7 +30,8 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            if (saveResult <= 0)
+                return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
             return Result.OK($"{Messages.ObjectSaved<Models.Subject>()}:{subject.Name}");
         }
         catch (DbUpdateException e)
@@ -54,7 +57,8 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            if (saveResult <= 0)
+                return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
             return Result.OK($"{Messages.ObjectSaved<Models.Subject>()}: {subject.Name}");
         }
         catch (DbUpdateException ex)

@@ -6,11 +6,12 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
     public async Task<Result<HashSet<CategoryVM>>> GetCategories(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result =  db.Categories
+        var queryable = db.Categories
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking()
-            .ToHashSet();
+            .AsNoTracking();
+        
+        var result = await queryable.ToHashSetByEnvironment();
 
         if (result is null || result.Count <= 0)
             return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
@@ -18,13 +19,13 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         return Result.OK(resultVms);
     }
 
-    
+
     public async Task<Result<HashSet<CategoryVM>>> GetCategoriesBySubject(string? subjectId)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result =  db.Categories
+        var result = db.Categories
             .Where(x => x.Docs.Any(x => x.Subjects.Any(x => x.Id == subjectId)))
-            .Include(x=>x.Docs)
+            .Include(x => x.Docs)
             // .AsNoTracking()
             .ToHashSet();
         if (result is null || result.Count <= 0)
@@ -33,7 +34,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         return Result.OK(resultVms);
     }
 
-    
+
     // ADD
     public async Task<Result> AddCategory(CategoryVM categoryVM)
     {
@@ -58,7 +59,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         }
     }
 
-    
+
 //UPDATE
     public async Task<Result> UpdateCategory(CategoryVM category)
     {
@@ -70,7 +71,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         exist.Descritpion = category.Description;
         // db.Categories.Entry(exist).CurrentValues.SetValues(category);
         db.Categories.Update(exist);
-        
+
         try
         {
             var saveResult = await db.SaveChangesAsync();
@@ -87,7 +88,7 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
         }
     }
 
-    
+
     // DELETE
     public async Task<Result> DeleteCategory(string categoryId)
     {

@@ -23,4 +23,5 @@ public class AppState
         SelectedCategory = selectedCategory;
         OnChange?.Invoke();
     }
+
 }

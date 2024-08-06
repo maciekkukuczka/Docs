@@ -6,13 +6,14 @@ public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextF
     public async Task<Result<HashSet<SubjectVM>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result =  db.Subjects
+        var queryable = db.Subjects
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking()
-            .ToHashSet();
+            .AsNoTracking();
+        var result = await queryable.ToHashSetByEnvironment();
 
-        if (result is null || result.Count <= 0)
+
+        if (result is null || !result.Any())
             return Result.Error<HashSet<SubjectVM>>($"{Messages.ObjectNotFound<HashSet<SubjectVM>>()}");
         var resultVms = result.Select(x => SubjectVM.ToVm(x)).ToHashSet();
         return Result.OK(resultVms);
@@ -29,7 +30,8 @@ public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextF
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            if (saveResult <= 0)
+                return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
             return Result.OK($"{Messages.ObjectSaved<Models.Subject>()}:{subject.Name}");
         }
         catch (DbUpdateException e)
@@ -54,7 +56,8 @@ public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextF
         try
         {
             var saveResult = await db.SaveChangesAsync();
-            if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
+            if (saveResult <= 0)
+                return Result.Error($"{Messages.ObjectCannotBeSaved<Models.Subject>()}: {subject.Name}");
             return Result.OK($"{Messages.ObjectSaved<Models.Subject>()}: {subject.Name}");
         }
         catch (DbUpdateException ex)

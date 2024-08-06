@@ -7,11 +7,31 @@ public class DataSeed(
     IConfiguration configuration
 )
 {
-    public async Task Seed(bool deleteDbBeforeSeed)
+    public async Task Seed(bool deleteDbBeforeSeed, bool ensureCreated = false)
     {
         // CONFIG
-        if (deleteDbBeforeSeed) await dbContext.Database.EnsureDeletedAsync(); 
-        await dbContext.Database.EnsureCreatedAsync();
+        if (deleteDbBeforeSeed)
+        {
+            await dbContext.Database.EnsureDeletedAsync();
+            await dbContext.Database.EnsureCreatedAsync();
+        }
+
+        if (ensureCreated)
+        {
+            try
+            {
+                await dbContext.Database.EnsureCreatedAsync().WhenGivenEnvironment(Environments.Development);
+            }
+            catch (DbUpdateException e)
+            {
+                Log.Logger.ForContext<DataSeed>().Error(e, Messages.CantCreateDb<Object>());
+            }
+            catch (Exception e)
+            {
+                Log.Logger.ForContext<DataSeed>().Error(e, Messages.CantCreateDb<Object>());
+            }
+        }
+
         var isDbOk = await dbContext.Database.CanConnectAsync();
 
         if (isDbOk)

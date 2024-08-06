@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy ASP.Net Core app to Azure Web App - docs-mac
 
 on:
@@ -25,15 +22,6 @@ jobs:
               with:
                   dotnet-version: '8.0.x'
             
-            # RESTORE DEPENDENCIES
-            - name: Restore dependencies
-              run: dotnet restore ${{ env.PATH_TO_PROJECT }}
-            
-            # LIST INSTALLED PACKAGES
-            - name: List installed packages
-              id: list-packages
-              run: dotnet list ${{ env.PATH_TO_PROJECT }} package
-            
             # GET TARGET FRAMEWORK AND SET TO VARIABLE
             - name: Get target framework and set to variable
               id: get-framework
@@ -42,10 +30,10 @@ jobs:
                   target_framework=$(grep -oP '(?<=<TargetFramework>)[^<]+' ${{ env.PATH_TO_PROJECT }})
                   echo "TARGET FRAMEWORK: $target_framework"
                   echo "target_framework=$target_framework" >> $GITHUB_ENV
-                  if [ "$target_framework" != "net8.0" ]; then
-                    has_version9=true
+                  if [ "$target_framework" != "net8.0" ];then
+                    has_version_9=true
                   fi
-                  echo "has_version9=$has_version9" >> $GITHUB_ENV
+                  echo "has_version_9=$has_version_9" >> $GITHUB_ENV
             
             # LOG DEBUG INFORMATION
             - name: Log debug information
@@ -53,19 +41,19 @@ jobs:
                   echo "Environment variables:"
                   echo "PATH_TO_PROJECT: ${{ env.PATH_TO_PROJECT }}"
                   echo "TARGET_FRAMEWORK: ${{ env.target_framework }}"
-                  echo "HAS_VERSION_9: ${{ env.has_version9 }}"
+                  echo "HAS_VERSION_9: ${{ env.has_version_9 }}"
                   ls -la
             
             # SET TARGET FRAMEWORK IN DOCS.CSPROJ
             - name: Set target framework in Docs.csproj
-              if: env.has_version9 == 'true'
+              if: env.has_version_9 == 'true'
               run: |
                   echo "Updating target framework to net8.0..."
                   sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{ env.PATH_TO_PROJECT }}
             
             # REMOVE DEPENDENCIES IF DOTNET 9
             - name: Remove dependencies if using .NET 9
-              if: env.has_version9 == 'true'
+              if: env.has_version_9 == 'true'
               run: |
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
@@ -76,14 +64,14 @@ jobs:
             
             # ADD DEPENDENCIES FOR DOTNET 8
             - name: Add dependencies for .NET 8
-              if: env.has_version9 == 'true'
+              if: env.has_version_9 == 'true'
               run: |
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization --version 8.0.x
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore --version 8.0.x
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 8.0.x
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design --version 8.0.x
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools --version 8.0.x
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.x
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
             
             # RESTORE DEPENDENCIES AGAIN
             - name: Restore dependencies again
