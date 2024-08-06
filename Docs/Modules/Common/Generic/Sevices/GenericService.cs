@@ -29,7 +29,7 @@ public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContext
             }
         }
 
-        var result = await query.AsNoTracking().ToHashSetAsync(cancellationToken: cancellationToken);
+        var result =  query.AsNoTracking().ToHashSet();
 
         try
         {

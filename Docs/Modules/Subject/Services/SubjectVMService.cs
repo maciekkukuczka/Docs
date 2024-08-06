@@ -6,11 +6,11 @@ public class SubjectVMService(IDbContextFactory<ApplicationDbContext> dbContextF
     public async Task<Result<HashSet<SubjectVM>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Subjects
+        var result =  db.Subjects
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
             .AsNoTracking()
-            .ToHashSetAsync();
+            .ToHashSet();
 
         if (result is null || result.Count <= 0)
             return Result.Error<HashSet<SubjectVM>>($"{Messages.ObjectNotFound<HashSet<SubjectVM>>()}");

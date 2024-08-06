@@ -15,13 +15,13 @@ try
     builder.Configuration.AddConfiguration(configuration);
 
 //DI
- 
-    builder.Services.AddServices(builder.Configuration);
+
+    builder.Services.AddServices(builder.Configuration, builder.Environment);
     var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment()||app.Environment.IsStaging())
     {
         app.UseExceptionHandler("/errormid");
 
@@ -36,8 +36,8 @@ try
 
     app.UseHttpsRedirection();
 
-    // app.UseStaticFiles();
-    app.MapStaticAssets();
+    app.UseStaticFiles();
+    // app.MapStaticAssets();
     app.UseSerilogRequestLogging();
 
 
@@ -47,7 +47,7 @@ try
     app.UseAntiforgery();
 
     app.MapRazorComponents<App>()
-        .WithStaticAssets()
+        // .WithStaticAssets()
         .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.

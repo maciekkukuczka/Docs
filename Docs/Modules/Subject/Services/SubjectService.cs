@@ -8,11 +8,11 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
     public async Task<Result<HashSet<Models.Subject>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var result = await db.Subjects
+        var result =  db.Subjects
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
             .AsNoTracking()
-            .ToHashSetAsync();
+            .ToHashSet();
 
         if (result is null||result.Count <= 0) return Result.Error<HashSet<Models.Subject>>($"{Messages.ObjectNotFound<HashSet<Models.Subject>>()}");
         return Result.OK(result);

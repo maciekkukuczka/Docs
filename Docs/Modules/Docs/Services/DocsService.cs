@@ -41,9 +41,9 @@ public class DocsService(
         }
 
 
-        var queryResult = await query
+        var queryResult =  query
             .AsNoTracking()
-            .ToHashSetAsync(cancellationToken: cancellationToken);
+            .ToHashSet();
 
 
         var resultVM = queryResult.Select(x => DocVM.ToVM(x)).ToHashSet();

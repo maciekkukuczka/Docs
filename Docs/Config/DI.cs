@@ -4,7 +4,8 @@ namespace Docs.Config;
 
 public static class DI
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration,
+        IHostEnvironment environment)
     {
         //SERILOG
         services.AddSerilog();
@@ -29,9 +30,49 @@ public static class DI
         var connectionString = configuration.GetConnectionString("DefaultConnection") ??
                                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlite(connectionString),
-            lifetime: ServiceLifetime.Scoped);
-        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+        if (environment.IsDevelopment())
+        {
+            services.AddDbContextFactory<ApplicationDbContext>(options =>
+                {
+                    options.UseSqlite(connectionString, x =>
+                    {
+                        x.MigrationsAssembly("Docs");
+                        x.MigrationsHistoryTable("__EFMigrationsHistory", "Migrations.Sqlite");
+                    });
+                },
+                lifetime: ServiceLifetime.Scoped);
+            services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    options.UseSqlite(connectionString, x =>
+                    {
+                        x.MigrationsAssembly("Docs");
+                        x.MigrationsHistoryTable("__EFMigrationsHistory", "Migrations.Sqlite");
+                    });
+                }
+            );
+            
+            // Log.Information("Using SQLite Database with Migration Assembly: {assembly}", typeof(Program).Assembly.FullName)
+        }
+        else
+        {
+            services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString,
+                x =>
+                {
+                    x.MigrationsAssembly("Docs");
+                    x.MigrationsHistoryTable("__EFMigrationsHistory", "Migrations.SqlServer");
+                }));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString,
+                x =>
+                {
+                    x.MigrationsAssembly("Docs");
+                    x.MigrationsHistoryTable("__EFMigrationsHistory", "Migrations.SqlServer");
+                }));
+        }
+
+        /*
+        services.AddDbContextFactory<ApplicationDbContext>(options => { options.UseSqlServer(connectionString); });
+        services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+        */
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
