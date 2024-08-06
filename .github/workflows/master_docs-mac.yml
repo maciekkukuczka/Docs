@@ -20,11 +20,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      
-      # DOWNGRADE
+        
+        # DOWNGRADE
+        env:
+          PATH_TO_PROJECT: Docs/Docs.csproj
+
       - name: Restore dependencies
         run: dotnet restore
-        
+
       - name: List installed packages
         id: list-packages
         run: |
@@ -32,47 +35,63 @@ jobs:
 
       - name: Conditionally remove and update NuGet packages
         run: |
+          
           cd Docs
           has_version_9=false
           
-          if dotnet list package | grep -q "Microsoft.AspNetCore.Components.Authorization.*9\."; then
-            has_version_9=true
-          fi
-          if dotnet list package | grep -q "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore.*9\."; then
-            has_version_9=true
-          fi
-          if dotnet list package | grep -q "Microsoft.AspNetCore.Identity.EntityFrameworkCore.*9\."; then
-            has_version_9=true
-          fi
-          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.Design.*9\."; then
-            has_version_9=true
-          fi
-          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.Tools.*9\."; then
-            has_version_9=true
-          fi
-          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.SqlServer.*9\."; then
-            has_version_9=true
+                   # Wykorzystanie grep do wyciągnięcia target framework
+          target_framework=$(grep -oP '(?<=<TargetFramework>)[^<]+' ${{env.PATH_TO_PROJECT}})
+          echo "TARGET FRAMEWORK: $target_framework"                
+          
+                         # Ustawienie zmiennej środowiskowej na podstawie wyniku
+            if [ "$target_framework" == "net8.0" ]; then
+             has_version9=false
+          #                 echo "has_version_9=false" >> $GITHUB_ENV
+          else
+          has_version9=false
+          #                 echo "has_version_9=true" >> $GITHUB_ENV
           fi
           
-
+          
+          #          if dotnet list package | grep -q "Microsoft.AspNetCore.Components.Authorization.*9\."; then
+          #            has_version_9=true
+          #          fi
+          #          if dotnet list package | grep -q "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore.*9\."; then
+          #            has_version_9=true
+          #          fi
+          #          if dotnet list package | grep -q "Microsoft.AspNetCore.Identity.EntityFrameworkCore.*9\."; then
+          #            has_version_9=true
+          #          fi
+          #          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.Design.*9\."; then
+          #            has_version_9=true
+          #          fi
+          #          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.Tools.*9\."; then
+          #            has_version_9=true
+          #          fi
+          #          if dotnet list package | grep -q "Microsoft.EntityFrameworkCore.SqlServer.*9\."; then
+          #            has_version_9=true
+          #          fi
           
           
           if [ "$has_version_9" = true ]; then
-            dotnet remove package Microsoft.AspNetCore.Components.Authorization
-            dotnet remove package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
-            dotnet remove package Microsoft.AspNetCore.Identity.EntityFrameworkCore
-            dotnet remove package Microsoft.EntityFrameworkCore.Design
-            dotnet remove package Microsoft.EntityFrameworkCore.Tools
-            dotnet remove package Microsoft.EntityFrameworkCore.SqlServer
-
-            dotnet add package Microsoft.AspNetCore.Components.Authorization--version 8.0.x
-            dotnet add package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore --version 8.0.x
-            dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 8.0.x
-            dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.x
-            dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.x
-            dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.x
-          fi
+          # Zmiana TargetFramework na net8.0
+          sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{env.PATH_TO_PROJECT}}
           
+          dotnet remove package Microsoft.AspNetCore.Components.Authorization
+          dotnet remove package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
+          dotnet remove package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+          dotnet remove package Microsoft.EntityFrameworkCore.Design
+          dotnet remove package Microsoft.EntityFrameworkCore.Tools
+          dotnet remove package Microsoft.EntityFrameworkCore.SqlServer
+          
+          dotnet add package Microsoft.AspNetCore.Components.Authorization--version 8.0.x
+          dotnet add package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore --version 8.0.x
+          dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 8.0.x
+          dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.x
+          dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.x
+          dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.x
+          fi
+
 
       - name: Restore dependencies again
         run: dotnet restore
