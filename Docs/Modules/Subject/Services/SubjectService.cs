@@ -8,12 +8,12 @@ public class SubjectService(IDbContextFactory<ApplicationDbContext> dbContextFac
     public async Task<Result<HashSet<Subject>>> GetSubjects(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var queryable = db.Subjects
+        var result = db.Subjects
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking();
+            .AsNoTracking().ToHashSet();
 
-        var result = await queryable.ToHashSetByEnvironment();
+        // var result = await queryable.ToHashSetByEnvironment();
         
         if (result is null || result.Any())
             return Result.Error<HashSet<Subject>>($"{Messages.ObjectNotFound<HashSet<Models.Subject>>()}");

@@ -37,9 +37,8 @@ public class DocsService(
         }
 
 
-        var queryResult = await query
-            .AsNoTracking()
-            .ToHashSetByEnvironment();
+        var queryResult =  query.AsNoTracking().ToHashSet();
+            // .ToHashSetByEnvironment();
 
 
         var resultVM = queryResult.Select(x => DocVM.ToVM(x)).ToHashSet();

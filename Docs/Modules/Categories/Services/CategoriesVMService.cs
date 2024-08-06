@@ -6,12 +6,12 @@ public class CategoriesVMService(IDbContextFactory<ApplicationDbContext> dbConte
     public async Task<Result<HashSet<CategoryVM>>> GetCategories(string? userName)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-        var queryable = db.Categories
+        var result = db.Categories
             .Include(x => x.Docs)
             // .Where(x => x.User.UserName.Equals(userName))
-            .AsNoTracking();
+            .AsNoTracking().ToHashSet();
         
-        var result = await queryable.ToHashSetByEnvironment();
+        // var result = await queryable.ToHashSetByEnvironment();
 
         if (result is null || result.Count <= 0)
             return Result.Error<HashSet<CategoryVM>>($"{Messages.ObjectNotFound<HashSet<CategoryVM>>()}");
