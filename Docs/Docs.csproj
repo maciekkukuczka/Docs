@@ -44,6 +44,13 @@
     </ItemGroup>
 
 
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <DefineConstants>NET9</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <DefineConstants>NET9</DefineConstants>
+    </PropertyGroup>
+    
     <ItemGroup>
         <_ContentIncludedByDefault Remove="Modules\Generic\Components\CrudComponent\GenericCrudComp.razor"/>
         <_ContentIncludedByDefault Remove="Config\Json\Exceptions\Exception.razor"/>

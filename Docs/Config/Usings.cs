@@ -33,6 +33,7 @@ global using Mac.Modules.DataSeed;
 
 global using Docs.Modules.Generic.Services;
 
+global using  Mac.Modules.Common;
 global using Docs.Modules.Common.Models;
 global using Docs.Modules.Common.Result;
 

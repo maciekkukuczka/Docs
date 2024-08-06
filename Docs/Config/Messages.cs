@@ -14,5 +14,6 @@ public static class Messages
     public static string ObjectCreated<T> () => $"{typeof(T).Name.ToUpper()} - utworzono";
     public static string ObjectSaved<T> () => $"{typeof(T).Name.ToUpper()} - zapisano";
     public static string ObjectDeleted <T> () => $"{typeof(T).Name.ToUpper()} - usunieto";
+    public static string CantCreateDb <T> () => $"Nie mozna utworzyć bazy danych:";
 
 }

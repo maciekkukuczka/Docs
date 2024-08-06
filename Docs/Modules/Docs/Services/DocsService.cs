@@ -25,9 +25,8 @@ public class DocsService(
                 query = query.Include(include);
             }
         }
-        
 
-        
+
         //Filters
         if (filters is not null && filters.Count > 0)
         {
@@ -38,9 +37,9 @@ public class DocsService(
         }
 
 
-        var queryResult =  query
+        var queryResult = await query
             .AsNoTracking()
-            .ToHashSet();
+            .ToHashSetByEnvironment();
 
 
         var resultVM = queryResult.Select(x => DocVM.ToVM(x)).ToHashSet();
@@ -122,7 +121,7 @@ public class DocsService(
 
         var existDoc = await dbContext.Docs
             .Include(x => x.Categories)
-            .Include(x=>x.Links)
+            .Include(x => x.Links)
             .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
         if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");
@@ -184,7 +183,7 @@ public class DocsService(
         try
         {
             // dbContext.Entry(exist).State = EntityState.Modified;
-            
+
             var saveResult = await dbContext.SaveChangesAsync();
             if (saveResult <= 0) return Result.Error($"{Messages.ObjectCannotBeSaved<Doc>()}: {newDoc.Title}");
             return Result.OK($"{Messages.ObjectSaved<Doc>()}: {newDoc.Title}");

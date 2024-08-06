@@ -1,3 +1,6 @@
+using Mac.Modules.Common;
+using Environment = System.Environment;
+
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Config", "Json"))
     .AddJsonFile("appsettings.json")
@@ -18,10 +21,10 @@ try
 
     builder.Services.AddServices(builder.Configuration, builder.Environment);
     var app = builder.Build();
-
+    StaticServiceProvider.SetServiceProvider(app.Services);
 
 // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment()||app.Environment.IsStaging())
+    if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
         app.UseExceptionHandler("/errormid");
 
@@ -36,8 +39,11 @@ try
 
     app.UseHttpsRedirection();
 
+#if NET9
+    app.MapStaticAssets();
+#else
     app.UseStaticFiles();
-    // app.MapStaticAssets();
+#endif
     app.UseSerilogRequestLogging();
 
 
@@ -47,18 +53,20 @@ try
     app.UseAntiforgery();
 
     app.MapRazorComponents<App>()
-        // .WithStaticAssets()
+#if NET9
+        .WithStaticAssets()
+#endif
         .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
     app.MapAdditionalIdentityEndpoints();
 
-    
+
     //SEED
     var scope = app.Services.CreateScope();
     var service = scope.ServiceProvider.GetRequiredService<DataSeed>();
-    await service.Seed(deleteDbBeforeSeed:false);
-    
+    await service.Seed(deleteDbBeforeSeed: false, ensureCreated: true);
+
     app.Run();
 }
 catch (Exception e)
