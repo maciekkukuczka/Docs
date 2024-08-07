@@ -42,8 +42,8 @@ jobs:
             # REMOVE DEPENDENCIES IF .NET 9
             - name: Remove dependencies if using .NET 9
               run: |
+                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
 #                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
-                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
 #                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 #                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
 #                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
