@@ -13,7 +13,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0-preview.6.24328.4" />
+<!--        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0-preview.6.24328.4" />-->
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.0-preview.6.24328.4"/>
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0-preview.6.24328.4"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0-preview.6.24327.4">
@@ -70,6 +70,7 @@
 
 
     <ItemGroup>
+        <Folder Include="Migrations\Sqlite\" />
         <Folder Include="wwwroot\js\"/>
     </ItemGroup>
 
