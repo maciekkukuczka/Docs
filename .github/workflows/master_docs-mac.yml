@@ -54,7 +54,6 @@ jobs:
             # ADD DEPENDENCIES FOR .NET 8
             - name: Add dependencies for .NET 8
               run: |
-#                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
