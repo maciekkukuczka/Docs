@@ -59,7 +59,6 @@ jobs:
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
             
             # RESTORE DEPENDENCIES AGAIN
