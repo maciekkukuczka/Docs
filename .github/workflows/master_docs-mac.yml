@@ -23,8 +23,8 @@ jobs:
                   dotnet-version: '8.0.x'
             
             # CLEAR NUGET CACHE (opcjonalnie)
-            - name: Clear NuGet cache
-              run: dotnet nuget locals all --clear
+#            - name: Clear NuGet cache
+#              run: dotnet nuget locals all --clear
             
             # LOG DEBUG INFORMATION (opcjonalnie dla weryfikacji)
             - name: Log debug information
@@ -47,6 +47,7 @@ jobs:
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
+                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Sqlite
 #                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
             
             # ADD DEPENDENCIES FOR .NET 8
@@ -57,6 +58,7 @@ jobs:
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
+                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Sqlite
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
             
             # RESTORE DEPENDENCIES AGAIN
