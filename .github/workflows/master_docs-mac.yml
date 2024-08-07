@@ -23,8 +23,8 @@ jobs:
                   dotnet-version: '8.0.x'
             
             # CLEAR NUGET CACHE (opcjonalnie)
-#            - name: Clear NuGet cache
-#              run: dotnet nuget locals all --clear
+            #            - name: Clear NuGet cache
+            #              run: dotnet nuget locals all --clear
             
             # LOG DEBUG INFORMATION (opcjonalnie dla weryfikacji)
             - name: Log debug information
@@ -42,13 +42,13 @@ jobs:
             # REMOVE DEPENDENCIES IF .NET 9
             - name: Remove dependencies if using .NET 9
               run: |
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Sqlite
-#                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
+                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Sqlite
+            #                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
             
             # ADD DEPENDENCIES FOR .NET 8
             - name: Add dependencies for .NET 8
