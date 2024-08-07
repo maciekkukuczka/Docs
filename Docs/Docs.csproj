@@ -71,6 +71,7 @@
 
     <ItemGroup>
         <Folder Include="Migrations\Sqlite\" />
+        <Folder Include="Migrations\SqlServer\" />
         <Folder Include="wwwroot\js\"/>
     </ItemGroup>
 

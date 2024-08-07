@@ -22,38 +22,25 @@ jobs:
               with:
                   dotnet-version: '8.0.x'
             
-            # GET TARGET FRAMEWORK AND SET TO VARIABLE
-            - name: Get target framework and set to variable
-              id: get-framework
-              run: |
-                  has_version_9=false
-                  target_framework=$(grep -oP '(?<=<TargetFramework>)[^<]+' ${{ env.PATH_TO_PROJECT }})
-                  echo "TARGET FRAMEWORK: $target_framework"
-                  echo "target_framework=$target_framework" >> $GITHUB_ENV
-                  if [ "$target_framework" != "net8.0" ];then
-                    has_version_9=true
-                  fi
-                  echo "has_version_9=$has_version_9" >> $GITHUB_ENV
+            # CLEAR NUGET CACHE (opcjonalnie)
+            - name: Clear NuGet cache
+              run: dotnet nuget locals all --clear
             
-            # LOG DEBUG INFORMATION
+            # LOG DEBUG INFORMATION (opcjonalnie dla weryfikacji)
             - name: Log debug information
               run: |
                   echo "Environment variables:"
                   echo "PATH_TO_PROJECT: ${{ env.PATH_TO_PROJECT }}"
-                  echo "TARGET_FRAMEWORK: ${{ env.target_framework }}"
-                  echo "HAS_VERSION_9: ${{ env.has_version_9 }}"
                   ls -la
             
             # SET TARGET FRAMEWORK IN DOCS.CSPROJ
             - name: Set target framework in Docs.csproj
-              if: env.has_version_9 == 'true'
               run: |
                   echo "Updating target framework to net8.0..."
                   sed -i 's|<TargetFramework>.*</TargetFramework>|<TargetFramework>net8.0</TargetFramework>|' ${{ env.PATH_TO_PROJECT }}
             
-            # REMOVE DEPENDENCIES IF DOTNET 9
+            # REMOVE DEPENDENCIES IF .NET 9
             - name: Remove dependencies if using .NET 9
-              if: env.has_version_9 == 'true'
               run: |
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
@@ -62,15 +49,10 @@ jobs:
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore
-                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Abstractions
                   dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
-                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.Extensions.Caching.Memory
-                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.Extensions.Logging
-#                  dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Relational
             
-            # ADD DEPENDENCIES FOR DOTNET 8
+            # ADD DEPENDENCIES FOR .NET 8
             - name: Add dependencies for .NET 8
-              if: env.has_version_9 == 'true'
               run: |
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Components.Authorization
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
@@ -79,13 +61,8 @@ jobs:
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Abstractions
                   dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.Extensions.Caching.Memory
-                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.Extensions.Logging
-#                  dotnet add ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Relational
-                  
-                  
+            
             # RESTORE DEPENDENCIES AGAIN
             - name: Restore dependencies again
               run: dotnet restore ${{ env.PATH_TO_PROJECT }}
