@@ -47,7 +47,7 @@ jobs:
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Design
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Tools
                      dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.SqlServer
-                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
+#                     dotnet remove ${{ env.PATH_TO_PROJECT }} package Microsoft.EntityFrameworkCore.Analyzers
             
             # ADD DEPENDENCIES FOR .NET 8
             - name: Add dependencies for .NET 8
