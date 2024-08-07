@@ -29,7 +29,7 @@ public class GenericService<T>(IDbContextFactory<ApplicationDbContext> dbContext
             }
         }
 
-        var result =  query.AsNoTracking().ToHashSet();
+        var result =  await query.AsNoTracking().ToHashSetByEnvironment();
 
         try
         {

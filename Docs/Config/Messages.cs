@@ -5,6 +5,7 @@ public static class Messages
 {
     public static string ObjectNotExist<T> () => $"{typeof(T).Name.ToUpper()} - nie istnieje";
     public static string ObjectNotFound<T> () => $"{typeof(T).Name.ToUpper()} - nie znaleziono";
+    public static string ObjectIsNull<T> () => $"{typeof(T).Name.ToUpper()} - brak obiektu";
     public static string ObjectCannotBeGet<T> () => $"{typeof(T).Name.ToUpper()} - nie można pobrać";
     public static string ObjectCannotBeUpdate<T> () => $"{typeof(T).Name.ToUpper()} - nie mógł zostać zaktualizowany";
     public static string ObjectCannotBeSaved<T> () => $"{typeof(T).Name.ToUpper()} - nie można zapisać";
@@ -15,5 +16,7 @@ public static class Messages
     public static string ObjectSaved<T> () => $"{typeof(T).Name.ToUpper()} - zapisano";
     public static string ObjectDeleted <T> () => $"{typeof(T).Name.ToUpper()} - usunieto";
     public static string CantCreateDb <T> () => $"Nie mozna utworzyć bazy danych:";
+    
+    public static string ValidationRequired { get; }= $"Pole jest wymagane";
 
 }

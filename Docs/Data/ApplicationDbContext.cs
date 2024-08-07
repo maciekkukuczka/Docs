@@ -1,5 +1,3 @@
-using Docs.Modules.Shortcuts;
-
 namespace Docs.Data;
 
 public class ApplicationDbContext(

@@ -1,0 +1,45 @@
+﻿@namespace Docs.Modules.Tags
+
+@page "/tags"
+@inject TagsService TagsService
+@inject  ISnackbar Snackbar 
+
+<MidiCrudComp T="TagVM" OnSubmit="@(async (x)=>await Submit(x))">
+    @* <CascadingValue TValue="RenderFragment" > *@
+    <EditFormContent>
+        <MudElement HtmlTag="div" Class="mb-5" Style="width: 100%;">
+            <MudStack Row StretchItems="StretchItems.End">
+                <MudTextField Label="Nazwa" @bind-Value="tag.Name" For="() =>tag.Name " Class="flex-none"/>
+                <MudTextField Label="Kolor" @bind-Value="tag.Color" Class="flex-none"/>
+                <MudTextField Label="Opis" @bind-Value="tag.Description"/>
+            </MudStack>
+        </MudElement>
+    </EditFormContent>
+    @* </CascadingValue> *@
+
+</MidiCrudComp>
+
+@code {
+
+    TagVM tag = new();
+    /*{
+        Name = "Tag1",
+        Description = "Opis",
+        Color = "#005511",
+    };*/
+
+    HashSet<TagVM> tags=[];
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        tags = (await TagsService.GetTags([x => x.Docs])).Data;
+    }
+
+    async Task Submit(TagVM? tagVm)
+    {
+      var result=  await TagsService.AddTag(tagVm);
+      _=Snackbar.Add(result.Message,result.Success ? Severity.Success: Severity.Error);
+    }
+
+}

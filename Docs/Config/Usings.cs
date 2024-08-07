@@ -33,8 +33,12 @@ global using Serilog.Sinks.SystemConsole.Themes;
 
 // MODULES
 global using Mac.Modules.DataSeed;
-global using Docs.Modules.Generic.Services;
 global using Mac.Modules.Common;
+global using Mac.Modules.Crud;
+
+global using Docs.Modules.Tags;
+global using Docs.Modules.Shortcuts;
+global using Docs.Modules.Generic.Services;
 global using Docs.Modules.Common.Models;
 global using Docs.Modules.Common.Result;
 global using Docs.Modules.Items.Models;

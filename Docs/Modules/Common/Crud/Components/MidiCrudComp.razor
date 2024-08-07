@@ -1,0 +1,66 @@
+﻿@namespace Mac.Modules.Crud
+
+@typeparam T where T : BaseModel, new()
+
+<MudPaper Outlined="true" Class="pa-5">
+    <PageHeaderComp Name="@Name"/>
+
+    @Header
+
+    <AddComp T="T" Model="@Model" OnSubmit="Submit">
+        <EditFormContent>
+            @EditFormContent
+        </EditFormContent>
+    </AddComp>
+
+
+    <MudSimpleTable Striped="true">
+        <thead>
+        <tr></tr>
+        </thead>
+        <tbody>
+        @if (Items is null)
+        {
+            <NoDataComp/>
+        }
+        else
+        {
+            <tr>
+                @foreach (var item in Items)
+                {
+                    <td>
+                        @ItemTemplate(item)
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+
+    </MudSimpleTable>
+</MudPaper>
+
+
+@code {
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public T? Model { get; set; } = new();
+    [Parameter] public ICollection<T>? Items { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
+    // [CascadingParameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
+    [Parameter] public EventCallback<T> OnSubmit { get; set; }
+    [Parameter] public EventCallback<T>? OnEditItem { get; set; }
+    [Parameter] public EventCallback<T>? OnRemoveItem { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    async Task Submit(T? submittedItem)
+    {
+        await OnSubmit.InvokeAsync(submittedItem);
+    }
+
+}

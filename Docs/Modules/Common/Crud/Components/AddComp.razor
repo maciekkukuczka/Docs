@@ -1,0 +1,25 @@
+﻿@namespace Mac.Modules.Crud
+@typeparam T where T : BaseModel, new()
+
+<EditForm Model="@Model"  OnSubmit="Submit" >
+    <DataAnnotationsValidator/>
+    <MudStack Row="true" Context="mud">
+        @EditFormContent
+        <MudIconButton ButtonType="ButtonType.Submit" Icon="@(isEdited ? Icons.Material.Filled.AddTask : Icons.Material.Filled.Add)" Color="Color.Success"/>
+    </MudStack>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired] public T? Model { get; set; } = new();
+    [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
+    // [CascadingParameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
+    [Parameter] public EventCallback<T> OnSubmit { get; set; }
+    bool isEdited;
+
+    async Task Submit()
+    {
+        // Model = editContext as T;
+        await OnSubmit.InvokeAsync(Model);
+    }
+
+}
