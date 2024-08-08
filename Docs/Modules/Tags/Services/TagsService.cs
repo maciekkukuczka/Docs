@@ -28,4 +28,23 @@ public class TagsService(IDbContextFactory<ApplicationDbContext> dbContextFactor
             ? Result.OK($"{Messages.ObjectCreated<TagVM>()}: {tagVm.Name}")
             : Result.Error($"{Messages.ObjectCannotBeSaved<TagVM>()}: {tagVm.Name}");
     }
+    
+    // UPDATE
+    public async Task<Result> UpdateTag(TagVM tagVm)
+    {
+        if (tagVm is null) return Result.Error($"{Messages.ObjectNotExist<TagVM>()}");
+        var model = TagVM.ToModel(tagVm);
+        
+        var result=await Update(model);
+        return result.Success
+            ? Result.OK($"{Messages.ObjectCreated<TagVM>()}: {tagVm.Name}")
+            : Result.Error($"{Messages.ObjectCannotBeSaved<TagVM>()}: {tagVm.Name}");
+
+    }
+    
+    // DELETE
+    public async Task<Result> DeleteTag(TagVM tagVm)
+    {
+        return await Delete(TagVM.ToModel(tagVm));
+    }
 }

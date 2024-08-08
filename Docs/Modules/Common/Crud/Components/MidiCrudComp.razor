@@ -7,11 +7,11 @@
 
     @Header
 
-    <AddComp T="T" Model="@Model" OnSubmit="Submit">
+    <SubmitComp T="T" Model="@Model" OnSubmit="Submit" IsEdited="isEdited">
         <EditFormContent>
             @EditFormContent
         </EditFormContent>
-    </AddComp>
+    </SubmitComp>
 
 
     <MudSimpleTable Striped="true">
@@ -19,20 +19,25 @@
         <tr></tr>
         </thead>
         <tbody>
-        @if (Items is null)
+        @if (Items is null || Items.Count <= 0)
         {
             <NoDataComp/>
         }
         else
         {
-            <tr>
-                @foreach (var item in Items)
-                {
+            foreach (var item in Items)
+            {
+                <tr class="d-flex justify-space-between">
                     <td>
                         @ItemTemplate(item)
                     </td>
-                }
-            </tr>
+
+                    <td>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="async () =>await Edit(item)"></MudIconButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
+                    </td>
+                </tr>
+            }
         }
         </tbody>
 
@@ -41,26 +46,33 @@
 
 
 @code {
+    // [Parameter] public bool IsEdited { get; set; }
     [Parameter] public string? Name { get; set; }
     [Parameter] public T? Model { get; set; } = new();
     [Parameter] public ICollection<T>? Items { get; set; }
     [Parameter] public RenderFragment? Header { get; set; }
     [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+
     [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
+
     // [CascadingParameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
     [Parameter] public EventCallback<T> OnSubmit { get; set; }
-    [Parameter] public EventCallback<T>? OnEditItem { get; set; }
-    [Parameter] public EventCallback<T>? OnRemoveItem { get; set; }
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-    }
+    [Parameter] public EventCallback<(T item, bool isEdited)> OnEditItem { get; set; }
+    [Parameter] public EventCallback<T> OnRemoveItem { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    bool isEdited;
 
     async Task Submit(T? submittedItem)
     {
+        isEdited = false;
         await OnSubmit.InvokeAsync(submittedItem);
+
+    }
+
+    async Task Edit(T item)
+    {
+        isEdited = true;
+        await OnEditItem.InvokeAsync((item,isEdited));
     }
 
 }
