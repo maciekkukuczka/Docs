@@ -17,7 +17,7 @@
         <thead>
         <tr>
             @TableHeader
-            <th>Akcje</th>
+            <th style="text-align: right">Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -29,10 +29,10 @@
         {
             foreach (var item in Items)
             {
-                <tr>
-                        @TableItemTemplate(item)
+                <tr >
+                    @TableItemTemplate(item)
 
-                    <td>
+                    <td  style="text-align: right;">
                         <MudIconButton Disabled="@isEdited"Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="async () => await Edit(item)"></MudIconButton>
                         <MudIconButton Disabled="@isEdited" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
                     </td>
