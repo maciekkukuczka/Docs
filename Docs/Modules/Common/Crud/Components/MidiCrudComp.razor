@@ -5,7 +5,6 @@
 <MudPaper Outlined="true" Class="pa-5">
     <PageHeaderComp Name="@Name"/>
 
-    @Header
 
     <SubmitComp T="T" Model="@Model" OnSubmit="Submit" IsEdited="isEdited">
         <EditFormContent>
@@ -16,7 +15,10 @@
 
     <MudSimpleTable Striped="true">
         <thead>
-        <tr></tr>
+        <tr>
+            @TableHeader
+            <th>Akcje</th>
+        </tr>
         </thead>
         <tbody>
         @if (Items is null || Items.Count <= 0)
@@ -27,14 +29,12 @@
         {
             foreach (var item in Items)
             {
-                <tr class="d-flex justify-space-between">
-                    <td>
-                        @ItemTemplate(item)
-                    </td>
+                <tr>
+                        @TableItemTemplate(item)
 
                     <td>
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="async () =>await Edit(item)"></MudIconButton>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
+                        <MudIconButton Disabled="@isEdited"Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="async () => await Edit(item)"></MudIconButton>
+                        <MudIconButton Disabled="@isEdited" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await OnRemoveItem.InvokeAsync(item)"></MudIconButton>
                     </td>
                 </tr>
             }
@@ -46,12 +46,13 @@
 
 
 @code {
+
     // [Parameter] public bool IsEdited { get; set; }
     [Parameter] public string? Name { get; set; }
     [Parameter] public T? Model { get; set; } = new();
     [Parameter] public ICollection<T>? Items { get; set; }
-    [Parameter] public RenderFragment? Header { get; set; }
-    [Parameter] public RenderFragment<T>? ItemTemplate { get; set; }
+    [Parameter] public RenderFragment TableHeader { get; set; }
+    [Parameter] public RenderFragment<T>? TableItemTemplate { get; set; }
 
     [Parameter, EditorRequired] public RenderFragment? EditFormContent { get; set; }
 
@@ -66,13 +67,12 @@
     {
         isEdited = false;
         await OnSubmit.InvokeAsync(submittedItem);
-
     }
 
     async Task Edit(T item)
     {
         isEdited = true;
-        await OnEditItem.InvokeAsync((item,isEdited));
+        await OnEditItem.InvokeAsync((item, isEdited));
     }
 
 }

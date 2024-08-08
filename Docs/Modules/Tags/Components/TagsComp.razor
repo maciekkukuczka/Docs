@@ -1,0 +1,94 @@
+﻿@namespace Docs.Modules.Tags
+@inject TagsService TagsService
+@inject  ISnackbar Snackbar 
+@inject  PersistentComponentState PersistentComponentState
+@using Docs.Modules.Common.ColorGenerator
+@implements IDisposable
+
+<MidiCrudComp Name="Tagi" T="TagVM" Model="tag" Items="tags"
+              OnSubmit="async x => await Submit(x)" OnEditItem="async x => await Edit(x)" OnRemoveItem="async x => await Delete(x)">
+    <EditFormContent>
+        <MudElement HtmlTag="div" Class="mb-5" Style="width: 100%;">
+            <MudStack Row StretchItems="StretchItems.End">
+                <MudTextField Label="Nazwa" @bind-Value="tag.Name" For="@(() => tag.Name)" Class="flex-none"/>
+                <MudColorPicker Label="Kolor" @bind-Text="tag.Color" Style="@($"color: {tag.Color};")" Placeholder="Wybierz kolor" Class="flex-none"/>
+                <DrawButton Small="true" Colored="false" OnClick="@(() => { tag.Color = ColorGenerator.DrawColor(); })" Style="margin: 8px 0 0 -10px;"/>
+                @* <MudTextField Label="Kolor" @bind-Value="tag.Color" Class="flex-none"/> *@
+                <MudTextField Label="Opis" @bind-Value="tag.Description"/>
+            </MudStack>
+        </MudElement>
+    </EditFormContent>
+
+    @* TABLE HEADER *@
+    <TableHeader>
+        <th>Nazwa</th>
+        <th>Kolor</th>
+        <th>Opis</th>
+    </TableHeader>
+    @* ITEMS LIST *@
+    <TableItemTemplate>
+        <td><MudText Inline="true">@context.Name</MudText></td>
+        <td><MudChip T="string" Style="@($"background-color:{context.Color};")">@context.Name</MudChip></td>
+        <td><MudText Inline="true">@context.Description</MudText></td>
+    </TableItemTemplate>
+
+</MidiCrudComp>
+
+@code {
+    bool isEdited;
+    TagVM tag = new();
+    HashSet<TagVM> tags = [];
+    PersistingComponentStateSubscription stateSubscription;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        {
+            PersistentComponentState.PersistAsJson($"{nameof(TagsComp)}-tags", tags);
+            return Task.CompletedTask;
+        });
+        await GetTasks();
+    }
+
+
+    async Task Submit(TagVM? tagVm)
+    {
+        Result result;
+        result = isEdited ? await TagsService.UpdateTag(tagVm) : await TagsService.AddTag(tagVm);
+        _ = Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+        tag = new();
+        await GetTasks();
+    }
+
+
+    async Task Edit((TagVM tagVm, bool isEdited) tuple)
+    {
+        tag = tuple.tagVm;
+        isEdited = tuple.isEdited;
+    }
+
+
+    async Task Delete(TagVM tag)
+    {
+        await ShowMessage(await TagsService.DeleteTag(tag));
+        await GetTasks();
+    }
+
+
+    async Task ShowMessage(Result result) => _ = Snackbar.Add(result.Message, result.Success ? Severity.Success : Severity.Error);
+
+    async Task GetTasks() =>
+        tags = PersistentComponentState.TryTakeFromJson<HashSet<TagVM>>($"{nameof(TagsComp)}-tags", out var restoredState)
+            ? restoredState
+            : (await TagsService.GetTags([x => x.Docs])).Data;
+
+    Task DrawColor()
+    {
+        tag.Color = ColorGenerator.DrawColor();
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => stateSubscription.Dispose();
+
+}

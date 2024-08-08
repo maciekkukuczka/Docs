@@ -96,7 +96,7 @@
             currentUserId = (await UserManager.FindByNameAsync(currentUserName))?.Id;
 
 
-        stateSubscription = PersistentComponentState.RegisterOnPersisting(() =>
+        stateSubscription= PersistentComponentState.RegisterOnPersisting(() =>
         {
             PersistentComponentState.PersistAsJson("Subjects", subjects);
             return Task.CompletedTask;

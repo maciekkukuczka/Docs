@@ -1,0 +1,34 @@
+﻿@namespace Mac.Modules.Tags
+@* @typeparam T where T : BaseModel, new() *@
+
+<MudPaper Outlined="true" Class="pa-5 ma-5">
+    <PageHeaderComp Name="@Name"/>
+    @if (Items is null || Items.Count <= 0)
+    {
+        <NoDataComp/>
+    }
+    else
+    {
+        <MudChipSet T="TagVM" bind-SelectedValues="@selectedItems" SelectionMode="SelectionMode.MultiSelection" CheckMark="true"
+                    Variant="Variant.Filled" Color="Color.Surface">
+            @foreach (var item in Items)
+            {
+                <MudChip Style="@($"background-color:{item.Color};")">
+                    @item.Name
+                </MudChip>
+            }
+
+        </MudChipSet>
+    }
+
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public TagVM Model { get; set; } = new();
+    [Parameter , EditorRequired] public HashSet<TagVM>? Items { get; set; } = [];
+    // [Parameter, EditorRequired] public RenderFragment<T> Content { get; set; }
+    [Parameter] public string? Name { get; set; }
+
+    IReadOnlyCollection<TagVM>? selectedItems = [];
+
+}

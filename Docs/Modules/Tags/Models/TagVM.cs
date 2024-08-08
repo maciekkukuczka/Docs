@@ -2,6 +2,10 @@
 
 public class TagVM : BaseModel
 {
+    public TagVM()
+    {
+        
+    }
     [Required(ErrorMessageResourceType = typeof(Messages), 
         ErrorMessageResourceName="ValidationRequired")]
     public string Name { get; set; } = string.Empty;
