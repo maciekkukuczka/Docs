@@ -10,12 +10,15 @@
     <AddButton Small="false" Colored="true" OnClick="AddDoc"/>
 </SectionContent>
 
-<MudGrid  >
+<MudGrid>
 
     <MudItem xs="12">
         @* <SubjectDisplayComp/> *@
         <SubjectDisplayComp OnSubjectSelected="@OnSubjectSelected"/>
         <CategoriesDisplayComp OnCategorySelected="@OnCategorySelected" SelectedSubjectIId="@selectedSubject?.Id"/>
+        <TagsDisplayComp IsEdited="true"  Name="Tagi" Model="new TagVM()" Tags="allTagsFromDocuments" OnSelectedTags="OnTagsSelected" />
+        
+        
         @if (docs is null || !docs.Any())
         {
             <NoDataComp/>
@@ -67,6 +70,18 @@
                                 @foreach (var category in context.Item?.Categories)
                                 {
                                     <span>@category.Name</span>
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+                        
+                        @* Tags *@
+                        <TemplateColumn TItle="Tagi">
+                            <CellTemplate>
+                                @foreach (var tag in context.Item?.Tags)
+                                {
+                                    <MudChip Text="@tag.Name" Variant="Variant.Filled" 
+                                  Size="Size.Small"           Style="@($"background-color:{tag.Color};")"/>
+                                             // Color="Color.Success" SelectedColor="Color.Primary"
                                 }
                             </CellTemplate>
                         </TemplateColumn>

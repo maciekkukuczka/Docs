@@ -125,6 +125,7 @@ public class DocsService(
         var existDoc = await dbContext.Docs
             .Include(x => x.Categories)
             .Include(x => x.Links)
+            .Include(x=>x.Tags)
             .FirstOrDefaultAsync(x => x.Id == newDoc.Id);
 
         if (existDoc is null) return Result.Error($"{Messages.ObjectNotFound<Doc>()}: {newDoc.Title}");
@@ -156,7 +157,7 @@ public class DocsService(
 
         //Links
         var existLinks = dbContext.Links.AsQueryable();
-        existLinks.ForEachAsync(e =>
+        await existLinks.ForEachAsync(e =>
         {
             if (newDoc.Links.Any(n => n.Id == e.Id))
             {
@@ -165,9 +166,22 @@ public class DocsService(
                 newDoc.Links.Add(e);
             }
         });
+        existDoc.Links = newDoc.Links.ToHashSet();
 
-        /*
-        Stopwatch sw = new();
+        //Tags
+        var existTags = dbContext.Tags.AsQueryable();
+        await existTags.ForEachAsync(e =>
+        {
+            if (newDoc.Tags.Any(n => n.Id == e.Id))
+            {
+                var untracked = newDoc.Tags.FirstOrDefault(n => n.Id == e.Id);
+                newDoc.Tags.Remove(untracked);
+                newDoc.Tags.Add(e);
+            }
+        });
+
+        existDoc.Tags = newDoc.Tags.ToHashSet();
+        /*Stopwatch sw = new();
         try
         {
             sw.Start();
@@ -176,10 +190,7 @@ public class DocsService(
         {
             sw.Stop();
             Console.WriteLine($"SPEED! Updated Doc: {sw.ElapsedMilliseconds}ms");
-        }
-        */
-
-        existDoc.Links = newDoc.Links.ToHashSet();
+        }*/
 
         dbContext.Update(existDoc);
 
@@ -214,10 +225,12 @@ public class DocsService(
         return Result.OK($"{Messages.ObjectDeleted<Doc>()}: {exist.Title}");
     }
 
+
     // ------------------------------------
 
     #region Another
 
+    /*
     public async Task<Result<HashSet<DocVM>>> GetAllDocs()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -233,7 +246,7 @@ public class DocsService(
         CancellationToken cancellationToken = default)
     {
         /*return await cache.GetOrCreateAsync(
-            $"Docs", async cancel=>*/
+            $"Docs", async cancel=>#1#
 
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         IQueryable<Doc> res;
@@ -257,12 +270,15 @@ public class DocsService(
 
         var result = await res
             .Include(x => x.Subjects)
+            .Include(x => x.Tags)
             .AsNoTracking()
             .ToHashSetAsync(cancellationToken: cancellationToken);
 
         var resultVM = result.Select(x => DocVM.ToVM(x)).ToHashSet();
         return Result.OK(resultVM);
     }
+
+    */
 
     #endregion
 }

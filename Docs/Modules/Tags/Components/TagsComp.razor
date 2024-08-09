@@ -21,15 +21,15 @@
 
     @* TABLE HEADER *@
     <TableHeader>
-        <th >Nazwa</th>
-        <th>Kolor</th>
+        <th >Tag</th>
+        @* <th>Kolor</th> *@
         <th>Opis</th>
     </TableHeader>
     @* ITEMS LIST *@
     <TableItemTemplate>
-        <td style="width: 30%;"><MudText Inline="true">@context.Name</MudText></td>
-        <td><MudChip T="string" Style="@($"background-color:{context.Color};")">@context.Name</MudChip></td>
-        <td  style="width: 30%;"><MudText Inline="true">@context.Description</MudText></td>
+        @* <td style="width: 30%;"><MudText Inline="true">@context.Name</MudText></td> *@
+        <td style="width: 15%;"><MudChip T="string" Style="@($"background-color:{context.Color};")" >@context.Name</MudChip></td>
+        <td  style="width: 70%;"><MudText Inline="true">@context.Description</MudText></td>
     </TableItemTemplate>
 
 </MidiCrudComp>

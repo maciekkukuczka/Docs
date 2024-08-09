@@ -1,34 +1,48 @@
 ﻿@namespace Mac.Modules.Tags
 @* @typeparam T where T : BaseModel, new() *@
 
-<MudPaper Outlined="true" Class="pa-5 ma-5">
+<MudPaper Outlined="true" Class="pa-5 mb-5">
     <PageHeaderComp Name="@Name"/>
-    @if (Items is null || Items.Count <= 0)
+    @if (Tags is null or { Count: <= 0 })
     {
         <NoDataComp/>
     }
     else
     {
-        <MudChipSet T="TagVM" bind-SelectedValues="@selectedItems" SelectionMode="SelectionMode.MultiSelection" CheckMark="true"
-                    Variant="Variant.Filled" Color="Color.Surface">
-            @foreach (var item in Items)
+        <MudChipSet Disabled="!IsEdited" T="string" SelectedValues="@selectedItems" SelectionMode="SelectionMode.MultiSelection" CheckMark="true"
+                    Variant="Variant.Filled" Color="Color.Surface" CheckedIcon="@Icons.Material.Filled.Check"
+                    SelectedValuesChanged="@((tags) => OnSelectedTagChanges(tags))">
+            
+            @foreach (var item in Tags)
             {
-                <MudChip Style="@($"background-color:{item.Color};")">
-                    @item.Name
-                </MudChip>
+                <MudChip Text="@item.Name" Variant="Variant.Filled" Value="item.Name"
+                         Selected="@UserTags.Any(x=>x.Name==item.Name)"
+                         Style="@($"background-color:{item.Color};")"/>
             }
 
         </MudChipSet>
     }
-
+    @* <MudText>You selected @string.Join(", ", selectedItems.OrderBy(x => x))</MudText> *@
 </MudPaper>
 
 @code {
-    [Parameter, EditorRequired] public TagVM Model { get; set; } = new();
-    [Parameter , EditorRequired] public HashSet<TagVM>? Items { get; set; } = [];
+    [Parameter] public TagVM Model { get; set; } = new();
+    [Parameter] public bool IsEdited { get; set; }
+
+    [Parameter, EditorRequired] public HashSet<TagVM>? Tags { get; set; } = [];
+    [Parameter] public HashSet<TagVM>? UserTags { get; set; } = [];
+    [Parameter] public EventCallback<IReadOnlyCollection<string>> OnSelectedTags { get; set; }
+
+
     // [Parameter, EditorRequired] public RenderFragment<T> Content { get; set; }
     [Parameter] public string? Name { get; set; }
 
-    IReadOnlyCollection<TagVM>? selectedItems = [];
+    IReadOnlyCollection<string>? selectedItems = [];
+
+    async Task OnSelectedTagChanges(IReadOnlyCollection<string> selectedTags)
+    {
+        selectedItems = selectedTags;
+        await OnSelectedTags.InvokeAsync(selectedTags);
+    }
 
 }

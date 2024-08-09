@@ -1,14 +1,15 @@
 ﻿namespace Docs.Modules.Items.Pages;
 
-public partial class AddEditDocPage : IDisposable
+public partial class SubmitDocPage : IDisposable
 {
     [CascadingParameter] Task<AuthenticationState>? AuthStateTask { get; set; }
-    [Inject] public DocsService DocsService { get; set; }
-    [Inject] public CategoriesVMService CategoriesService { get; set; }
     [Inject] public NavigationManager NavigationManager { get; set; }
     [Inject] public AppState AppState { get; set; }
     [Inject] public ISnackbar Snackbar { get; set; }
     [Inject] public UserManager<ApplicationUser> UserManager { get; set; }
+    [Inject] public DocsService DocsService { get; set; }
+    [Inject] public CategoriesVMService CategoriesService { get; set; }
+    [Inject] public TagsService TagsService { get; set; }
 
     [Parameter] public string? Id { get; set; }
     [Parameter] public bool IsEdited { get; set; }
@@ -16,14 +17,17 @@ public partial class AddEditDocPage : IDisposable
     bool isLinkEdited = false;
 
     // Doc? Doc { get; set; }
+    string? userId;
     DocVM? Doc { get; set; }
     LinkVM? linkModel = new();
-    string? userId;
+
     HashSet<CategoryVM>? allCategories;
     CategoryVM? selectedCategory;
     IEnumerable<CategoryVM> categoryOptions = new HashSet<CategoryVM>();
-
     Converter<CategoryVM?> converter = new();
+
+    HashSet<TagVM>? allTags = [];
+    IReadOnlyCollection<TagVM> selectedTags = [];
 
 
     protected override async Task OnInitializedAsync()
@@ -36,6 +40,7 @@ public partial class AddEditDocPage : IDisposable
         userId = (await UserManager.Users.FirstOrDefaultAsync(x => x.UserName == user))?.Id;
 
         await GetAllCategories();
+        await GetAllTags();
         // Doc = AppState.DocToEdit ?? new Doc
         Doc = AppState.DocToEdit ?? new DocVM
         {
@@ -48,13 +53,14 @@ public partial class AddEditDocPage : IDisposable
             Tags = new List<Tag>()*/
         };
         Doc.Categories.ToHashSet();
-
+        Doc.Tags.ToHashSet();
 
         converter.SetFunc = cat => cat?.Name;
         converter.GetFunc = text => allCategories?.FirstOrDefault(x => x.Name.Equals(text));
     }
 
-// DOC
+
+    // DOC
     async Task Submit(EditContext context)
     {
         var submittedDoc = context.Model as DocVM;
@@ -67,6 +73,7 @@ public partial class AddEditDocPage : IDisposable
         // submittedDoc.Categories = Doc.Categories;
 
         submittedDoc.Links = Doc.Links;
+        submittedDoc.Tags = selectedTags.ToHashSet();
 
         Result? result = null;
         if (string.IsNullOrWhiteSpace(Id))
@@ -92,38 +99,35 @@ public partial class AddEditDocPage : IDisposable
         }
     }
 
-    void EditDoc()
+
+    Task EditDoc()
     {
         IsEdited = !IsEdited;
+        return Task.CompletedTask;
     }
 
 
-// CATEGORIES
-    async Task GetAllCategories()
-    {
-        allCategories = (await CategoriesService.GetCategories(userId)).Data;
-    }
+    void OnLocationChanged(object sender, LocationChangedEventArgs e) => AppState.DocToEdit = null;
+
+
+    // CATEGORIES
+    async Task GetAllCategories() => allCategories = (await CategoriesService.GetCategories(userId)).Data;
 
 
     Task OnCategorySelected(IEnumerable<CategoryVM> selectedCategories)
     {
-        Doc.Categories = selectedCategories.ToList();
-        /*Doc.Categories.Clear();
-        foreach (var category in selectedCategories)
-        {
-            Doc.Categories.Add(category);
-        }*/
-
+        Doc.Categories = selectedCategories.ToHashSet();
         return Task.CompletedTask;
     }
+
 
     // LINKS
     Task SubmitLink(LinkVM link)
     {
-        _ =isLinkEdited ? EditLink(link) : AddLink(link);
-
+        _ = isLinkEdited ? EditLink(link) : AddLink(link);
         return Task.CompletedTask;
     }
+
 
     Task AddLink(LinkVM link)
     {
@@ -132,26 +136,32 @@ public partial class AddEditDocPage : IDisposable
         return Task.CompletedTask;
     }
 
+
     Task EditLink(LinkVM link)
     {
         Doc.Links.Remove(link);
         Doc.Links.Add(link);
         linkModel = link;
         return Task.CompletedTask;
-
     }
 
-Task RemoveLink(LinkVM link)
+
+    Task RemoveLink(LinkVM link)
     {
         Doc.Links.Remove(link);
         linkModel = new();
         return Task.CompletedTask;
-
     }
 
-    void OnLocationChanged(object sender, LocationChangedEventArgs e)
+
+//TAGS
+    async Task GetAllTags() => allTags = (await TagsService.GetTags()).Data;
+
+
+    async Task OnSelectedTags(IReadOnlyCollection<string> selectedTags)
     {
-        AppState.DocToEdit = null;
+        // Doc.Tags = (HashSet<TagVM>) [];
+        this.selectedTags = allTags.Where(x => selectedTags.Contains(x.Name)).ToHashSet();
     }
 
 
